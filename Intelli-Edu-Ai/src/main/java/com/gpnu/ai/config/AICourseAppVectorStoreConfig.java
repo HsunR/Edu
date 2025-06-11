@@ -1,0 +1,106 @@
+package com.gpnu.ai.config;
+
+import com.gpnu.ai.rag.AICourseDocumentLoader;
+
+import com.gpnu.ai.rag.MyTokenTextSplitter;
+import jakarta.annotation.Resource;
+import org.springframework.ai.autoconfigure.vectorstore.redis.RedisVectorStoreProperties;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.redis.RedisVectorStore;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.ai.vectorstore.VectorStore;
+import redis.clients.jedis.DefaultJedisClientConfig;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisClientConfig;
+import redis.clients.jedis.JedisPooled;
+
+
+import java.util.List;
+
+@Configuration
+public class AICourseAppVectorStoreConfig {
+
+
+    @Resource
+    private AICourseDocumentLoader aiCourseDocumentLoader;
+
+    @Resource(name = "dashscopeEmbeddingModel")
+    private EmbeddingModel dashscopeEmbeddingModel;
+
+    @Resource
+    private MyTokenTextSplitter myTokenTextSplitter;
+
+
+
+//注销此Bean，使其不需要每次启动都调用向量数据库
+//    @Bean
+//    VectorStore aiCourseVectorStore() {
+//        //这里的AI嵌入模型使用的是springAI官方的模型
+//        SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel).build();
+//        // 加载文档
+//        List<Document> documents = aiCourseDocumentLoader.loadMarkdowns() ;
+//        //对文档进行切分
+//        List<Document> mySplitDocument = myTokenTextSplitter.splitDocuments(documents);
+//        simpleVectorStore.add(mySplitDocument);
+//        return simpleVectorStore;
+//    }
+
+
+    // 在你的配置类中添加
+    @Bean
+    public RedisVectorStoreProperties redisVectorStoreProperties() {
+        RedisVectorStoreProperties properties = new RedisVectorStoreProperties();
+        properties.setIndex("Intelli-Edu-index");
+        properties.setPrefix("Intelli-Edu-prefix");
+        properties.setInitializeSchema(true);
+        return properties;
+    }
+
+
+    @Bean
+    public RedisVectorStore redisVectorStore(
+            RedisVectorStoreProperties properties
+    ) {
+        JedisClientConfig clientConfig = DefaultJedisClientConfig.builder()
+                .password("1097cba")
+                .database(0)
+                .build();
+
+        JedisPooled jedisPooled = new JedisPooled(new HostAndPort("8.134.210.227", 6379), clientConfig);
+
+        RedisVectorStore redisVectorStore =
+                RedisVectorStore.builder(jedisPooled, dashscopeEmbeddingModel)
+                .metadataFields(RedisVectorStore.MetadataField.tag("filename"))
+                .indexName(properties.getIndex())
+                .prefix(properties.getPrefix())
+                .initializeSchema(properties.isInitializeSchema())
+                .build();
+//        List<Document> documents = aiCourseDocumentLoader.loadMarkdowns();
+//        List<Document> documentsFromFiles = myTokenTextSplitter.splitDocuments(documents);
+//        redisVectorStore.add(documentsFromFiles);
+
+        return redisVectorStore;
+    }
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+//Rag的ETL流程
+// 加载文档
+//        List<Document> documents = aiCourseDocumentLoader.loadMarkdowns() ;
+//        //对文档进行切分
+//        List<Document> mySplitDocument = myTokenTextSplitter.splitDocuments(documents);
+//        redisVectorStore.add(mySplitDocument);

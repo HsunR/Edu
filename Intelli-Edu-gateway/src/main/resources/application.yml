@@ -1,0 +1,10 @@
+server:
+  port: 8890
+
+spring:
+  application:
+    name: Intelli-Edu-gateway
+  profiles:
+    active: local  #自己进行更改，现在激活的为local
+
+
