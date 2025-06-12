@@ -68,7 +68,7 @@ public class ToolCallAgent extends ReActAgent{
         try {
             Prompt prompt = new Prompt(messageList,chatOptions);
             ChatResponse chatResponse = getChatClient().prompt(prompt)
-                    .tools(availableTools)
+                    .toolCallbacks(availableTools)
                     .call()
                     .chatResponse();
             //记录响应，用于等下Act
