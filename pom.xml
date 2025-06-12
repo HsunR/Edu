@@ -27,8 +27,8 @@
         <spring-boot-test.version>3.2.0</spring-boot-test.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
-        <spring-ai.version>1.0.0-M6</spring-ai.version>
-        <spring-ai-alibaba.version>1.0.0-M6.1</spring-ai-alibaba.version>
+        <spring-ai.version>1.0.0</spring-ai.version>
+        <spring-ai-alibaba.version>1.0.0.2</spring-ai-alibaba.version>
         <mysql.version>8.0.28</mysql.version>
         <druid.version>1.2.23</druid.version>
         <jedis.version>5.2.0</jedis.version>
@@ -72,6 +72,7 @@
             </dependency>
 
             <!-- AI  Begin-->
+
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
@@ -82,23 +83,24 @@
 
             <dependency>
                 <groupId>com.alibaba.cloud.ai</groupId>
-                <artifactId>spring-ai-alibaba-starter</artifactId>
+                <artifactId>spring-ai-alibaba-bom</artifactId>
                 <version>${spring-ai-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
-            <!-- openAI模型 1.0.0M6版-->
+<!--            redis向量数据库Begin-->
             <dependency>
                 <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+                <artifactId>spring-ai-autoconfigure-vector-store-redis</artifactId>
                 <version>${spring-ai.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-core</artifactId>
+                <artifactId>spring-ai-starter-vector-store-redis</artifactId>
                 <version>${spring-ai.version}</version>
             </dependency>
-
 
             <dependency>
                 <groupId>org.springframework.ai</groupId>
@@ -106,20 +108,20 @@
                 <version>${spring-ai.version}</version>
             </dependency>
 
-            <!--Redis向量数据库-->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-starter-vector-store-redis</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-
+<!--这个暂时保留-->
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-redis-store</artifactId>
                 <version>${spring-ai.version}</version>
             </dependency>
 
+<!--            redis向量数据库依赖END-->
+
+
+
+
+
+<!--ETL环境中的抽取环境依赖Begin-->
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-markdown-document-reader</artifactId>
@@ -140,6 +142,7 @@
                 <version>${spring-ai.version}</version>
             </dependency>
 
+<!--ETL环境中的抽取环境依赖End-->
 
 
             <!-- AI  End-->
@@ -163,6 +166,7 @@
                 <version>${spring-boot-test.version}</version>
                 <scope>test</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-redis</artifactId>

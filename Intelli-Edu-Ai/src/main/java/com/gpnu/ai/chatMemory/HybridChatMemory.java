@@ -5,6 +5,9 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.Resource;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,6 +15,7 @@ import java.util.List;
  */
 @Component
 public class HybridChatMemory implements ChatMemory {
+
 
     // 缓存窗口大小
     private static final int WINDOW_SIZE = 20;
@@ -23,29 +27,32 @@ public class HybridChatMemory implements ChatMemory {
     private MySQLChatMemory mySQLChatMemory;
 
     @Override
-    public List<Message> get(String conversationId, int lastN) {
-        // 优先从缓存获取消息
-        List<Message> cachedMessages = cacheMemory.get(conversationId, lastN);
+    public List<Message> get(String conversationId) {
+        // 优先从缓存获取
+        List<Message> cachedMessages = cacheMemory.get(conversationId);
         if (cachedMessages.isEmpty()) {
-            // 缓存未命中，从数据库加载最近的 lastN 条消息
-            List<Message> dbMessages = mySQLChatMemory.get(conversationId, lastN);
-            // 同时更新缓存
-            cacheMemory.add(conversationId, dbMessages);
-            return dbMessages;
+            // 缓存为空，从数据库加载
+            List<Message> dbMessages = mySQLChatMemory.get(conversationId);
+            List<Message> lastN = getLastN(dbMessages, WINDOW_SIZE);
+            cacheMemory.add(conversationId, lastN);
+            return lastN;
         }
-        return cachedMessages;
+        return getLastN(cachedMessages, WINDOW_SIZE);
+    }
+
+    private List<Message> getLastN(List<Message> messages, int lastN) {
+        if (messages == null || messages.isEmpty()) return Collections.emptyList();
+        return messages.size() > lastN ? messages.subList(messages.size() - lastN, messages.size()) : new ArrayList<>(messages);
     }
 
     @Override
     public void add(String conversationId, List<Message> messages) {
-        // 同时写入缓存和数据库
         cacheMemory.add(conversationId, messages);
         mySQLChatMemory.add(conversationId, messages);
     }
 
     @Override
     public void clear(String conversationId) {
-        // 清空缓存和数据库
         cacheMemory.clear(conversationId);
         mySQLChatMemory.clear(conversationId);
     }

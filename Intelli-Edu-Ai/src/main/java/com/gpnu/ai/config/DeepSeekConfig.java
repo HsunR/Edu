@@ -1,0 +1,43 @@
+package com.gpnu.ai.config;
+
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.ClientHttpRequestFactories;
+import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.time.Duration;
+
+@Configuration
+public class DeepSeekConfig {
+    @Value("${spring.ai.deepseek.api-key}")
+    private String apiKey;
+
+    @Value("${spring.ai.deepseek.base-url}")
+    private String baseUrl;
+
+    /**
+     * 配置其，防止ChatModel调用Rag功能时候超时
+     * @return
+     */
+    @Bean
+    public RestClientCustomizer deepSeekTimeoutCustomizer() {
+        return builder -> builder.requestFactory(
+            ClientHttpRequestFactories.get(
+                ClientHttpRequestFactorySettings.DEFAULTS
+                    .withConnectTimeout(Duration.ofSeconds(5))
+                    .withReadTimeout(Duration.ofSeconds(60))
+            )
+        );
+    }
+
+
+
+
+
+
+
+
+}

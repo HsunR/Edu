@@ -49,7 +49,7 @@ public class ToolCallAgent extends ReActAgent{
         this.availableTools = availableTools;
         this.toolCallingManager = ToolCallingManager.builder().build();
         //禁止Spring AI 内置的工具调用机制,自己维护会话上下文
-        this.chatOptions = DashScopeChatOptions.builder().withProxyToolCalls(true).build();
+        this.chatOptions = DashScopeChatOptions.builder().withInternalToolExecutionEnabled(true).build();
     }
 
     /**

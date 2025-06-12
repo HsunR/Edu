@@ -5,6 +5,7 @@ import com.gpnu.ai.advisor.MyLoggerAdvisor;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.deepseek.DeepSeekChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ public class AICourseManus extends ToolCallAgent {
 
 
 
-    public AICourseManus(ToolCallback[] allTools, @Qualifier("openAiChatModel")ChatModel chatModel) {
+    public AICourseManus(ToolCallback[] allTools, DeepSeekChatModel deepSeekChatModel) {
         super(allTools);
         this.setName("yuManus");
         String SYSTEM_PROMPT = """
@@ -31,7 +32,7 @@ public class AICourseManus extends ToolCallAgent {
         this.setNextStepPrompt(NEXT_STEP_PROMPT);
         this.setMaxStep(20);
         // 初始化客户端
-        ChatClient chatClient = ChatClient.builder(chatModel)
+        ChatClient chatClient = ChatClient.builder(deepSeekChatModel)
                 .defaultAdvisors(
                         new MyLoggerAdvisor()
                 )

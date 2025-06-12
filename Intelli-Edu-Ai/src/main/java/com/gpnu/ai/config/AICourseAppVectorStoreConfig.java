@@ -4,14 +4,12 @@ import com.gpnu.ai.rag.AICourseDocumentLoader;
 
 import com.gpnu.ai.rag.MyTokenTextSplitter;
 import jakarta.annotation.Resource;
-import org.springframework.ai.autoconfigure.vectorstore.redis.RedisVectorStoreProperties;
-import org.springframework.ai.document.Document;
+
 import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore;
+import org.springframework.ai.vectorstore.redis.autoconfigure.RedisVectorStoreProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.ai.vectorstore.VectorStore;
 import redis.clients.jedis.DefaultJedisClientConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisClientConfig;
@@ -53,7 +51,7 @@ public class AICourseAppVectorStoreConfig {
     @Bean
     public RedisVectorStoreProperties redisVectorStoreProperties() {
         RedisVectorStoreProperties properties = new RedisVectorStoreProperties();
-        properties.setIndex("Intelli-Edu-index");
+        properties.setIndexName("Intelli-Edu-index");
         properties.setPrefix("Intelli-Edu-prefix");
         properties.setInitializeSchema(true);
         return properties;
@@ -74,7 +72,7 @@ public class AICourseAppVectorStoreConfig {
         RedisVectorStore redisVectorStore =
                 RedisVectorStore.builder(jedisPooled, dashscopeEmbeddingModel)
                 .metadataFields(RedisVectorStore.MetadataField.tag("filename"))
-                .indexName(properties.getIndex())
+                .indexName(properties.getIndexName())
                 .prefix(properties.getPrefix())
                 .initializeSchema(properties.isInitializeSchema())
                 .build();

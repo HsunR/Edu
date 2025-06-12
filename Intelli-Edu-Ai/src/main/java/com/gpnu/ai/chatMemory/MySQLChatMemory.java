@@ -23,8 +23,8 @@ public class MySQLChatMemory implements ChatMemory {
     private ChatMessageService chatMessageService;
 
     @Override
-    public List<Message> get(String conversationId,int lastN) {
-        List<ChatMessage> chatMessages = chatMessageService.findLatestMessages(conversationId,lastN);
+    public List<Message> get(String conversationId) {
+        List<ChatMessage> chatMessages = chatMessageService.findAllMessageByConversationId(conversationId);
         return chatMessages.stream()
                 .map(ChatMessage::toMessage)
                 .collect(Collectors.toList());

@@ -26,15 +26,9 @@ public class MultiSessionMessageWindowMemory implements ChatMemory {
     }
 
     @Override
-    public List<Message> get(String conversationId, int lastN) {
+    public List<Message> get(String conversationId) {
         Deque<Message> window = conversationWindows.get(conversationId);
-        if (window == null || window.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 从窗口中获取最近的 lastN 条消息
-        List<Message> result = new ArrayList<>(window);
-        return result.size() > lastN ? result.subList(result.size() - lastN, result.size()) : result;
+        return window == null ? Collections.emptyList() : new ArrayList<>(window);
     }
 
     @Override
@@ -46,7 +40,7 @@ public class MultiSessionMessageWindowMemory implements ChatMemory {
             for (Message message : messages) {
                 window.addLast(message);
                 if (window.size() > windowSize) {
-                    window.removeFirst(); // 超过窗口大小，移除最早的消息
+                    window.removeFirst();
                 }
             }
             return window;

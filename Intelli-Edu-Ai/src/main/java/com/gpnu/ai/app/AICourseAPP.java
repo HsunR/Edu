@@ -7,11 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
+
+import org.springframework.ai.deepseek.DeepSeekChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore;
@@ -19,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
-import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
 
 
 @Slf4j
@@ -52,9 +52,9 @@ public class AICourseAPP {
 
 
 
-    public AICourseAPP(OpenAiChatModel openAiChatModel) {
+    public AICourseAPP(DeepSeekChatModel deepSeekChatModel) {
         this.chatClient =  ChatClient.
-                builder(openAiChatModel).
+                builder(deepSeekChatModel).
                 //  设置系统提示语
                 defaultSystem(SYSTEM_PROMPT).
                 // 设置默认Advisor
@@ -110,13 +110,11 @@ public class AICourseAPP {
         ChatResponse response = chatClient
                 .prompt()
                 .user(message)
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 .advisors(
                         new SimpleLoggerAdvisor(),
                         new QuestionAnswerAdvisor(redisVectorStore)
                 )
-                .tools(allTools)
+                .toolCallbacks(allTools)
                 .call()
                 .chatResponse();
         String result = response.getResult().getOutput().getText();
