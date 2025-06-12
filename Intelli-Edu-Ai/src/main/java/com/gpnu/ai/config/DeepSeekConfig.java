@@ -12,11 +12,6 @@ import java.time.Duration;
 
 @Configuration
 public class DeepSeekConfig {
-    @Value("${spring.ai.deepseek.api-key}")
-    private String apiKey;
-
-    @Value("${spring.ai.deepseek.base-url}")
-    private String baseUrl;
 
     /**
      * 配置其，防止ChatModel调用Rag功能时候超时
@@ -32,12 +27,4 @@ public class DeepSeekConfig {
             )
         );
     }
-
-
-
-
-
-
-
-
 }

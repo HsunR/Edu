@@ -1,5 +1,6 @@
 package com.gpnu.ai.chatMemory;
 
+
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Component;

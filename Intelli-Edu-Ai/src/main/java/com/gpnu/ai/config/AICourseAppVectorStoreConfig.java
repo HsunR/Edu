@@ -8,6 +8,7 @@ import jakarta.annotation.Resource;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.ai.vectorstore.redis.autoconfigure.RedisVectorStoreProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.DefaultJedisClientConfig;
@@ -60,14 +61,18 @@ public class AICourseAppVectorStoreConfig {
 
     @Bean
     public RedisVectorStore redisVectorStore(
+            @Value("${spring.data.redis.host}") String redisHost,
+            @Value("${spring.data.redis.port}") int redisPort,
+            @Value("${spring.data.redis.password}") String redisPassword,
+            @Value("${spring.data.redis.database}") int redisDatabase,
             RedisVectorStoreProperties properties
     ) {
         JedisClientConfig clientConfig = DefaultJedisClientConfig.builder()
-                .password("1097cba")
-                .database(0)
+                .password(redisPassword)
+                .database(redisDatabase)
                 .build();
 
-        JedisPooled jedisPooled = new JedisPooled(new HostAndPort("8.134.210.227", 6379), clientConfig);
+        JedisPooled jedisPooled = new JedisPooled(new HostAndPort(redisHost, redisPort), clientConfig);
 
         RedisVectorStore redisVectorStore =
                 RedisVectorStore.builder(jedisPooled, dashscopeEmbeddingModel)
