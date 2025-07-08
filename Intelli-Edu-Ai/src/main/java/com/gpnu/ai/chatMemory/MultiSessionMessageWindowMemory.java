@@ -1,5 +1,6 @@
 package com.gpnu.ai.chatMemory;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Component;
@@ -26,13 +27,13 @@ public class MultiSessionMessageWindowMemory implements ChatMemory {
     }
 
     @Override
-    public List<Message> get(String conversationId) {
+    public List<Message> get(@NotNull String conversationId) {
         Deque<Message> window = conversationWindows.get(conversationId);
         return window == null ? Collections.emptyList() : new ArrayList<>(window);
     }
 
     @Override
-    public void add(String conversationId, List<Message> messages) {
+    public void add(@NotNull String conversationId, @NotNull List<Message> messages) {
         conversationWindows.compute(conversationId, (key, window) -> {
             if (window == null) {
                 window = new LinkedList<>();
@@ -48,7 +49,7 @@ public class MultiSessionMessageWindowMemory implements ChatMemory {
     }
 
     @Override
-    public void clear(String conversationId) {
+    public void clear(@NotNull String conversationId) {
         conversationWindows.remove(conversationId);
     }
 }

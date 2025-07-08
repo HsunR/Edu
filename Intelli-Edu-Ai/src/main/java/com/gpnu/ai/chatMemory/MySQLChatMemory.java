@@ -4,6 +4,7 @@ package com.gpnu.ai.chatMemory;
 import com.gpnu.ai.model.entity.ChatMessage;
 import com.gpnu.ai.service.ChatMessageService;
 import jakarta.annotation.Resource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Component;
@@ -22,8 +23,9 @@ public class MySQLChatMemory implements ChatMemory {
     @Resource
     private ChatMessageService chatMessageService;
 
+    @NotNull
     @Override
-    public List<Message> get(String conversationId) {
+    public List<Message> get(@NotNull String conversationId) {
         List<ChatMessage> chatMessages = chatMessageService.findAllMessageByConversationId(conversationId);
         return chatMessages.stream()
                 .map(ChatMessage::toMessage)
@@ -31,13 +33,13 @@ public class MySQLChatMemory implements ChatMemory {
     }
 
     @Override
-    public void add(String conversationId, Message message) {
+    public void add(@NotNull String conversationId, @NotNull Message message) {
         ChatMessage chatMessage = ChatMessage.fromMessage(conversationId, message);
         chatMessageService.save(chatMessage);
     }
 
     @Override
-    public void add(String conversationId, List<Message> messages) {
+    public void add(@NotNull String conversationId, List<Message> messages) {
         List<ChatMessage> chatMessages = messages.stream()
                 .map(message -> ChatMessage.fromMessage(conversationId, message))
                 .toList();
@@ -46,7 +48,7 @@ public class MySQLChatMemory implements ChatMemory {
 
 
     @Override
-    public void clear(String conversationId) {
+    public void clear(@NotNull String conversationId) {
         chatMessageService.deleteByConversationId(conversationId);
     }
 }

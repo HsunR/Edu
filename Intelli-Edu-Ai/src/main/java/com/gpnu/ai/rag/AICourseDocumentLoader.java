@@ -59,7 +59,7 @@ public class AICourseDocumentLoader {
         return documents;
     }
     /**
-     * 加载markdown文档
+     * 加载本地的markdown文档
      * @return
      */
     public List<Document> loadMarkdowns(){
@@ -70,13 +70,15 @@ public class AICourseDocumentLoader {
             for (Resource resource : resources) {
                 String filename = resource.getFilename();
                 //提前文档倒数第三个和第二个字作为标签
-                String status = filename.substring(filename.length() - 6, filename.length() - 4);
+                String status = "AI通识历史";
+                String tag = "AI通识历史,深度学习，人工智能";
                 MarkdownDocumentReaderConfig config = MarkdownDocumentReaderConfig.builder()
                         .withHorizontalRuleCreateDocument(true)
                         .withIncludeCodeBlock(false)
                         .withIncludeBlockquote(false)
                         .withAdditionalMetadata("filename", filename)
                         .withAdditionalMetadata("status", status)
+                        .withAdditionalMetadata("tag", tag)
                         .build();
                 MarkdownDocumentReader markdownDocumentReader = new MarkdownDocumentReader(resource, config);
                 allDocuments.addAll(markdownDocumentReader.get());

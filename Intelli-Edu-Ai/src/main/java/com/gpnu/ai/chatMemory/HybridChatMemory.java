@@ -1,6 +1,7 @@
 package com.gpnu.ai.chatMemory;
 
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class HybridChatMemory implements ChatMemory {
     private MySQLChatMemory mySQLChatMemory;
 
     @Override
-    public List<Message> get(String conversationId) {
+    public List<Message> get(@NotNull String conversationId) {
         // 优先从缓存获取
         List<Message> cachedMessages = cacheMemory.get(conversationId);
         if (cachedMessages.isEmpty()) {
@@ -47,13 +48,13 @@ public class HybridChatMemory implements ChatMemory {
     }
 
     @Override
-    public void add(String conversationId, List<Message> messages) {
+    public void add(@NotNull String conversationId, @NotNull List<Message> messages) {
         cacheMemory.add(conversationId, messages);
         mySQLChatMemory.add(conversationId, messages);
     }
 
     @Override
-    public void clear(String conversationId) {
+    public void clear(@NotNull String conversationId) {
         cacheMemory.clear(conversationId);
         mySQLChatMemory.clear(conversationId);
     }

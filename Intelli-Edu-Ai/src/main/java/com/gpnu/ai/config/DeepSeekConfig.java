@@ -14,7 +14,7 @@ import java.time.Duration;
 public class DeepSeekConfig {
 
     /**
-     * 配置其，防止ChatModel调用Rag功能时候超时
+     * 配置作用:防止ChatModel调用Rag功能时候超时
      * @return
      */
     @Bean

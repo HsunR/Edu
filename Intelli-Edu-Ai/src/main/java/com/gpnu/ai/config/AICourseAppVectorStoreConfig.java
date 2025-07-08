@@ -5,7 +5,10 @@ import com.gpnu.ai.rag.AICourseDocumentLoader;
 import com.gpnu.ai.rag.MyTokenTextSplitter;
 import jakarta.annotation.Resource;
 
+import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.ai.vectorstore.redis.autoconfigure.RedisVectorStoreProperties;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,18 +37,12 @@ public class AICourseAppVectorStoreConfig {
 
 
 
-//注销此Bean，使其不需要每次启动都调用向量数据库
-//    @Bean
-//    VectorStore aiCourseVectorStore() {
-//        //这里的AI嵌入模型使用的是springAI官方的模型
-//        SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel).build();
-//        // 加载文档
-//        List<Document> documents = aiCourseDocumentLoader.loadMarkdowns() ;
-//        //对文档进行切分
-//        List<Document> mySplitDocument = myTokenTextSplitter.splitDocuments(documents);
-//        simpleVectorStore.add(mySplitDocument);
-//        return simpleVectorStore;
-//    }
+    @Bean
+    public SimpleVectorStore simpleVectorStore() {
+        //这里的AI嵌入模型使用的是springAI官方的模型
+        SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel).build();
+        return simpleVectorStore;
+    }
 
 
     // 在你的配置类中添加
@@ -81,19 +78,8 @@ public class AICourseAppVectorStoreConfig {
                 .prefix(properties.getPrefix())
                 .initializeSchema(properties.isInitializeSchema())
                 .build();
-//        List<Document> documents = aiCourseDocumentLoader.loadMarkdowns();
-//        List<Document> documentsFromFiles = myTokenTextSplitter.splitDocuments(documents);
-//        redisVectorStore.add(documentsFromFiles);
-
         return redisVectorStore;
     }
-
-
-
-
-
-
-
 
 
 
