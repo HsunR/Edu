@@ -31,10 +31,15 @@
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
 
+
+
+        <!--        该系统自定义的通用模块包 Begin-->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <groupId>com.gpnu</groupId>
+            <artifactId>Intelli-Edu-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
 
     </dependencies>
 

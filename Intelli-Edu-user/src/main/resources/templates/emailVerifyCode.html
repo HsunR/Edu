@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>邮箱验证码验证</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #a8c0d8, #f2f2f2);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .context {
+            font-size: 16px;
+            margin-bottom: 30px;
+            font-weight: 400;
+            color: #7f8c8d;
+        }
+
+        .code {
+            display: inline-block;
+            padding: 16px 32px;
+            margin: 30px 0;
+            font-size: 30px;
+            font-weight: 600;
+            background: linear-gradient(45deg, #4caf50, #81c784);
+            color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .code:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        .text {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="title">请验证您的邮箱</h1>
+    <div class="context">
+        <p style="font-weight: bold">以下是您的验证码：</p>
+        <div class="code" th:text="${code}">123456</div>
+        <p class="text">此验证码将在 10 分钟后失效。<br />如非本人操作，请忽略此邮件。</p>
+    </div>
+    <div class="footer">
+        系统邮件，请勿回复<br />
+        智慧教育平台 © 2025
+    </div>
+</div>
+</body>
+</html>
