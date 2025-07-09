@@ -84,7 +84,7 @@ public class LoginService {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "无效的刷新令牌");
         }
 
-        String userId = jwtTokenProvider.getUserIdFromRefreshToken(refreshToken);
+        Long userId = Long.valueOf(jwtTokenProvider.getUserIdFromRefreshToken(refreshToken));
 
         // 确保用户仍然存在且未被禁用/删除
         UsUser user = usUserService.getById(userId);
@@ -117,7 +117,7 @@ public class LoginService {
 
         // 移除Refresh Token，防止其被用于刷新
         try {
-            String userId = jwtTokenProvider.getUserIdFromAccessToken(accessToken);
+            Long userId = Long.valueOf(jwtTokenProvider.getUserIdFromAccessToken(accessToken));
             jwtTokenProvider.invalidateRefreshToken(userId);
             log.info("用户 {} 成功注销，Access Token已列入黑名单，Refresh Token已移除。", userId);
         } catch (Exception e) {

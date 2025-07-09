@@ -16,8 +16,8 @@ public class UsUser implements Serializable {
     /**
      * 用户id
      */
-    @TableId
-    private String userId;
+    @TableId(type = IdType.ASSIGN_ID)
+    private Long userId;
 
     /**
      * 用户姓名

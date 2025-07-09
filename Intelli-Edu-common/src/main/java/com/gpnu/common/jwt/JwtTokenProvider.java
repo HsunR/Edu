@@ -56,14 +56,14 @@ public class JwtTokenProvider {
      * @param userType 用户类型 (String 类型，与数据库UsUser.type匹配)
      * @return Access Token
      */
-    public String generateAccessToken(String userId, String userType) {
+    public String generateAccessToken(Long userId, String userType) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("userType", userType);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userId)
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -75,7 +75,7 @@ public class JwtTokenProvider {
      * @param userId 用户ID
      * @return Refresh Token
      */
-    public String generateRefreshToken(String userId) {
+    public String generateRefreshToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         // refresh token通常不携带userType等业务信息，除非刷新时不需要查库
@@ -83,14 +83,14 @@ public class JwtTokenProvider {
 
         String refreshToken = Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userId)
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationDays * 24 * 60 * 60 * 1000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
         // 将Refresh Token存储到Redis，便于管理和吊销
-        storeRefreshToken(refreshToken, userId);
+        storeRefreshToken(refreshToken, String.valueOf(userId));
         return refreshToken;
     }
 
@@ -116,7 +116,7 @@ public class JwtTokenProvider {
      * 使Refresh Token失效 (从Redis删除)
      * @param userId 用户ID
      */
-    public void invalidateRefreshToken(String userId) {
+    public void invalidateRefreshToken(Long userId) {
         redisService.deleteObject(REFRESH_TOKEN_PREFIX + userId);
         log.info("Refresh Token for user {} invalidated from Redis.", userId);
     }

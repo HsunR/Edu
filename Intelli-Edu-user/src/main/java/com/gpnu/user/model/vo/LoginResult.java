@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class LoginResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String userId;
+    private Long userId;
     private String userType;
     private String accessToken;
     private String refreshToken;

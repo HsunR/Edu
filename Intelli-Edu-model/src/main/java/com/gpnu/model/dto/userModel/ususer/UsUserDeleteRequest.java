@@ -12,7 +12,7 @@ public class UsUserDeleteRequest implements Serializable {
     /**
      * 用户id
      */
-    private String userId;
+    private Long userId;
 
 
 }
