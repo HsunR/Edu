@@ -57,6 +57,17 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+        </dependency>
+
+<!--网关聚合文档-->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
+        </dependency>
+
 <!--        以下这两配合响应式编程使用·-->
         <dependency>
             <groupId>jakarta.validation</groupId>
@@ -68,6 +79,8 @@
             <artifactId>hibernate-validator</artifactId>
         </dependency>
 
+
+<!--        系统必备配件-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

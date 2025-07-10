@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -40,6 +41,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     public static final String HEADER_USER_ID = "X-User-Id";
     public static final String HEADER_USER_TYPE = "X-User-Type";
 
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
 
     // 无需认证的路径白名单
     // 这里可以使用 AntPathMatcher 进行更灵活的路径匹配
@@ -52,6 +55,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             // Swagger UI 相关路径（通常需要根据实际Swagger配置调整）
             "/v2/api-docs", // Springfox old version
             "/v3/api-docs/**", // Springdoc-openapi
+            "/**/v3/api-docs/**",
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/swagger-ui/**",
@@ -125,9 +129,12 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
      * private AntPathMatcher antPathMatcher = new AntPathMatcher();
      * antPathMatcher.match(ignorePath, path)
      */
+
     private boolean isPathInIgnoreList(String path) {
-        for (String ignorePath : IGNORE_PATHS) {
-            if (path.startsWith(ignorePath)) { // 简单的前缀匹配
+        for (String ignorePattern : IGNORE_PATHS) {
+            boolean matched = pathMatcher.match(ignorePattern, path);
+            log.info("Matching pattern: {}, path: {}, matched: {}", ignorePattern, path, matched);
+            if (matched) {
                 return true;
             }
         }
