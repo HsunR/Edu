@@ -34,6 +34,12 @@
             <scope>test</scope>
         </dependency>
 
+<!--        降级处理-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+        </dependency>
+
 <!--        负载均衡-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -43,6 +49,12 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+<!--        注册发现-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
 <!--        以下这两配合响应式编程使用·-->
