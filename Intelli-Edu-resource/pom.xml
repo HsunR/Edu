@@ -2,73 +2,43 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.gpnu</groupId>
         <artifactId>Intelli-Edu-backend</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>Intelli-Edu-user</artifactId>
+
+
+    <artifactId>Intelli-Edu-resource</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Intelli-Edu-User</name>
-    <description>Intelli-Edu-User</description>
+    <name>Intelli-Edu-resource</name>
+    <description>Intelli-Edu-resource</description>
+
+
+
 
 
     <properties>
         <java.version>17</java.version>
     </properties>
+
     <dependencies>
 
-
-        <!--        SpringCloud -->
-
-        <!--        负载均衡-->
+        <!--        腾讯云对象存储-->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-        </dependency>
-        <!--        nacos注册中心-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-        <!--        nacos配置中心-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
         </dependency>
 
-        <!--        SpringCloud -->
 
-<!--        spring自带的邮件发送服务-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
-
-        <!--Thymeleaf模板依赖-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
             <optional>true</optional>
-        </dependency>
-
-
-        <!--    图形验证码-->
-        <dependency>
-            <groupId>com.github.penggle</groupId>
-            <artifactId>kaptcha</artifactId>
-        </dependency>
-
-<!--        腾讯云短信服务-->
-        <dependency>
-            <groupId>com.tencentcloudapi</groupId>
-            <artifactId>tencentcloud-sdk-java</artifactId>
         </dependency>
 
         <!--        该系统自定义的通用模块包 Begin-->
@@ -85,6 +55,7 @@
         </dependency>
 
         <!--        该系统自定义的通用模块包 End-->
+
 
 
 
@@ -120,17 +91,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <compilerArgs>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
 
