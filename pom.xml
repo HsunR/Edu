@@ -17,6 +17,7 @@
         <module>Intelli-Edu-gateway</module>
         <module>Intelli-Edu-Ai</module>
         <module>Intelli-Edu-user</module>
+        <module>Intelli-Edu-resource</module>
     </modules>
 
     <properties>
@@ -43,6 +44,7 @@
 
         <kaptcha.version>2.3.2</kaptcha.version>
         <tencentcloud.version>3.1.270</tencentcloud.version>
+        <cos.version>5.6.227</cos.version>
         <jakarta.validation.version>3.0.2</jakarta.validation.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
         <lombok.version>1.18.36</lombok.version>
@@ -311,6 +313,13 @@
                 <groupId>com.tencentcloudapi</groupId>
                 <artifactId>tencentcloud-sdk-java</artifactId>
                 <version>${tencentcloud.version}</version>
+            </dependency>
+
+            <!--        腾讯云对象存储-->
+            <dependency>
+                <groupId>com.qcloud</groupId>
+                <artifactId>cos_api</artifactId>
+                <version>${cos.version}</version>
             </dependency>
 
             <dependency>
