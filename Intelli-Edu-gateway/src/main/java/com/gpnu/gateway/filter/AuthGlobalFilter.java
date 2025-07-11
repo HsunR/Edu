@@ -56,6 +56,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             "/v2/api-docs", // Springfox old version
             "/v3/api-docs/**", // Springdoc-openapi
             "/**/v3/api-docs/**",
+            "**/doc.html",
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/swagger-ui/**",
