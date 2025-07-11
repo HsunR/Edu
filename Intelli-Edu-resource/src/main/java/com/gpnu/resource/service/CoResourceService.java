@@ -2,6 +2,8 @@ package com.gpnu.resource.service;
 
 import com.gpnu.model.entity.resourceModel.CoResource;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.gpnu.resource.model.dto.resource.UploadResult;
+import com.gpnu.resource.model.vo.coResource.CoResourceVO;
 
 /**
 * @author Chenxingdong
@@ -9,5 +11,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-07-11 18:41:14
 */
 public interface CoResourceService extends IService<CoResource> {
+
+
+    public CoResourceVO addResource(UploadResult uploadResult);
+
 
 }

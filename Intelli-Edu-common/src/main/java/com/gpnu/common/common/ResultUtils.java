@@ -22,7 +22,7 @@ public class ResultUtils {
      * @param errorCode 错误码
      * @return 响应
      */
-    public static BaseResponse<?> error(ErrorCode errorCode) {
+    public static <T> BaseResponse<T> error(ErrorCode errorCode) {
         return new BaseResponse<>(errorCode);
     }
 
@@ -33,7 +33,7 @@ public class ResultUtils {
      * @param message 错误信息
      * @return 响应
      */
-    public static BaseResponse<?> error(int code, String message) {
+    public static <T> BaseResponse<T> error(int code, String message) {
         return new BaseResponse<>(code, null, message);
     }
 
@@ -43,7 +43,7 @@ public class ResultUtils {
      * @param errorCode 错误码
      * @return 响应
      */
-    public static BaseResponse<?> error(ErrorCode errorCode, String message) {
+    public static <T> BaseResponse<T> error(ErrorCode errorCode, String message) {
         return new BaseResponse<>(errorCode.getCode(), null, message);
     }
 }
