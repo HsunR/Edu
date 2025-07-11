@@ -24,7 +24,7 @@ public class RegisterRequest implements Serializable {
     private String password;
 
     @NotNull(message = "注册类型不能为空")
-    private Integer registerType; //
+    private Integer registerType;
 
     // 根据registerType，mobile或email至少有一个需要被校验
 
