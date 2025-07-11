@@ -56,7 +56,6 @@ public class AuthController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的登录类型");
         }
 
-
         if(loginTypeEnum == LoginTypeEnum.MOBILE_CODE){
             ValidationUtil.validateAndThrow(request, LoginRequest.MobileCodeGroup.class);
         }else if(loginTypeEnum == LoginTypeEnum.EMAIL_CODE){

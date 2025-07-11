@@ -28,8 +28,11 @@ public class UsUserServiceImpl extends ServiceImpl<UsUserMapper, UsUser>
     implements UsUserService {
 
 
+     public final String DEFAULT_HEAD_PORTRAIT = "https://intelli-edu-backend-1332962051.cos.ap-guangzhou.myqcloud.com/images/default_avatar.webp"; // 默认头像链接
+
+
     @Override
-    public UsUserVO getUserInfoById(String userId) {
+    public UsUserVO getUserInfoById(Long userId) {
         UsUser usUser = getOne(new QueryWrapper<UsUser>().eq("user_id", userId).eq("is_delete", 0));
         if (usUser == null) {
             return null;
@@ -89,6 +92,8 @@ public class UsUserServiceImpl extends ServiceImpl<UsUserMapper, UsUser>
         user.setPassword(getEncryptPassword(user.getPassword()));
         user.setCreateTime(new Date());
         user.setUpdateTime(new Date());
+        user.setHeadPortrait(DEFAULT_HEAD_PORTRAIT);
+        user.setPersonalSignature("这个人很懒，什么都没有留下~");
         return this.save(user);
     }
 

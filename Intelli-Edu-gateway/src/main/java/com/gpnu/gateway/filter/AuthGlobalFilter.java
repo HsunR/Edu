@@ -27,6 +27,7 @@ import java.util.List;
 /**
  * 全局认证过滤器，验证JWT
  */
+//注解注释掉的话，则关闭网关过滤器
 @Component
 @Slf4j
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
@@ -47,11 +48,11 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     // 无需认证的路径白名单
     // 这里可以使用 AntPathMatcher 进行更灵活的路径匹配
     private static final List<String> IGNORE_PATHS = List.of(
-            "/user/login",
-            "/user/register",
-            "/user/register/send-code",
-            "/user/login/send-code",
-            "/user/refresh-token",
+            "/api/user/auth/login",
+            "/api/user/auth/register",
+            "/api/user/auth/register/send-code",
+            "/api/user/auth/login/send-code",
+            "/api/user/auth/refresh-token",
             // Swagger UI 相关路径（通常需要根据实际Swagger配置调整）
             "/v2/api-docs", // Springfox old version
             "/v3/api-docs/**", // Springdoc-openapi

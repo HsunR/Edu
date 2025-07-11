@@ -25,7 +25,7 @@ public interface UsUserService extends IService<UsUser> {
     public boolean existsByOpenId(String openId); // 新增OpenID存在性检查
     public boolean registerUser(RegisterRequest request); // 注册用户方法
 
-    public UsUserVO getUserInfoById(String userId);
+    public UsUserVO getUserInfoById(Long userId);
 
     public Page<UsUserVO> listUsers(UsUserQueryRequest queryRequest);
 

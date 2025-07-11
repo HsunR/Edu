@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.service.RedisService;
+import com.gpnu.common.utils.validator.ValidationUtil;
 import com.gpnu.user.constants.CaptchaConstants;
 import com.gpnu.user.model.dto.ususer.SendRegisterCodeRequest;
 import com.gpnu.user.model.dto.ususer.RegisterRequest;
@@ -151,15 +152,17 @@ public class VerificationCodeService {
      * 校验注册验证码并完成用户注册
      * @param request 用户注册请求，包含验证码
      */
-    @Transactional // 确保注册操作的原子性
-    public void verifyRegisterAndRegisterUser(@Validated({Default.class, SendRegisterCodeRequest.MobileGroup.class, SendRegisterCodeRequest.EmailGroup.class}) RegisterRequest request) {
+    @Transactional
+    public void verifyRegisterAndRegisterUser( RegisterRequest request) {
         String key;
         String account;
 
         if (request.getRegisterType() == RegisterTypeEnum.MOBILE_CODE.getCode()) {
+            ValidationUtil.validateAndThrow(request, Default.class, RegisterRequest.MobileGroup.class);
             account = request.getMobile();
             key = CaptchaConstants.REGISTER_CODE_PREFIX_MOBILE + account;
         } else if (request.getRegisterType() == RegisterTypeEnum.EMAIL_CODE.getCode()) {
+            ValidationUtil.validateAndThrow(request, Default.class, RegisterRequest.EmailGroup.class);
             account = request.getEmail();
             key = CaptchaConstants.REGISTER_CODE_PREFIX_EMAIL + account;
         } else {

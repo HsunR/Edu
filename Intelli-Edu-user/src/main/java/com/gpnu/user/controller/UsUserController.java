@@ -6,6 +6,8 @@ import com.gpnu.common.common.BaseResponse;
 import com.gpnu.common.common.ResultUtils;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
+import com.gpnu.common.exception.ThrowUtils;
+import com.gpnu.model.dto.userModel.ususer.UsUserDeleteRequest;
 import com.gpnu.model.dto.userModel.ususer.UsUserQueryRequest;
 import com.gpnu.model.dto.userModel.ususer.UsUserUpdateRequest;
 import com.gpnu.model.entity.userModel.UsUser;
@@ -28,10 +30,10 @@ public class UsUserController {
     private UsUserService usUserService;
 
 
-    @GetMapping("/getUserInfo")
+    @GetMapping("/getUserInfo/{userId}")
     @Operation(summary = "获取用户信息", description = "根据用户ID获取用户信息")
-    public BaseResponse<UsUserVO> getUserInfo(@RequestBody String userId) {
-        if (userId == null || userId.isEmpty()) {
+    public BaseResponse<UsUserVO> getUserInfo(@PathVariable Long userId) {
+        if (userId == null ) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不能为空");
         }
         UsUserVO userInfo = usUserService.getUserInfoById(userId);
@@ -72,10 +74,9 @@ public class UsUserController {
     
     @PostMapping("/deleteUser")
     @Operation(summary = "删除用户", description = "根据用户ID删除用户")
-    public BaseResponse<Boolean> deleteUser(@RequestBody String userId) {
-        if (userId == null || userId.isEmpty()) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不能为空");
-        }
+    public BaseResponse<Boolean> deleteUser(@RequestBody UsUserDeleteRequest deleteRequest) {
+        Long userId = deleteRequest.getUserId();
+        ThrowUtils.throwIf(userId == null || userId <= 0, ErrorCode.PARAMS_ERROR, "用户ID不能为空或无效");
         boolean isDeleted = usUserService.removeById(userId);
         if (!isDeleted) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户未找到或删除失败");
