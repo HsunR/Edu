@@ -54,8 +54,9 @@ public class UsUserController {
         return ResultUtils.success(userPage);
     }
     
-    @PostMapping
+
     @Operation(summary = "更新用户信息", description = "根据用户ID更新用户信息")
+    @PostMapping("/update")
     public BaseResponse<Boolean> updateUserInfo(@RequestBody UsUserUpdateRequest updateRequest) {
         if (updateRequest == null || updateRequest.getUserId() == null ) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户信息或用户ID不能为空");
