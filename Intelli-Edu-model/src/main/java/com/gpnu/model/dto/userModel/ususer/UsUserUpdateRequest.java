@@ -26,10 +26,6 @@ public class UsUserUpdateRequest implements Serializable {
      */
     private String password;
 
-    /**
-     * 用户身份
-     */
-    private String type;
 
 
     /**
