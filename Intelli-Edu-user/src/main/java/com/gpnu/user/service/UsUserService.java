@@ -19,6 +19,7 @@ public interface UsUserService extends IService<UsUser> {
     public UsUser getByUsername(String username);
     public UsUser getByMobile(String mobile);
     public UsUser getByEmail(String email);
+    public UsUser getByUserNameAndPassword(String username, String password);
     public UsUser getByOpenId(String openId); // 新增OpenID查询方法
     public UsUserVO updateUserInfoById(UsUserUpdateRequest updateRequest);
     public boolean existsByUsername(String username);

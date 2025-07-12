@@ -60,6 +60,8 @@ public class AuthController {
             ValidationUtil.validateAndThrow(request, LoginRequest.MobileCodeGroup.class);
         }else if(loginTypeEnum == LoginTypeEnum.EMAIL_CODE){
             ValidationUtil.validateAndThrow(request, LoginRequest.EmailCodeGroup.class);
+        }else if(loginTypeEnum == LoginTypeEnum.USERNAME_PASSWORD){
+            ValidationUtil.validateAndThrow(request, LoginRequest.UsernamePasswordGroup.class);
         }
 
         LoginResult loginResult = loginService.login(request);

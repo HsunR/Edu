@@ -63,6 +63,16 @@ public class UsUserServiceImpl extends ServiceImpl<UsUserMapper, UsUser>
     }
 
     @Override
+    public UsUser getByUserNameAndPassword(String username, String password) {
+        String encryptedPassword = getEncryptPassword(password);
+        UsUser user = getOne(new QueryWrapper<UsUser>()
+                .eq("username", username)
+                .eq("password", encryptedPassword)
+                .eq("is_delete", 0));
+        return user;
+    }
+
+    @Override
     public UsUser getByOpenId(String openId) {
         return getOne(new QueryWrapper<UsUser>().eq("open_id", openId).eq("is_delete", 0));
     }
