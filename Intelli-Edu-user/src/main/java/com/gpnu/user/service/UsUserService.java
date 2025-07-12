@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.gpnu.model.dto.userModel.ususer.UsUserQueryRequest;
+import com.gpnu.model.dto.userModel.ususer.UsUserUpdateRequest;
 import com.gpnu.model.entity.userModel.UsUser;
 import com.gpnu.user.model.dto.ususer.RegisterRequest;
 import com.gpnu.user.model.vo.UsUserVO;
@@ -19,6 +20,7 @@ public interface UsUserService extends IService<UsUser> {
     public UsUser getByMobile(String mobile);
     public UsUser getByEmail(String email);
     public UsUser getByOpenId(String openId); // 新增OpenID查询方法
+    public UsUserVO updateUserInfoById(UsUserUpdateRequest updateRequest);
     public boolean existsByUsername(String username);
     public boolean existsByMobile(String mobile);
     public boolean existsByEmail(String email);

@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import com.gpnu.common.exception.BusinessException;
+import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.model.dto.userModel.ususer.UsUserQueryRequest;
+import com.gpnu.model.dto.userModel.ususer.UsUserUpdateRequest;
 import com.gpnu.model.entity.userModel.UsUser;
 import com.gpnu.user.mapper.UsUserMapper;
 import com.gpnu.user.model.dto.ususer.RegisterRequest;
@@ -62,6 +65,30 @@ public class UsUserServiceImpl extends ServiceImpl<UsUserMapper, UsUser>
     @Override
     public UsUser getByOpenId(String openId) {
         return getOne(new QueryWrapper<UsUser>().eq("open_id", openId).eq("is_delete", 0));
+    }
+
+    @Override
+    public UsUserVO updateUserInfoById(UsUserUpdateRequest updateRequest) {
+        UsUser user = new UsUser();
+        BeanUtils.copyProperties(updateRequest, user);
+        if(updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty()) {
+            user.setPassword(getEncryptPassword(updateRequest.getPassword()));
+        }
+        //判断用户是否存在
+        UsUser existingUser = getById(user.getUserId());
+        if(existingUser == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+        }
+        boolean isUpdated = updateById(user);
+        UsUserVO usUserVO = new UsUserVO();
+        if(isUpdated) {
+            UsUser updatedUser = getById(user.getUserId());
+            BeanUtils.copyProperties(updatedUser, usUserVO);
+
+        }else{
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新用户信息失败");
+        }
+        return usUserVO;
     }
 
     @Override

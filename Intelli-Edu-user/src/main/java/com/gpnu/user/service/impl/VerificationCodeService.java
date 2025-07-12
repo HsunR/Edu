@@ -176,7 +176,6 @@ public class VerificationCodeService {
         }
 
 
-
         // 验证码校验成功后立即删除，防止重复使用
         redisService.deleteObject(key);
         log.info("账户 {} 注册验证码校验成功，已从Redis删除", account);

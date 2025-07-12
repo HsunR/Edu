@@ -30,6 +30,8 @@ public class UsUserController {
     private UsUserService usUserService;
 
 
+
+
     @GetMapping("/getUserInfo/{userId}")
     @Operation(summary = "获取用户信息", description = "根据用户ID获取用户信息")
     public BaseResponse<UsUserVO> getUserInfo(@PathVariable Long userId) {
@@ -55,21 +57,18 @@ public class UsUserController {
         }
         return ResultUtils.success(userPage);
     }
+
+
     
 
     @Operation(summary = "更新用户信息", description = "根据用户ID更新用户信息")
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateUserInfo(@RequestBody UsUserUpdateRequest updateRequest) {
+    public BaseResponse<UsUserVO> updateUserInfo(@RequestBody UsUserUpdateRequest updateRequest) {
         if (updateRequest == null || updateRequest.getUserId() == null ) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户信息或用户ID不能为空");
         }
-        UsUser newUser = new UsUser();
-        BeanUtils.copyProperties(updateRequest, newUser);
-        boolean isUpdated = usUserService.updateById(newUser);
-        if (!isUpdated) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户未找到或更新失败");
-        }
-        return ResultUtils.success(true);
+        UsUserVO userVO =  usUserService.updateUserInfoById(updateRequest);
+        return ResultUtils.success(userVO);
     }
     
     @PostMapping("/deleteUser")

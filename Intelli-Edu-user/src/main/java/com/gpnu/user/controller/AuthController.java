@@ -77,7 +77,7 @@ public class AuthController {
      */
     @Operation(summary = "用户注册")
     @PostMapping("/register")
-    public BaseResponse<Boolean> register(@Validated @RequestBody RegisterRequest request) {
+    public BaseResponse<Boolean> register(@RequestBody RegisterRequest request) {
         log.info("接收到用户注册请求：{}", request.getName());
         // 校验注册类型
         if (request.getRegisterType() == null || RegisterTypeEnum.getByCode(request.getRegisterType()) == null) {

@@ -26,8 +26,6 @@ public class UsUserUpdateRequest implements Serializable {
      */
     private String password;
 
-
-
     /**
      * 用户性别（默认1男，0女）
      */
@@ -49,8 +47,6 @@ public class UsUserUpdateRequest implements Serializable {
      * 用户学校
      */
     private String school;
-
-
 
 
 }

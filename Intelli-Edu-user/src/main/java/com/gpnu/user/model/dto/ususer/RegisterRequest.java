@@ -21,7 +21,8 @@ public class RegisterRequest implements Serializable {
     private String name;
 
     @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 20, message = "密码长度必须在6到20之间")
+    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,20}$",
+             message = "密码必须包含字母、数字和特殊字符且长度在6到20之间")
     private String password;
 
     @NotNull(message = "注册类型不能为空")
