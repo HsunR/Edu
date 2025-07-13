@@ -66,7 +66,7 @@ public class UsUserServiceImpl extends ServiceImpl<UsUserMapper, UsUser>
     public UsUser getByUserNameAndPassword(String username, String password) {
         String encryptedPassword = getEncryptPassword(password);
         UsUser user = getOne(new QueryWrapper<UsUser>()
-                .eq("username", username)
+                .eq("name", username)
                 .eq("password", encryptedPassword)
                 .eq("is_delete", 0));
         return user;
