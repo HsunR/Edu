@@ -19,7 +19,6 @@ public class UsUserVO implements Serializable {
      */
     private String name;
 
-
     /**
      * 用户身份
      */
