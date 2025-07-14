@@ -20,7 +20,6 @@ public class UsUserVO implements Serializable {
     private String name;
 
 
-
     /**
      * 用户身份
      */
@@ -60,16 +59,5 @@ public class UsUserVO implements Serializable {
      * 用户学校
      */
     private String school;
-
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
 }
