@@ -219,6 +219,7 @@ function toggleTheme() {
           bottom: 10px;
           font-size: 14px;
           font-weight: bold;
+          margin-right: 10px;
         }
 
         i {

@@ -1,10 +1,11 @@
 // @ts-ignore
 /* eslint-disable */
-// API 更新时间：
-// API 唯一标识：
-import * as yonghuxiangguanjiekou from "./yonghuxiangguanjiekou";
-import * as yonghujianquanjiekou from "./yonghujianquanjiekou";
+
+import * as userController from "./user";
+import * as authController from "./login";
+import * as coResourceController from "./resource"
 export default {
-  yonghuxiangguanjiekou,
-  yonghujianquanjiekou,
+  authController,
+  userController,
+  coResourceController
 };

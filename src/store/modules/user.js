@@ -1,13 +1,15 @@
 import router from "@/router";
-import { ElMessageBox } from "element-plus";
-import { login, logout } from "@/api/login";
-import { getInfo } from "@/api/user";
+// import api from '@/services/user/user/index.js';
+import api from '@/temp/index';
+const { userController,authController } = api;
+
+
 import { getToken, setToken, removeToken } from "@/utils/auth";
 
 const useUserStore = defineStore("user", {
   state: () => ({
     token: getToken(),
-    id: "",
+    userId: "",
     name: "",
     headPortrait: "",
     email: "",
@@ -19,10 +21,11 @@ const useUserStore = defineStore("user", {
     // 登录
     login(userInfo) {
       return new Promise((resolve, reject) => {
-        login(userInfo)
+          authController.login(userInfo)
           .then((res) => {
             console.log("登录");
             console.log(res);
+            console.log(res.data.data.userId);
             if (res.data.data) {
               ElMessage.success("登录成功");
             } else {
@@ -30,7 +33,7 @@ const useUserStore = defineStore("user", {
             }
             setToken(res.data.data.accessToken);
             this.token = res.data.data.accessToken;
-            this.id = res.data.data.userId;
+            this.userId = res.data.data.userId;
             localStorage.setItem("userId", res.data.data.userId);
             localStorage.setItem("headPortrait", res.data.data.headPortrait);
             resolve();
@@ -44,20 +47,20 @@ const useUserStore = defineStore("user", {
     // 获取用户信息
     getInfo() {
       return new Promise((resolve, reject) => {
-        const id = localStorage.getItem("userId");
-        getInfo(id)
+        const userId = Number(localStorage.getItem("userId"));
+          userController.getUserInfo(userId)
           .then((res) => {
             console.log("获取用户信息");
             console.log(res);
             const user = res.data.data;
-            if (res.roles && res.roles.length > 0) {
-              // 验证返回的roles是否是一个非空数组
-              this.roles = res.roles;
-              this.permissions = res.permissions;
-            } else {
-              this.roles = ["ROLE_DEFAULT"];
-            }
-            this.id = user.userId;
+            // if (res.roles && res.roles.length > 0) {
+            //   // 验证返回的roles是否是一个非空数组
+            //   this.roles = res.roles;
+            //   this.permissions = res.permissions;
+            // } else {
+            //   this.roles = ["ROLE_DEFAULT"];
+            // }
+            this.userId = user.userId;
             this.name = user.name;
             this.email = user.email;
             this.mobile = user.mobile;
@@ -73,10 +76,10 @@ const useUserStore = defineStore("user", {
     // 退出系统
     logOut() {
       return new Promise((resolve, reject) => {
-        logout()
+          authController.logout()
           .then(() => {
             this.token = "";
-            this.id = "";
+            this.userId = "";
             this.name = "";
             this.headPortrait = "";
             this.email = "";

@@ -2,85 +2,59 @@
 /* eslint-disable */
 import request from "../utils/request";
 
-/** 用户登录 POST /auth/login */
-export async function login(
-  body: API.LoginRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseLoginResult>("/auth/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
+export function login(data) {
+  return request({
+    url: '/user/auth/login',
+    method: 'post',
+    withCredentials: true,
+    data
+  })
+}
+
+/**
+ * 退出登录
+ * **/
+export function logout() {
+  return request({
+    url: '/user/auth/logout',
+    method: 'post'
+  })
+}
+
+/**
+ * 注册
+ * **/
+export function register(data) {
+  return request({
+    url: '/user/auth/register',
+    method: 'post',
+    data
+  })
 }
 
 /** 发送登录验证码 POST /auth/login/send-code */
-export async function sendLoginCode(
-  body: API.SendLoginCodeRequest,
-  options?: { [key: string]: any }
-) {
-  return request<any>("/auth/login/send-code", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 用户注销 POST /auth/logout */
-export async function logout(options?: { [key: string]: any }) {
-  return request<any>("/auth/logout", {
-    method: "POST",
-    ...(options || {}),
-  });
+export function sendLoginCode(data) {
+  return request({
+    url: '/user/auth/login/send-code',
+    method: 'post',
+    data
+  })
 }
 
 /** 刷新Access Token POST /auth/refresh-token */
-export async function refreshToken(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.refreshTokenParams,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseLoginResult>("/auth/refresh-token", {
-    method: "POST",
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 用户注册 POST /auth/register */
-export async function register(
-  body: API.RegisterRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseBoolean>("/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
+export function refreshToken(data) {
+  return request({
+    url: '/user/auth/refresh-token',
+    method: 'post',
+    data
+  })
 }
 
 /** 发送注册验证码 POST /auth/register/send-code */
-export async function sendRegisterCode(
-  body: API.SendRegisterCodeRequest,
-  options?: { [key: string]: any }
-) {
-  return request<any>("/auth/register/send-code", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
+export function sendRegisterCode(data) {
+  return request({
+    url: '/user/auth/register/send-code',
+    method: 'post',
+    data
+  })
 }

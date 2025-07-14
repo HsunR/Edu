@@ -17,9 +17,11 @@
 </template>
 
 <script setup>
-import { updateInfo } from "@/api/user"
-import { reactive } from "vue"
+import api from '@/temp/index';
+// import api from '@/services/user/user/index.js';
+const { userController } = api;
 
+import { reactive } from "vue"
 const { proxy } = getCurrentInstance()
 
 const user = reactive({
@@ -47,7 +49,7 @@ function submit() {
   proxy.$refs.pwdRef.validate(valid => {
     if (valid) {
       console.log(user)
-      updateInfo(user).then(response => {
+      userController.updateUserInfo(user).then(response => {
         console.log(response.data)
         if (response.data.data) {
           proxy.$modal.msgSuccess("修改成功")

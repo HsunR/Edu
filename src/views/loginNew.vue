@@ -27,7 +27,7 @@
           </el-form-item>
 
           <!-- 密码 -->
-          <el-form-item prop="password">
+          <el-form-item v-if="loginForm.loginType === 4"  prop="password">
             <el-input v-model="loginForm.password" class="form_input" type="password" placeholder="密码"
               :prefix-icon="Lock" show-password />
           </el-form-item>
@@ -143,7 +143,11 @@
 </template>
 
 <script setup>
-import { register, getLoginCode, getRegisterCode } from '@/api/login'
+import api from '@/services/user/user/index.js';
+const { userController,authController } = api;
+// import api from '@/temp/index';
+// const { loginAPI,userAPI } = api;
+
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import useUserStore from '@/store/modules/user'
@@ -344,7 +348,7 @@ const LoginCode = async () => {
       "mobile": loginForm.mobile,
       "email": loginForm.email
     }
-    const res = await getLoginCode(data)
+    const res = await authController.sendLoginCode(data)
     console.log(res)
     if (res.data === '') {
       // 倒计时
@@ -382,7 +386,7 @@ const RegisterCode = async () => {
       "mobile": registerForm.mobile,
       "email": registerForm.email
     }
-    const res = await getRegisterCode(data)
+    const res = await authController.sendRegisterCode(data)
 
     if (!res.data || res.data === "") {
       // 倒计时
@@ -438,7 +442,7 @@ const handleRegister = () => {
     if (valid) {
       loading.value = true
       try {
-        const res = await register(registerForm)
+        const res = await authController.register(registerForm)
         console.log('注册结果:', res)
         if (res.data.data) {
           ElMessage.success('注册成功')

@@ -32,7 +32,10 @@
 </template>
 
 <script setup>
-import { updateInfo } from "@/api/user"
+import api from '@/temp/index';
+// import api from '@/services/user/user/index.js';
+const { userController } = api;
+
 import { ElMessage } from "element-plus"
 import { toRefs } from 'vue'
 
@@ -58,7 +61,7 @@ const rules = ref({
 function submit() {
   proxy.$refs.userRef.validate(valid => {
     if (valid) {
-      updateInfo(form.value).then(response => {
+      userController.updateUserInfo(form.value).then(response => {
         if (response.data.data) {
           ElMessage.success("修改成功")
         } else {

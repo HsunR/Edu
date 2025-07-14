@@ -62,8 +62,14 @@
 import "vue-cropper/dist/index.css"
 import { VueCropper } from "vue-cropper"
 import useUserStore from "@/store/modules/user"
-import { uploadPicture } from "@/api/resource"
-import { updateInfo } from "@/api/user"
+
+import api from '@/temp/index';
+// import api from '@/services/user/user/index.js';
+const { userController,coResourceController } = api;
+
+// import api2 from '@/services/resource/resource/index.js'
+// const {coResourceController} = api2;
+
 import { ElMessage } from "element-plus"
 import { onMounted, onUpdated } from "vue"
 
@@ -74,9 +80,7 @@ const open = ref(false)
 const visible = ref(false)
 const title = ref("修改头像")
 
-// onMounted(() => {
-//   options.img = localStorage.getItem("headPortrait")
-// })
+
 onMounted(() => {
   console.log("更新了")
   console.log(userStore.headPortrait.value)
@@ -145,13 +149,15 @@ function uploadImg() {
   proxy.$refs.cropper.getCropBlob(data => {
     let formData = new FormData()
     formData.append("file", data, options.filename)
-    uploadPicture(formData).then(async response => {
+    coResourceController.uploadPicture(formData).then(async response => {
 
+      console.log("上传图片")
+      console.log(response)
       const form = {
         userId: localStorage.getItem("userId"),
         headPortrait: response.data.data.thumbnailUrl
       }
-      const res = await updateInfo(form)
+      const res = await userController.updateUserInfo(form)
       console.log(res)
       if (res.data.data) {
         open.value = false
