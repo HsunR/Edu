@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user")
 @Slf4j
-@Tag(name = "用户相关接口", description = "提供用户增删改查等功能")
+@Tag(name = "UserController", description = "提供用户增删改查等功能")
 public class UsUserController {
 
     @Resource

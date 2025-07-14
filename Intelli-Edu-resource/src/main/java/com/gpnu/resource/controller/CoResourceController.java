@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/coresource")
-@Tag(name = "资源处理相关接口", description = "提供资源上传等功能等功能")
+@Tag(name = "CoResourceController", description = "提供资源上传等功能等功能")
 @Slf4j
 public class CoResourceController {
 

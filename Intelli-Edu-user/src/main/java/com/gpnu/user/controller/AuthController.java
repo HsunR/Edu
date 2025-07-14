@@ -28,7 +28,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/auth")
 @Slf4j
-@Tag(name = "用户鉴权接口", description = "提供用户注册、登录等功能")
+@Tag(name = "AuthController", description = "提供用户注册、登录等功能")
 public class AuthController {
 
 
