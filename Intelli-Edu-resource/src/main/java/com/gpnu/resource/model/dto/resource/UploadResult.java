@@ -9,6 +9,8 @@ public class UploadResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+
+
     /**
      * 资源在cos服务器上的唯一标识
      */
@@ -20,9 +22,9 @@ public class UploadResult implements Serializable {
     private String resourceName;
 
     /**
-     * 资源类型(根据情况决定)
+     * 资源类型
      */
-    private String resourceType;
+    private String type;
 
     /**
      * 资源链接

@@ -1,4 +1,4 @@
-package com.gpnu.resource.manager.upload;
+package com.gpnu.resource.manager;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -6,7 +6,6 @@ import cn.hutool.core.util.RandomUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.resource.config.CosClientConfig;
-import com.gpnu.resource.manager.CosManager;
 
 
 import com.gpnu.resource.model.dto.resource.UploadResult;
@@ -116,4 +115,9 @@ public abstract class BaseUploadTemplate<T, R extends UploadResult> {
             }
         }
     }
+
+    /**
+     * 删除云存储文件
+     */
+    public abstract void deleteObject(String key) ;
 }

@@ -45,6 +45,12 @@ public class CoResource implements Serializable {
     private String resourceUuid;
 
     /**
+     * 上传状态
+     * 0-待上传，1-上传成功，2-上传失败，
+     */
+    private Integer uploadStatus;
+
+    /**
      * 乐观锁标志
      */
     @Version

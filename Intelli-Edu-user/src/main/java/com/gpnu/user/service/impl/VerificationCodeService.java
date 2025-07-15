@@ -40,10 +40,6 @@ public class VerificationCodeService {
     private EmailService emailService;
 
 
-
-
-
-
     /**
      * 发送注册验证码（手机或邮箱）
      * @param request 发送验证码请求

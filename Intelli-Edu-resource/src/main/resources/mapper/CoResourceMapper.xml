@@ -11,6 +11,7 @@
             <result property="type" column="type" jdbcType="TINYINT"/>
             <result property="resourceLink" column="resource_link" jdbcType="VARCHAR"/>
             <result property="resourceUuid" column="resource_uuid" jdbcType="VARCHAR"/>
+            <result property="uploadStatus" column="upload_status" jdbcType="TINYINT"/>
             <result property="version" column="version" jdbcType="INTEGER"/>
             <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -19,7 +20,7 @@
 
     <sql id="Base_Column_List">
         resource_id,resource_name,course_id,
-        type,resource_link,resource_uuid,
+        type,resource_link,resource_uuid,upload_status,
         version,is_delete,create_time,
         update_time
     </sql>

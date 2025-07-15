@@ -16,4 +16,9 @@ public interface CoResourceService extends IService<CoResource> {
     public CoResourceVO addResource(UploadResult uploadResult);
 
 
+    public CoResourceVO addResource(CoResource coResource);
+
+    public CoResourceVO updateResource(CoResource coResource);
+
+
 }

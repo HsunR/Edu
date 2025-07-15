@@ -96,7 +96,7 @@ public class CosManager {
      */
     public void deleteObject(String key) {
         log.info("Deleting object from COS. Bucket: {}, Key: {}", cosClientConfig.getBucket(), key);
-       cosClient.deleteObject(cosClientConfig.getBucket(),key);
+        cosClient.deleteObject(cosClientConfig.getBucket(),key);
     }
 
 

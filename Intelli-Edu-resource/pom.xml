@@ -26,6 +26,14 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+
         <!--        SpringCloud -->
 
         <!--        负载均衡-->
@@ -52,7 +60,11 @@
             <groupId>com.qcloud</groupId>
             <artifactId>cos_api</artifactId>
         </dependency>
-
+        <!--        腾讯VOD视频点播-->
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>vod_api</artifactId>
+        </dependency>
 
 
         <dependency>

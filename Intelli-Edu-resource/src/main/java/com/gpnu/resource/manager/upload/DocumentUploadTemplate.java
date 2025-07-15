@@ -3,6 +3,7 @@ package com.gpnu.resource.manager.upload;
 import cn.hutool.core.io.FileUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
+import com.gpnu.resource.manager.BaseUploadTemplate;
 import com.gpnu.resource.model.dto.resource.UploadResult;
 import com.qcloud.cos.model.PutObjectResult;
 
@@ -76,11 +77,22 @@ public class DocumentUploadTemplate extends BaseUploadTemplate<MultipartFile, Up
         uploadResult.setResourceName(originalFilename);
         uploadResult.setResourceLink(cosClientConfig.getHost() + "/" + uploadFileName); // 直接可访问的URL
         uploadResult.setResourceSize(FileUtil.size(tempFile));
-        uploadResult.setResourceType(FileUtil.getSuffix(originalFilename)); // 文件后缀作为格式
+        uploadResult.setType(FileUtil.getSuffix(originalFilename)); // 文件后缀作为格式
 
         // 可以在这里根据putObjectResult添加COS特有的ETag等信息
         // uploadResult.setEtag(putObjectResult.getETag());
 
         return uploadResult;
+    }
+
+    @Override
+    public void deleteObject(String key) {
+        // 删除文档文件的逻辑
+        try {
+            cosManager.deleteObject(key);
+        } catch (Exception e) {
+            log.error("删除文档文件失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除文档文件失败，请稍后再试");
+        }
     }
 }

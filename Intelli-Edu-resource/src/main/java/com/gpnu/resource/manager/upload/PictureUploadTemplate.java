@@ -5,8 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
-import com.gpnu.resource.config.CosClientConfig;
-import com.gpnu.resource.manager.CosManager;
+import com.gpnu.resource.manager.BaseUploadTemplate;
 import com.gpnu.resource.model.dto.pic.UploadPictureResult;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
@@ -14,7 +13,6 @@ import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile; // 假设输入源是MultipartFile
@@ -119,7 +117,7 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
         uploadPictureResult.setResourceName(originalFilename);
         uploadPictureResult.setResourceLink(cosClientConfig.getHost() + "/" + uploadFileName); // 原始图URL
         uploadPictureResult.setResourceSize(tempFile.length());
-        uploadPictureResult.setResourceType(imageInfo.getFormat());
+        uploadPictureResult.setType(imageInfo.getFormat());
         uploadPictureResult.setPicWidth(imageInfo.getWidth());
         uploadPictureResult.setPicHeight(imageInfo.getHeight());
         uploadPictureResult.setPicScale(NumberUtil.round(imageInfo.getWidth() * 1.0 / imageInfo.getHeight(), 2).doubleValue());
@@ -131,7 +129,7 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
             uploadPictureResult.setResourceSize(compressCiObject.getSize().longValue());
             uploadPictureResult.setPicWidth(compressCiObject.getWidth());
             uploadPictureResult.setPicHeight(compressCiObject.getHeight());
-            uploadPictureResult.setResourceType(compressCiObject.getFormat());
+            uploadPictureResult.setType(compressCiObject.getFormat());
 
             if (objectList.size() > 1) { // 如果有生成缩略图
                 CIObject thumbnailCiObject = objectList.get(1);
@@ -142,5 +140,16 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
             }
         }
         return uploadPictureResult;
+    }
+
+    @Override
+    public void deleteObject(String key) {
+        // 删除文档文件的逻辑
+        try {
+            cosManager.deleteObject(key);
+        } catch (Exception e) {
+            log.error("删除文档文件失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除文档文件失败，请稍后再试");
+        }
     }
 }
