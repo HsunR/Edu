@@ -57,6 +57,12 @@ public class ChatMessage implements Serializable {
     private Date updateTime;
 
     /**
+     * 乐观锁版本号
+     */
+    @Version
+    private Integer version;
+
+    /**
      * 是否删除
      */
     @TableLogic

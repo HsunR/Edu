@@ -12,12 +12,13 @@
             <result property="tokens" column="tokens" jdbcType="INTEGER"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
             <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,conversation_id,content,
         role,tokens,create_time,
-        update_time,is_delete
+        update_time,version,is_delete
     </sql>
 </mapper>

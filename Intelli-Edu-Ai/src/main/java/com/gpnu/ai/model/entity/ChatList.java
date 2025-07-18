@@ -46,6 +46,12 @@ public class ChatList implements Serializable {
     private Date updateTime;
 
     /**
+     * 乐观锁版本号
+     */
+    @Version
+    private Integer version;
+
+    /**
      * 逻辑删除标志
      */
     @TableLogic
