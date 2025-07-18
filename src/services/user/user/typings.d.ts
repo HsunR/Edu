@@ -120,7 +120,6 @@ declare namespace API {
   type UsUserVO = {
     userId?: number;
     name?: string;
-    password?: string;
     type?: string;
     openId?: string;
     sex?: number;
@@ -129,7 +128,5 @@ declare namespace API {
     headPortrait?: string;
     personalSignature?: string;
     school?: string;
-    createTime?: string;
-    updateTime?: string;
   };
 }

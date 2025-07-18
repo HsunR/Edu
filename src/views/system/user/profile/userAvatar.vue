@@ -82,8 +82,6 @@ const title = ref("修改头像")
 
 
 onMounted(() => {
-  console.log("更新了")
-  console.log(userStore.headPortrait.value)
   userStore.getInfo().then(res => {
     options.img = localStorage.getItem("headPortrait")
   })

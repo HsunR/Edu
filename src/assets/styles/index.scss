@@ -182,3 +182,24 @@ aside {
     margin-bottom: 10px;
   }
 }
+
+.gradient-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to right, #67a2ff, #606bff);
+  color: white;
+  border: none;
+  text-align: center;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 2vh 0 0 5vh;
+}
+
+.gradient-btn:hover {
+  background: linear-gradient(to right, #606bff, #67a2ff);
+  border: none;
+}

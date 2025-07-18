@@ -10,7 +10,6 @@ let downloadLoadingInstance
 // 是否显示重新登录
 export let isRelogin = { show: false }
 
-axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
@@ -23,6 +22,13 @@ service.interceptors.request.use(config => {
   const isToken = (config.headers || {}).isToken === false
   // 是否需要防止数据重复提交
   const isRepeatSubmit = (config.headers || {}).repeatSubmit === false
+
+  if (config.data instanceof FormData) {
+    config.headers["Content-Type"] = "multipart/form-data";
+  } else if (!config.headers["Content-Type"]) {
+    config.headers["Content-Type"] = "application/json";
+  }
+
   if (getToken() && !isToken) {
     config.headers['Authorization'] = 'Bearer ' + getToken() 
     console.log(getToken())

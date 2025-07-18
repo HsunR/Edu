@@ -146,7 +146,6 @@
 import api from '@/services/user/user/index.js';
 const { userController,authController } = api;
 // import api from '@/temp/index';
-// const { loginAPI,userAPI } = api;
 
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'

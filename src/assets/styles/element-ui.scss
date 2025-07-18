@@ -46,7 +46,6 @@
   }
 }
 
-// to fixed https://github.com/ElemeFE/element/issues/2461
 .el-dialog {
   transform: none;
   left: 0;
@@ -73,12 +72,10 @@
   }
 }
 
-// fix date-picker ui bug in filter-item
 .el-range-editor.el-input__inner {
   display: inline-flex !important;
 }
 
-// to fix el-date-picker css style
 .el-range-separator {
   box-sizing: content-box;
 }
@@ -93,4 +90,45 @@
 
 .el-dropdown .el-dropdown-link{
   color: var(--el-color-primary) !important;
+}
+
+// 上传头像
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+
+.infinite-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  height: 600px;
+}
+.infinite-list .infinite-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  background: var(--el-color-primary-light-9);
+  margin: 10px;
+  color: var(--el-color-primary);
+}
+.infinite-list .infinite-list-item + .list-item {
+  margin-top: 10px;
 }

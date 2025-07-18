@@ -18,6 +18,7 @@ declare namespace API {
     type?: number;
     resourceLink?: string;
     resourceUuid?: string;
+    uploadStatus?: number;
   };
 
   type uploadDocumentParams = {
@@ -27,7 +28,7 @@ declare namespace API {
   type UploadPictureResult = {
     resourceUuid?: string;
     resourceName?: string;
-    resourceType?: string;
+    type?: string;
     resourceLink?: string;
     resourceSize?: number;
     picWidth?: number;

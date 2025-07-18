@@ -30,4 +30,22 @@ generateService({
   }
 });
 
+// AI
+generateService({
+  requestLibPath: "import request from '../../../utils/request'", // 你的自定义请求库路径
+  schemaPath: "http://localhost:8890/api/ai/v3/api-docs/default",
+  serversPath: "./src/services/ai", // 资源服务生成的代码存放路径
+  projectName: "ai", // 保留项目名称
+  apiPrefix: "'/ai'",
+  hook: {
+    customFunctionName: (operation) => {
+      // 自定义函数名生成逻辑
+      return (
+        operation.operationId ||
+        `${operation.method}${operation.path.split("/").join("_")}`
+      );
+    },
+  },
+});
+
 // 其他服务可以按照相同模式添加...

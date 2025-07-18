@@ -40,6 +40,10 @@ import ImageUpload from "@/components/ImageUpload"
 // 图片预览组件
 import ImagePreview from "@/components/ImagePreview"
 
+// 视频播放组件
+import VueVideoPlayer from '@videojs-player/vue'
+import 'video.js/dist/video-js.css'
+
 const app = createApp(App)
 
 // 全局方法挂载
@@ -64,6 +68,7 @@ app.use(store)
 app.use(plugins)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)
+app.use(VueVideoPlayer)
 
 directive(app)
 

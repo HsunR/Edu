@@ -86,9 +86,17 @@ html.dark {
   --el-bg-color: #141414;
   --el-bg-color-overlay: #1d1e1f;
   --el-text-color-primary: #ffffff;
-  --el-text-color-regular: #d0d0d0;
-  --el-border-color: #434343;
-  --el-border-color-light: #434343;
+  --el-text-color-regular: #d0d0d0a2;
+  // --el-border-color: #434343;
+  // --el-border-color-light: #434343;
+  .el-button {
+    --el-button-border-color: #d0d0d0a2;
+    --el-button-text-color: #303133;
+}
+.el-textarea__inner{
+  background-color: #fff;
+  border: 1px solid #d0d0d0a2;
+}
 
   /* 侧边栏 */
   --sidebar-bg: #151515;

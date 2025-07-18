@@ -56,6 +56,10 @@ export default defineConfig(({ mode, command }) => {
       host: true,
       open: true,
       proxy: {
+        "/api/ai": {
+          target: "http://localhost:8896",
+          changeOrigin: true,
+        },
         "/api/user": {
           target: "http://localhost:8891",
           changeOrigin: true,
