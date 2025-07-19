@@ -81,11 +81,7 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.gpnu</groupId>
-            <artifactId>Intelli-Edu-model</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+
 
         <!--        该系统自定义的通用模块包 End-->
 

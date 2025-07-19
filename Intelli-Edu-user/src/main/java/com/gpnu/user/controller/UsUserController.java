@@ -7,17 +7,15 @@ import com.gpnu.common.common.ResultUtils;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
-import com.gpnu.model.dto.userModel.ususer.UsUserDeleteRequest;
-import com.gpnu.model.dto.userModel.ususer.UsUserQueryRequest;
-import com.gpnu.model.dto.userModel.ususer.UsUserUpdateRequest;
-import com.gpnu.model.entity.userModel.UsUser;
+import com.gpnu.common.model.dto.userModel.ususer.UsUserDeleteRequest;
+import com.gpnu.common.model.dto.userModel.ususer.UsUserQueryRequest;
+import com.gpnu.common.model.dto.userModel.ususer.UsUserUpdateRequest;
 import com.gpnu.user.model.vo.UsUserVO;
 import com.gpnu.user.service.UsUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

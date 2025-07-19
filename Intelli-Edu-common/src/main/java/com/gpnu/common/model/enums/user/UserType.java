@@ -1,4 +1,4 @@
-package com.gpnu.user.model.enums;
+package com.gpnu.common.model.enums.user;
 
 import lombok.Getter;
 
@@ -12,16 +12,16 @@ public enum UserType {
     /**
      * 用户类型码
      */
-    private final int code;
+    private final Integer code;
 
     /**
      * 用户类型描述
      */
-    private final String description;
+    private final String type;
 
-    UserType(int code, String description) {
+    UserType(int code, String type) {
         this.code = code;
-        this.description = description;
+        this.type = type;
     }
 
     /**
@@ -29,9 +29,9 @@ public enum UserType {
      * @param code 用户类型码
      * @return 对应的UserType，如果不存在则返回null
      */
-    public static UserType getByCode(int code) {
+    public static UserType getByCode(Integer code) {
         for (UserType type : values()) {
-            if (type.getCode() == code) {
+            if (type.getCode() .equals(code) ) {
                 return type;
             }
         }
@@ -40,13 +40,13 @@ public enum UserType {
 
     /**
      * 根据描述获取对应的用户类型枚举
-     * @param description 用户类型描述
+     * @param type 用户类型描述
      * @return 对应的UserType，如果不存在则返回null
      */
-    public static UserType getByDescription(String description) {
-        for (UserType type : values()) {
-            if (type.getDescription().equalsIgnoreCase(description)) {
-                return type;
+    public static UserType getByDescription(String type) {
+        for (UserType userType : values()) {
+            if (userType.getType().equalsIgnoreCase(type)) {
+                return userType;
             }
         }
         return null;

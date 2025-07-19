@@ -6,6 +6,7 @@ import com.gpnu.ai.service.ChatMessageService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
  */
 @Component
 public class MySQLChatMemory implements ChatMemory {
+
+
 
     @Resource
     private ChatMessageService chatMessageService;

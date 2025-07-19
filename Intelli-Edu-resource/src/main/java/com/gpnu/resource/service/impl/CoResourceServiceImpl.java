@@ -3,7 +3,7 @@ package com.gpnu.resource.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
-import com.gpnu.model.entity.resourceModel.CoResource;
+import com.gpnu.common.model.entity.resourceModel.CoResource;
 import com.gpnu.resource.model.dto.resource.UploadResult;
 import com.gpnu.resource.model.enums.ResourceType;
 import com.gpnu.resource.model.vo.coResource.CoResourceVO;

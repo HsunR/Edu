@@ -4,8 +4,7 @@ package com.gpnu.user.service.impl;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.jwt.JwtTokenProvider;
-import com.gpnu.common.service.RedisService;
-import com.gpnu.model.entity.userModel.UsUser;
+import com.gpnu.common.model.entity.userModel.UsUser;
 import com.gpnu.user.model.dto.ususer.LoginRequest;
 import com.gpnu.user.model.enums.LoginTypeEnum;
 import com.gpnu.user.model.vo.LoginResult;
@@ -13,7 +12,6 @@ import com.gpnu.user.service.LoginStrategy;
 import com.gpnu.user.service.UsUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.LoginException;

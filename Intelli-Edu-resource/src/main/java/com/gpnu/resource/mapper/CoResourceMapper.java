@@ -1,6 +1,6 @@
 package com.gpnu.resource.mapper;
 
-import com.gpnu.model.entity.resourceModel.CoResource;
+import com.gpnu.common.model.entity.resourceModel.CoResource;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

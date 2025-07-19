@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.gpnu.user.mapper.UsUserMapper">
 
-    <resultMap id="BaseResultMap" type="com.gpnu.model.entity.userModel.UsUser">
+    <resultMap id="BaseResultMap" type="com.gpnu.common.model.entity.userModel.UsUser">
         <id property="userId" column="user_id" jdbcType="CHAR"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="password" column="password" jdbcType="VARCHAR"/>

@@ -4,7 +4,7 @@ import com.gpnu.common.common.BaseResponse;
 import com.gpnu.common.common.ResultUtils;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
-import com.gpnu.model.entity.resourceModel.CoResource;
+import com.gpnu.common.model.entity.resourceModel.CoResource;
 import com.gpnu.resource.manager.upload.DocumentUploadTemplate;
 import com.gpnu.resource.manager.upload.PictureUploadTemplate;
 import com.gpnu.resource.manager.upload.VideoUploadTemplate;
@@ -19,7 +19,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

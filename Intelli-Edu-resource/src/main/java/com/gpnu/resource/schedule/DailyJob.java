@@ -2,7 +2,7 @@ package com.gpnu.resource.schedule;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.gpnu.model.entity.resourceModel.CoResource;
+import com.gpnu.common.model.entity.resourceModel.CoResource;
 import com.gpnu.resource.manager.upload.VideoUploadTemplate;
 import com.gpnu.resource.model.enums.UploadStatusEnum;
 import com.gpnu.resource.service.CoResourceService;

@@ -1,13 +1,13 @@
-package com.gpnu.model.dto.userModel.ususer;
+package com.gpnu.common.model.dto.userModel.ususer;
 
-import com.baomidou.mybatisplus.annotation.TableId;
+
+import com.gpnu.common.common.PageRequest;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
-public class UsUserUpdateRequest implements Serializable {
+public class UsUserQueryRequest extends PageRequest  implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,20 +27,26 @@ public class UsUserUpdateRequest implements Serializable {
     private String password;
 
     /**
+     * 用户身份
+     */
+    private String type;
+
+
+
+    /**
      * 用户性别（默认1男，0女）
      */
     private Integer sex;
 
+    /**
+     * 用户邮箱
+     */
+    private String email;
 
     /**
-     * 用户头像路径地址
+     * 用户手机号码
      */
-    private String headPortrait;
-
-    /**
-     * 用户个性签名
-     */
-    private String personalSignature;
+    private String mobile;
 
 
     /**

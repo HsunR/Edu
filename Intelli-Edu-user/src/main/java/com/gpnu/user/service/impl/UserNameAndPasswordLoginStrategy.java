@@ -4,7 +4,7 @@ import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.jwt.JwtTokenProvider;
 import com.gpnu.common.service.RedisService;
-import com.gpnu.model.entity.userModel.UsUser;
+import com.gpnu.common.model.entity.userModel.UsUser;
 import com.gpnu.user.model.dto.ususer.LoginRequest;
 import com.gpnu.user.model.enums.LoginTypeEnum;
 import com.gpnu.user.model.vo.LoginResult;

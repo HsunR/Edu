@@ -1,4 +1,4 @@
-package com.gpnu.model.entity.userModel;
+package com.gpnu.common.model.entity.userModel;
 
 import com.baomidou.mybatisplus.annotation.*;
 

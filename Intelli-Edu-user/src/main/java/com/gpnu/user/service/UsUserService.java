@@ -1,11 +1,10 @@
 package com.gpnu.user.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.gpnu.model.dto.userModel.ususer.UsUserQueryRequest;
-import com.gpnu.model.dto.userModel.ususer.UsUserUpdateRequest;
-import com.gpnu.model.entity.userModel.UsUser;
+import com.gpnu.common.model.dto.userModel.ususer.UsUserQueryRequest;
+import com.gpnu.common.model.dto.userModel.ususer.UsUserUpdateRequest;
+import com.gpnu.common.model.entity.userModel.UsUser;
 import com.gpnu.user.model.dto.ususer.RegisterRequest;
 import com.gpnu.user.model.vo.UsUserVO;
 

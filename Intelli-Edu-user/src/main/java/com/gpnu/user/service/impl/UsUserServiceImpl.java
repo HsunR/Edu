@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
-import com.gpnu.model.dto.userModel.ususer.UsUserQueryRequest;
-import com.gpnu.model.dto.userModel.ususer.UsUserUpdateRequest;
-import com.gpnu.model.entity.userModel.UsUser;
+import com.gpnu.common.model.dto.userModel.ususer.UsUserQueryRequest;
+import com.gpnu.common.model.dto.userModel.ususer.UsUserUpdateRequest;
+import com.gpnu.common.model.entity.userModel.UsUser;
 import com.gpnu.user.mapper.UsUserMapper;
 import com.gpnu.user.model.dto.ususer.RegisterRequest;
 import com.gpnu.user.model.vo.UsUserVO;

@@ -1,4 +1,4 @@
-package com.gpnu.model.entity.resourceModel;
+package com.gpnu.common.model.entity.resourceModel;
 
 import com.baomidou.mybatisplus.annotation.*;
 

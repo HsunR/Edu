@@ -2,7 +2,7 @@ package com.gpnu.user.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.gpnu.model.entity.userModel.UsUser;
+import com.gpnu.common.model.entity.userModel.UsUser;
 
 /**
 * @author Chenxingdong
