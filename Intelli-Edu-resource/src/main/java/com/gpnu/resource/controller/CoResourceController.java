@@ -74,7 +74,7 @@ public class CoResourceController {
      */
     @Operation(summary = "上传文档")
     @PostMapping("/upload/document")
-    public BaseResponse<CoResourceVO> uploadDocument(@RequestParam Long courseId ,@RequestParam("file") MultipartFile file) {
+    public BaseResponse<CoResourceVO> uploadDocument(@RequestParam(name = "courseId") Long courseId ,@RequestParam("file") MultipartFile file) {
 
             // 定义文档在COS中的上传路径前缀
         String uploadPathPrefix = "documents/";
