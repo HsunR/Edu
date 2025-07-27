@@ -25,7 +25,7 @@ public class ChatListController {
     @Resource
     private ChatListService chatListService;
 
-    @GetMapping("/getUserChatList")
+    @PostMapping("/getUserChatList")
     @Operation(summary = "获取当前用户的聊天会话列表")
     public BaseResponse<List<ChatListVO>> getUserChatList(@RequestBody ChatListQueryRequest queryRequest) {
         ThrowUtils.throwIf(queryRequest == null, ErrorCode.PARAMS_ERROR,"查询请求体不能为空");
@@ -34,7 +34,7 @@ public class ChatListController {
         return ResultUtils.success(chatList);
     }
 
-    @GetMapping("/getChatListByConversationId")
+    @PostMapping("/getChatListByConversationId")
     @Operation(summary = "根据会话ID获取聊天记录")
     public BaseResponse<ChatListVO> getChatListByConversationId(@RequestBody ChatListQueryRequest queryRequest) {
         ThrowUtils.throwIf(queryRequest == null, ErrorCode.PARAMS_ERROR,"查询请求体不能为空");
@@ -70,8 +70,5 @@ public class ChatListController {
         boolean result = chatListService.deleteChatList(chatListDeleteRequest);
         return ResultUtils.success(result);
     }
-
-
-
 
 }
