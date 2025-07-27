@@ -2,6 +2,7 @@ package com.gpnu.ai.app;
 
 import com.gpnu.ai.advisor.MyLoggerAdvisor;
 import com.gpnu.ai.chatMemory.HybridChatMemory;
+import com.gpnu.ai.model.dto.ChatRequest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,32 +36,28 @@ public class AICourseAPP {
     private ToolCallback[] allTools;
 
     @Resource(name = "aiCourseChatClient")
-    private   ChatClient chatClient;
-
-//    @Value("classpath:/prompts/system-message.st")
-//    private Resource systemPromptTemplateResource;
-
-
-//    private static final String SYSTEM_PROMPT = "你是AI通识课的助教，" +
-//            "请根据学生的提问，给出简洁明了的回答，" +
-//            "如果学生提问不清晰，请引导学生进行更清晰的提问。";
-
+    private  ChatClient chatClient;
 
 
 
 
     public String doChat(String message, String chatId){
 
+
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
                 .advisors(
                         //混合持久化的Advisor
-                        MessageChatMemoryAdvisor.builder(hybridChatMemory).build()
+//                        MessageChatMemoryAdvisor.builder(hybridChatMemory).conversationId(chatId).build()
                 )
                 .call()
                 .chatResponse();
+        Integer totalTokens = chatResponse.getMetadata().getUsage().getTotalTokens();
+        chatResponse.getMetadata().getUsage().getCompletionTokens();
+
         String text = chatResponse.getResult().getOutput().getText();
+        log.info("totalTokens = "+totalTokens);
         log.info("content: {}",text);
         return text;
     }
@@ -71,7 +68,7 @@ public class AICourseAPP {
                 .user(message)
                 .advisors(
                         new MyLoggerAdvisor(),
-                        MessageChatMemoryAdvisor.builder(hybridChatMemory).build()
+                        MessageChatMemoryAdvisor.builder(hybridChatMemory).conversationId(chatId).build()
                 )
                 .stream()
                 .content();
@@ -84,9 +81,7 @@ public class AICourseAPP {
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
-                .advisors(
-                        new QuestionAnswerAdvisor(redisVectorStore)
-                )
+                .advisors(QuestionAnswerAdvisor.builder(redisVectorStore).build())
                 .call()
                 .chatResponse();
         String text = chatResponse.getResult().getOutput().getText();
@@ -95,12 +90,13 @@ public class AICourseAPP {
     }
 
     public Flux<String> doChatWithRagByStream(String message ,String chatId){
+
         Flux<String> result = chatClient
                 .prompt()
                 .user(message)
                 .advisors(
                         new QuestionAnswerAdvisor(redisVectorStore),
-                        MessageChatMemoryAdvisor.builder(hybridChatMemory).build()
+                        MessageChatMemoryAdvisor.builder(hybridChatMemory).conversationId(chatId).build()
                 )
                 .stream()
                 .content();
@@ -113,7 +109,7 @@ public class AICourseAPP {
                 .user(message)
                 .advisors(
                         new QuestionAnswerAdvisor(redisVectorStore),
-                        MessageChatMemoryAdvisor.builder(hybridChatMemory).build()
+                        MessageChatMemoryAdvisor.builder(hybridChatMemory).conversationId(chatId).build()
                 )
                 .toolCallbacks(allTools)
                 .call()
@@ -124,13 +120,13 @@ public class AICourseAPP {
     }
 
 
-    public Flux<String> doChatWithToolsByStream(String message , String chatId){
+    public Flux<String> doChatWithToolsByStream(ChatRequest chatRequest){
         Flux<String> result = chatClient
                 .prompt()
-                .user(message)
+                .user(chatRequest.getUserPrompt())
                 .advisors(
                         new QuestionAnswerAdvisor(redisVectorStore),
-                        MessageChatMemoryAdvisor.builder(hybridChatMemory).build()
+                        MessageChatMemoryAdvisor.builder(hybridChatMemory).conversationId(chatRequest.getConversationId()).build()
                 )
                 .toolCallbacks(allTools)
                 .stream()
