@@ -23,7 +23,7 @@ public class DeepSeekConfig {
             ClientHttpRequestFactories.get(
                 ClientHttpRequestFactorySettings.DEFAULTS
                     .withConnectTimeout(Duration.ofSeconds(5))
-                    .withReadTimeout(Duration.ofSeconds(60))
+                    .withReadTimeout(Duration.ofSeconds(100))
             )
         );
     }
