@@ -1,6 +1,7 @@
 package com.gpnu.ai.config;
 
 import com.gpnu.ai.advisor.MyLoggerAdvisor;
+import com.gpnu.ai.chatMemory.HybridChatMemory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.deepseek.DeepSeekChatModel;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,11 @@ public class AIModelConfig {
     @Value("classpath:/prompts/system-message.st")
     private Resource systemPromptTemplateResource;
 
+    @Value("classpath:/prompts/system-naming.st")
+    private Resource systemNamingPromptTemplateResource;
+
+
+
     @Bean
     public ChatClient aiCourseChatClient(DeepSeekChatModel deepSeekChatModel){
        return ChatClient.builder(deepSeekChatModel)
@@ -23,4 +29,15 @@ public class AIModelConfig {
                )
                .build();
     }
+
+    @Bean
+    public ChatClient nameChatClient(DeepSeekChatModel deepSeekChatModel){
+        return ChatClient.builder(deepSeekChatModel)
+                .defaultSystem(systemNamingPromptTemplateResource)
+                .defaultAdvisors(
+                        new MyLoggerAdvisor()
+                )
+                .build();
+    }
+
 }
