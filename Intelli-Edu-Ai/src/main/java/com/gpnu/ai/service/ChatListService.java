@@ -1,6 +1,7 @@
 package com.gpnu.ai.service;
 
 import com.gpnu.ai.model.dto.chatList.ChatListAddRequest;
+import com.gpnu.ai.model.dto.chatList.ChatListDeleteRequest;
 import com.gpnu.ai.model.dto.chatList.ChatListUpdateRequest;
 import com.gpnu.ai.model.entity.ChatList;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -19,7 +20,7 @@ public interface ChatListService extends IService<ChatList> {
     /**
      * 创建新的聊天会话
      */
-    public boolean createChatList(ChatListAddRequest chatListAddRequest);
+    public ChatListVO createChatList(ChatListAddRequest chatListAddRequest);
 
     /**
      * 查询根据会话ID查询当前的聊天记录
@@ -29,8 +30,10 @@ public interface ChatListService extends IService<ChatList> {
     /**
      * 查询当前用户的所有聊天会话
      */
-    public List<ChatListVO> getChatListByUserId(String userId);
+    public List<ChatListVO> getChatListByUserId(Long userId);
 
 
-    boolean updateChatList(ChatListUpdateRequest updateRequest);
+    public ChatListVO updateChatList(ChatListUpdateRequest updateRequest);
+
+    public boolean deleteChatList(ChatListDeleteRequest chatListDeleteRequest);
 }

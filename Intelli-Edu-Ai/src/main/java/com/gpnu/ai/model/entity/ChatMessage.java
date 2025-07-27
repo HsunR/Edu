@@ -8,10 +8,7 @@ import java.util.Date;
 
 import com.gpnu.ai.model.enums.MessageTypeEnum;
 import lombok.Data;
-import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.messages.*;
 
 /**
  * 聊天消息表
@@ -83,6 +80,8 @@ public class ChatMessage implements Serializable {
             chatMessage.setContent(((UserMessage) message).getText());
         } else if (message instanceof AssistantMessage) {
             chatMessage.setContent(((AssistantMessage) message).getText());
+        }else if(message instanceof ToolResponseMessage){
+            chatMessage.setContent(((ToolResponseMessage) message).getText());
         }
         chatMessage.setRole(message.getMessageType().getValue());
         Object promptTokens = message.getMetadata().get("promptTokens");
@@ -95,7 +94,6 @@ public class ChatMessage implements Serializable {
         }
         chatMessage.setCreateTime(new Date());
         chatMessage.setUpdateTime(new Date());
-        chatMessage.setIsDelete(0);
         return chatMessage;
     }
 

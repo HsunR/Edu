@@ -5,9 +5,8 @@
 <mapper namespace="com.gpnu.ai.mapper.ChatListMapper">
 
     <resultMap id="BaseResultMap" type="com.gpnu.ai.model.entity.ChatList">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="userId" column="user_id" jdbcType="CHAR"/>
             <result property="conversationId" column="conversation_id" jdbcType="VARCHAR"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
             <result property="conversationTitle" column="conversation_title" jdbcType="VARCHAR"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
@@ -16,7 +15,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,user_id,conversation_id,
+        conversation_id, user_id,
         conversation_title,create_time,update_time,version,
           is_delete
     </sql>

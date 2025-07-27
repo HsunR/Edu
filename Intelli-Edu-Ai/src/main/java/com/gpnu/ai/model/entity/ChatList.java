@@ -15,20 +15,17 @@ import lombok.Data;
 @Data
 public class ChatList implements Serializable {
     /**
-     * Id 主键
+     * 会话id
      */
     @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
+    private String conversationId;
 
     /**
      * 用户id
      */
-    private String userId;
+    private Long userId;
 
-    /**
-     * 会话id
-     */
-    private String conversationId;
+
 
     /**
      * 会话标题

@@ -13,38 +13,27 @@ import java.util.List;
 public class ChatListVO implements Serializable {
 
     /**
-     * Id 主键
+     * 会话id
      */
-    private Long id;
+    private String conversationId;
+
 
     /**
      * 用户id
      */
     private String userId;
 
-    /**
-     * 会话id
-     */
-    private String conversationId;
 
     /**
      * 会话标题
      */
     private String conversationTitle;
 
-    /**
-     * 创建时间
-     */
-    private Date createTime;
 
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     /**
      * 一个会话对应的消息记录列表
      */
-    private List<ChatMessage> chatMessages;
+    private List<ChatMessageVO> chatMessageVOS;
 
 }

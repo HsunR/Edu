@@ -1,25 +1,25 @@
 package com.gpnu.ai.model.dto.chatList;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class ChatListQueryRequest implements java.io.Serializable {
+public class ChatListQueryRequest implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Id 主键
-     */
-    private Long id;
-
-    /**
-     * 用户id
-     */
-    private String userId;
 
     /**
      * 会话id
      */
     private String conversationId;
+
+    /**
+     * 用户id
+     */
+    private Long userId;
+
 
     /**
      * 会话标题
