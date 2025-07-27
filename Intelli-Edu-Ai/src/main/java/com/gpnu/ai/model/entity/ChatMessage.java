@@ -8,6 +8,7 @@ import java.util.Date;
 
 import com.gpnu.ai.model.enums.MessageTypeEnum;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.*;
 
 /**
@@ -16,6 +17,7 @@ import org.springframework.ai.chat.messages.*;
  */
 @TableName(value ="chat_message")
 @Data
+@Slf4j
 public class ChatMessage implements Serializable {
     /**
      * 主键ID
@@ -71,6 +73,9 @@ public class ChatMessage implements Serializable {
 
 
     public static ChatMessage fromMessage(String conversationId, Message message) {
+        log.info("---------MetaData的信息如下---------------");
+        log.info(message.getMetadata().toString());
+        log.info("------------------------------------------");
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setConversationId(conversationId);
         // 根据消息类型获取内容
