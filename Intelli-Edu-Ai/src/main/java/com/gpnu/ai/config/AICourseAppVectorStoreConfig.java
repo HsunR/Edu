@@ -20,6 +20,7 @@ import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.JedisPooled;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -45,7 +46,7 @@ public class AICourseAppVectorStoreConfig {
     }
 
 
-    // 在你的配置类中添加
+
     @Bean
     public RedisVectorStoreProperties redisVectorStoreProperties() {
         RedisVectorStoreProperties properties = new RedisVectorStoreProperties();
@@ -73,15 +74,18 @@ public class AICourseAppVectorStoreConfig {
 
         RedisVectorStore redisVectorStore =
                 RedisVectorStore.builder(jedisPooled, dashscopeEmbeddingModel)
-                .metadataFields(RedisVectorStore.MetadataField.tag("filename"))
+                .metadataFields(Arrays.asList(RedisVectorStore.MetadataField.text("tag"),
+                        RedisVectorStore.MetadataField.tag("accessPermission"),
+                        RedisVectorStore.MetadataField.text("filename"),
+                        RedisVectorStore.MetadataField.tag("conversationId"),
+                        RedisVectorStore.MetadataField.tag("userId")
+                ))
                 .indexName(properties.getIndexName())
                 .prefix(properties.getPrefix())
                 .initializeSchema(properties.isInitializeSchema())
                 .build();
         return redisVectorStore;
     }
-
-
 
 }
 
