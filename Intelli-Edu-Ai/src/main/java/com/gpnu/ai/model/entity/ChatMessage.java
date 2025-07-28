@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gpnu.ai.model.enums.MessageTypeEnum;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -72,10 +74,9 @@ public class ChatMessage implements Serializable {
 
 
 
+
+
     public static ChatMessage fromMessage(String conversationId, Message message) {
-        log.info("---------MetaData的信息如下---------------");
-        log.info(message.getMetadata().toString());
-        log.info("------------------------------------------");
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setConversationId(conversationId);
         // 根据消息类型获取内容
@@ -99,6 +100,8 @@ public class ChatMessage implements Serializable {
         }
         chatMessage.setCreateTime(new Date());
         chatMessage.setUpdateTime(new Date());
+
+
         return chatMessage;
     }
 
@@ -107,12 +110,14 @@ public class ChatMessage implements Serializable {
      */
     public Message toMessage() {
         MessageTypeEnum type = MessageTypeEnum.fromString(role);
-        return switch (type) {
-            case SYSTEM -> new SystemMessage(content);
-            case USER -> new UserMessage(content);
-            case ASSISTANT -> new AssistantMessage(content);
+        Message m;
+        switch (type) {
+            case SYSTEM -> m = new SystemMessage(content);
+            case USER -> m = new UserMessage(content);
+            case ASSISTANT -> m = new AssistantMessage(content);
             default -> throw new IllegalArgumentException("Unknown message role: " + role);
-        };
+        }
+        return m;
     }
 
 

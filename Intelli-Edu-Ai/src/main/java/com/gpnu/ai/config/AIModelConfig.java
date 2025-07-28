@@ -3,6 +3,7 @@ package com.gpnu.ai.config;
 import com.gpnu.ai.advisor.MyLoggerAdvisor;
 import com.gpnu.ai.chatMemory.HybridChatMemory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.deepseek.DeepSeekChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

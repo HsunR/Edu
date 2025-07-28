@@ -70,7 +70,7 @@ public class AiCourseController {
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR,"会话体不能为空");
         ThrowUtils.throwIf(request.getConversationId() == null || request.getConversationId().isEmpty(), ErrorCode.PARAMS_ERROR,"会话ID不能为空");
         ThrowUtils.throwIf(request.getUserPrompt() == null || request.getUserPrompt().isEmpty(), ErrorCode.PARAMS_ERROR,"用户输入不能为空");
-        return selfReflectingRagService.askStream(request)
+        return selfReflectingRagService.ask(request)
                 .map(ResultUtils :: success)
                 .onErrorResume(e -> Flux.just(new BaseResponse<>(ErrorCode.OPERATION_ERROR.getCode(), null, "聊天失败: " + e.getMessage())));
     }
@@ -101,7 +101,7 @@ public class AiCourseController {
             List<Document> splitDocuments = myTokenTextSplitter.splitDocuments(originalDocument);
             redisVectorStore.add(splitDocuments);
         }
-        return selfReflectingRagService.askStream(request)
+        return selfReflectingRagService.ask(request)
                 .map(ResultUtils::success)
                 .onErrorResume(e -> Flux.just(new BaseResponse<>(ErrorCode.OPERATION_ERROR.getCode(), null, "聊天失败: " + e.getMessage())));
     }
