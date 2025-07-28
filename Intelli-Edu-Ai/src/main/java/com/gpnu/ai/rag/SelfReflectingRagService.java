@@ -227,7 +227,7 @@ public class SelfReflectingRagService {
                 // --- 决策阶段 ---
                 if (currentCritique.confidence() == Critique.ConfidenceLevel.HIGH && !currentCritique.needsMoreInfo()) {
                     log.info("答案质量高，无需进一步迭代。");
-                    finalAnswer = currentAnswer; 
+                    finalAnswer = currentAnswer;
                     break;
                 }
 
