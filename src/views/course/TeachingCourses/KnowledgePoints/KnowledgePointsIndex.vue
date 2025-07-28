@@ -4,7 +4,19 @@
 
 <template>
   <div>
-    知识点
+
+    <el-card>
+      <template #header>
+        <div class="card-header">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="{ path: '/course/TeachingCourses' }">我教的课</el-breadcrumb-item>
+            <el-breadcrumb-item>知识点</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div>
+      </template>
+
+      知识点
+    </el-card>
   </div>
 </template>
 

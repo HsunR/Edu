@@ -4,8 +4,9 @@
 @use './sidebar.scss';
 @use './btn.scss';
 @use './ruoyi.scss';
+@use './formBase.scss';
 
-body {
+body{
   height: 100%;
   margin: 0;
   -moz-osx-font-smoothing: grayscale;

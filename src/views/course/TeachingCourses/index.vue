@@ -55,14 +55,14 @@ const courseFormRef = ref();
 const CourseForm = reactive({
   courseName: '',
   courseDescribe: '',
-  courseCover:'',
+  courseCover: '',
 })
 
-const addCourse = () =>{
+const addCourse = () => {
   isEdit.value = false
   dialogFormVisible.value = true
 }
-const editCourse = (id) =>{
+const editCourse = (id) => {
   console.log("编辑：", id);
   isEdit.value = true
   dialogFormVisible.value = true
@@ -72,8 +72,8 @@ const editCourse = (id) =>{
 const imageUrl = ref('')
 // 上传成功返回url地址  response.url
 const handleUploadSuccess: UploadProps['onSuccess'] = (
-    response,
-    uploadFile
+  response,
+  uploadFile
 ) => {
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
 }
@@ -99,7 +99,7 @@ const toCourse = (id) => {
 
 // 遮罩层
 const activeOverlayIndex = ref(-1);
-const toggleOverlay = (index, isShow)=>{
+const toggleOverlay = (index, isShow) => {
   activeOverlayIndex.value = isShow ? index : -1;
 }
 
@@ -168,9 +168,7 @@ const resetForm = () => {
         <template #default>
           <div class="courses-container">
             <el-card v-for="item in lists" :key="item.name" :body-style="{ padding: '20px', margin: '0px' }"
-              class="courseCard"
-              @mouseenter="toggleOverlay(item.id, true)"
-              @mouseleave="toggleOverlay(item.id, false)">
+              class="courseCard" @mouseenter="toggleOverlay(item.id, true)" @mouseleave="toggleOverlay(item.id, false)">
               <img :src="item.imgUrl" class="image multi-content" style="max-width: 100%" />
               <div style="padding: 14px">
                 <span>{{ item.name }}</span>
@@ -180,16 +178,16 @@ const resetForm = () => {
               </div>
 
               <!-- 遮罩层 -->
-              <div
-                  class="card-overlay"
-                  v-show="activeOverlayIndex === item.id"
-                  @click.stop
-              >
+              <div class="card-overlay" v-show="activeOverlayIndex === item.id" @click.stop>
                 <el-button type="primary" plain round @click="editCourse(item.id)" style="width: 6vh;">
-                  <el-icon><Edit /></el-icon>编辑
+                  <el-icon>
+                    <Edit />
+                  </el-icon>编辑
                 </el-button>
-                <el-button type="danger" round @click="handleDelete(item.id)"  style="width: 6vh;">
-                  <el-icon><Delete /></el-icon>删除
+                <el-button type="danger" round @click="handleDelete(item.id)" style="width: 6vh;">
+                  <el-icon>
+                    <Delete />
+                  </el-icon>删除
                 </el-button>
               </div>
             </el-card>
@@ -200,27 +198,25 @@ const resetForm = () => {
     </el-space>
 
     <!-- 新增课程对话框   -->
-    <el-dialog v-model="dialogFormVisible" :title="isEdit ? '编辑课程' : '新增课程' " width="700" style="padding: 20px 60px 20px 10px;">
+    <el-dialog v-model="dialogFormVisible" :title="isEdit ? '编辑课程' : '新增课程'" width="700"
+      style="padding: 20px 60px 20px 10px;">
       <el-form ref="courseFormRef" :model="CourseForm">
         <el-form-item label="课程名字" prop="courseName" :label-width="formLabelWidth">
           <el-input v-model="CourseForm.courseName" autocomplete="off" />
         </el-form-item>
         <el-form-item label="课程封面" prop="courseCover" :label-width="formLabelWidth">
-          <el-upload
-              class="avatar-uploader"
-              action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-              :show-file-list="false"
-              :on-success="handleUploadSuccess"
-              :before-upload="beforeUpload"
-          >
+          <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+            :show-file-list="false" :on-success="handleUploadSuccess" :before-upload="beforeUpload">
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            <el-icon v-else class="avatar-uploader-icon">
+              <Plus />
+            </el-icon>
             <el-button v-if="imageUrl" @click.stop="handleRemove">删除图片</el-button>
           </el-upload>
         </el-form-item>
 
         <el-form-item label="课程详细描述" prop="courseDescribe" :label-width="formLabelWidth">
-          <el-input v-model="CourseForm.courseDescribe " autocomplete="off" type="textarea"/>
+          <el-input v-model="CourseForm.courseDescribe" autocomplete="off" type="textarea" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -233,8 +229,10 @@ const resetForm = () => {
       </template>
     </el-dialog>
 
-    <router-view>
-      <keep-alive></keep-alive>
+    <router-view v-slot="{ Component }">
+      <keep-alive>
+        <component :is="Component" />
+      </keep-alive>
     </router-view>
   </div>
 </template>
@@ -254,11 +252,12 @@ const resetForm = () => {
   position: relative;
   padding-bottom: 30px;
 }
-.courseCard:hover{
+
+.courseCard:hover {
   box-shadow: 0 4px 15px rgba(39, 116, 232, 0.6);
 }
 
-.card-overlay{
+.card-overlay {
   position: absolute;
   top: 20px;
   right: 10px;
@@ -270,7 +269,7 @@ const resetForm = () => {
   display: block;
 }
 
-.gradient-btn{
+.gradient-btn {
   color: #fff;
 }
 </style>

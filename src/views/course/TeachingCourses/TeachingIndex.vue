@@ -72,9 +72,7 @@ const handleClick = menuInfo => {
     <div class="courseContent">
       <router-view v-slot="{ Component }">
         <keep-alive>
-          <transition name="fade" mode="out-in">
-            <component :is="Component" />
-          </transition>
+          <component :is="Component" />
         </keep-alive>
       </router-view>
     </div>
@@ -89,7 +87,7 @@ const handleClick = menuInfo => {
 
 .courseSider {
   flex: 1;
-  height: 90vh;
+  height: 93vh;
 }
 
 .el-menu {

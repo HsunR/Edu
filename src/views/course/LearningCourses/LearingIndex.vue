@@ -3,7 +3,7 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 import {
   StarTwoTone,
@@ -27,7 +27,7 @@ watch(
 )
 
 
-const selectedKeys = ref(['1']);
+const selectedKeys = ref(['/']);
 const handleClick = menuInfo => {
   console.log('click ', menuInfo);
   selectedKeys.value = menuInfo.key
@@ -76,11 +76,8 @@ const handleClick = menuInfo => {
 
     <div class="courseContent">
       <router-view v-slot="{ Component }">
-        <keep-alive
-          include="AITeachingAssistantLearning,ChapterStudyLearning,CourseWorkLearning,CourseExamsLearning,CourseMaterialsLearning,CurriculumMapLearning,ErrorSetLearning">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" />
-          </transition>
+        <keep-alive>
+          <component :is="Component" />
         </keep-alive>
       </router-view>
     </div>
@@ -95,7 +92,7 @@ const handleClick = menuInfo => {
 
 .courseSider {
   flex: 1;
-  height: 90vh;
+  height: 93vh;
 }
 
 .el-menu {

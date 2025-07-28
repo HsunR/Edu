@@ -275,6 +275,46 @@ export const constantRoutes = [
           },
         ],
       },
+      // 创建题目
+      {
+        path: "/course/createQuestion",
+        component: () =>
+          import(
+            "@/views/course/TeachingCourses/QuestionBankManagement/CreateQuestion"
+          ),
+        name: "CreateQuestion",
+        hidden: true,
+        meta: { title: "创建题目" },
+      },
+      // 新建作业（1）/考试（2）
+      {
+        path: "/course/createExam/:id",
+        component: () =>
+          import("@/views/course/TeachingCourses/CourseExams/createExam"),
+        name: "createExam",
+        hidden: true,
+        meta: { title: "新建作业/考试" },
+      },
+      // 作业库
+      {
+        path: "/course/jobLibrary",
+        component: () =>
+          import("@/views/course/TeachingCourses/CourseWork/JobLibrary"),
+        name: "JobLibrary",
+        hidden: true,
+        meta: { title: "作业库" },
+      },
+      // 进入作业 / 考试详情页 
+      {
+        path: "/course/homeworkWorkDetail/:type/:id",
+        component: () =>
+          import(
+            "@/views/course/LearningCourses/CourseExams/homeworkExamDetail"
+          ),
+        name: "homeworkWorkDetail",
+        hidden: true,
+        meta: { title: "作业/考试详情" },
+      },
     ],
   },
 

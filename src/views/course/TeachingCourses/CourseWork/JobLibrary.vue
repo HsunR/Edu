@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ElLoading, ElMessage } from 'element-plus'
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
@@ -133,19 +133,26 @@ const handleEdit = (id) => {
 </script>
 
 <template>
-  <div>
+  <div class="JobLibrary">
     <el-card>
       <template #header>
         <div class="card-header">
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/TeachingCourses' }">我教的课</el-breadcrumb-item>
-            <el-breadcrumb-item>课程作业</el-breadcrumb-item>
-          </el-breadcrumb>
+          <el-page-header :icon="ArrowLeft" @back="router.back">
+            <template #content>
+              <div class="flex items-center">
+                <span class="text-large font-600 mr-3"> 作业库 </span>
+              </div>
+            </template>
+          </el-page-header>
 
           <div class="header-buttons">
-            <el-button class="gradient-btn" round style="color: #fff; margin-top: 0px;"
+            <el-button class="gradient-btn" style="color: #fff; margin-top: 0px;"
               @click="router.push(`/course/createExam/${1}`)">新建作业</el-button>
-            <el-button @click="router.push('/course/jobLibrary')" round>作业库</el-button>
+            <el-upload class="upload-demo" action="#" :on-change="handleChange" :show-file-list="false"
+              :auto-upload="false">
+              <el-button :icon="UploadFilled" type="warning" plain>导入作业</el-button>
+            </el-upload>
+            <el-button @click="exportToWord">导出作业</el-button>
 
             <!-- 查询 -->
             <div class="form" style="margin-left: 580px;">
@@ -164,11 +171,44 @@ const handleEdit = (id) => {
         </div>
       </template>
 
-      课程作业
+      <!-- 表格 -->
+      <el-table ref="exportContent" :data="list" height="500" border style="width: 100%"
+        @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column prop="achievementName" label="文件名" width="220" align="center" />
+        <el-table-column prop="achievementType" label="题量" width="130" align="center" />
+        <el-table-column prop="achievementType" label="总分" width="130" align="center" />
+        <el-table-column prop="note" label="创建者" width="200" align="center" />
+        <el-table-column prop="time" label="创建日期" width="200" align="center">
+          <template #default="scope">{{ scope.row.date }}</template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="150px" align="center" fixed="right">
+          <template v-slot="{ row }">
+            <el-button size="mini" type="text" @click="handlePublish(row.id)">发布</el-button>
+            <el-button size="mini" type="text" @click="handleEdit(row.id)">编辑</el-button>
+            <el-popconfirm title="确认删除该行数据吗？" @confirm="confirmDel(row.id)">
+              <template #reference>
+                <el-button style="margin-left: 10px;color: #F56C6C" size="mini" type="text">
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <el-row style="height: 60px" align="middle" type="flex" justify="end">
+        <el-pagination layout="total,prev, pager, next" :total="total" :current-page="queryParams.page"
+          :page-size="queryParams.pagesize" @current-change="changePage" />
+      </el-row>
     </el-card>
   </div>
 </template>
 
 <style scoped>
-
+.JobLibrary{
+  margin: 20px;
+  border-radius: 10px;
+}
 </style>

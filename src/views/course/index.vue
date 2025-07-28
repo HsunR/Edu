@@ -8,8 +8,10 @@ const route = useRoute()
 
 <template>
   <div class="app-container">
-    <router-view >
-      <keep-alive></keep-alive>
+    <router-view v-slot="{ Component }">
+      <keep-alive>
+        <component :is="Component" />
+      </keep-alive>
     </router-view>
   </div>
 </template>
