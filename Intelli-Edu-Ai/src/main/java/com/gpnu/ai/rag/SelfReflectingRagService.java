@@ -237,7 +237,7 @@ public class SelfReflectingRagService {
                     finalAnswer = currentAnswer + "\n\n(注意：此答案可能仍需改进，根据最大迭代次数限制返回)";
                 }
             }
-            // 将最终答案包装成 Flux<String> 返回
+           
             hybridChatMemory.add(chatRequest.getConversationId(),List.of(new AssistantMessage(finalAnswer)));
             return Flux.just(finalAnswer);
         });
