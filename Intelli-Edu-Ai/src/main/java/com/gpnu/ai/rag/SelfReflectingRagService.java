@@ -227,8 +227,8 @@ public class SelfReflectingRagService {
                 // --- 决策阶段 ---
                 if (currentCritique.confidence() == Critique.ConfidenceLevel.HIGH && !currentCritique.needsMoreInfo()) {
                     log.info("答案质量高，无需进一步迭代。");
-                    finalAnswer = currentAnswer; // 确定最终答案
-                    break; // 退出迭代循环
+                    finalAnswer = currentAnswer; 
+                    break;
                 }
 
                 // 如果达到最大迭代次数，返回当前最佳答案
