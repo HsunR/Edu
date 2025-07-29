@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum ResourceType {
+public enum ResourceTypeEnum {
 
     MP4(10, "mp4"),
     AVI(11, "avi"),
@@ -40,16 +40,16 @@ public enum ResourceType {
     private final Integer type;
     private final String description;
 
-    public static ResourceType getByType(Integer type) {
-        for (ResourceType resourceType : ResourceType.values()) {
+    public static ResourceTypeEnum getByType(Integer type) {
+        for (ResourceTypeEnum resourceType : ResourceTypeEnum.values()) {
             if (resourceType.getType().equals(type)) {
                 return resourceType;
             }
         }
         throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "资源类型不存在: " + type);
     }
-    public static ResourceType getByDescription(String description) {
-        for (ResourceType resourceType : ResourceType.values()) {
+    public static ResourceTypeEnum getByDescription(String description) {
+        for (ResourceTypeEnum resourceType : ResourceTypeEnum.values()) {
             if (resourceType.getDescription().equalsIgnoreCase(description)) {
                 return resourceType;
             }
