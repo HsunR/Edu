@@ -1,6 +1,6 @@
 package com.gpnu.ai.rag;
 
-import com.gpnu.ai.advisor.FilterChatMemoryAdvisor;
+
 import com.gpnu.ai.chatMemory.HybridChatMemory;
 import com.gpnu.ai.model.dto.ChatRequest;
 import com.gpnu.ai.model.dto.Critique;
