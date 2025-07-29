@@ -8,7 +8,7 @@ import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.resource.config.CosClientConfig;
 
 
-import com.gpnu.resource.model.dto.resource.UploadResult;
+import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,6 +1,6 @@
 package com.gpnu.resource.model.dto.pic;
 
-import com.gpnu.resource.model.dto.resource.UploadResult;
+import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

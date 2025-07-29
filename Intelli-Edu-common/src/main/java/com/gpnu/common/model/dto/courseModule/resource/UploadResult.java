@@ -1,4 +1,4 @@
-package com.gpnu.resource.model.dto.resource;
+package com.gpnu.common.model.dto.courseModule.resource;
 
 import lombok.Data;
 

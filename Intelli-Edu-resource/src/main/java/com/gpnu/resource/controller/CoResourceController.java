@@ -9,7 +9,7 @@ import com.gpnu.resource.manager.upload.DocumentUploadTemplate;
 import com.gpnu.resource.manager.upload.PictureUploadTemplate;
 import com.gpnu.resource.manager.upload.VideoUploadTemplate;
 import com.gpnu.resource.model.dto.pic.UploadPictureResult;
-import com.gpnu.resource.model.dto.resource.UploadResult;
+import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
 import com.gpnu.resource.model.enums.ResourceType;
 import com.gpnu.resource.model.enums.UploadStatusEnum;
 import com.gpnu.resource.model.vo.coResource.CoResourceVO;

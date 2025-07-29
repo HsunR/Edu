@@ -4,11 +4,10 @@ import cn.hutool.core.io.FileUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.resource.manager.BaseUploadTemplate;
-import com.gpnu.resource.model.dto.resource.UploadResult;
+import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
 import com.qcloud.cos.model.PutObjectResult;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
