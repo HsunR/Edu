@@ -1,10 +1,9 @@
-package com.gpnu.resource.model.enums;
+package com.gpnu.common.model.enums.resource;
 
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
