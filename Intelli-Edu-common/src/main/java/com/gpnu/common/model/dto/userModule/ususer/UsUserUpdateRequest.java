@@ -1,10 +1,8 @@
-package com.gpnu.common.model.dto.userModel.ususer;
+package com.gpnu.common.model.dto.userModule.ususer;
 
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
 public class UsUserUpdateRequest implements Serializable {

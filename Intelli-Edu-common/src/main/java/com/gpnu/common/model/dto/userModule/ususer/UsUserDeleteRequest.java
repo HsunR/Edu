@@ -1,4 +1,4 @@
-package com.gpnu.common.model.dto.userModel.ususer;
+package com.gpnu.common.model.dto.userModule.ususer;
 
 import lombok.Data;
 
