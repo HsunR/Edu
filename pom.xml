@@ -18,6 +18,7 @@
         <module>Intelli-Edu-Ai</module>
         <module>Intelli-Edu-user</module>
         <module>Intelli-Edu-resource</module>
+        <module>Intelli-Edu-course</module>
     </modules>
 
     <properties>
