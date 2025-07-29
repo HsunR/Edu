@@ -9,6 +9,7 @@ import com.gpnu.resource.model.dto.resource.UploadResult;
 import com.qcloud.vod.model.VodUploadResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.annotation.Resource;
@@ -19,7 +20,7 @@ import java.util.List;
 /**
  * 视频文件上传模板
  */
-@Component
+@Service
 @Slf4j
 public class VideoUploadTemplate extends BaseUploadTemplate<MultipartFile, UploadResult> { // 假设返回通用UploadResult
 

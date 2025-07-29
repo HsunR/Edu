@@ -9,13 +9,14 @@ import com.qcloud.cos.model.PutObjectResult;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-@Component // 标记为Spring组件
+@Service
 @Slf4j
 public class DocumentUploadTemplate extends BaseUploadTemplate<MultipartFile, UploadResult> {
 
