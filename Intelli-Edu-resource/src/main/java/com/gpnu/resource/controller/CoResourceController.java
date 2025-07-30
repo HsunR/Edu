@@ -4,13 +4,14 @@ import com.gpnu.common.common.BaseResponse;
 import com.gpnu.common.common.ResultUtils;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
+import com.gpnu.common.exception.ThrowUtils;
 import com.gpnu.common.model.entity.resourceModel.CoResource;
+import com.gpnu.common.model.enums.resource.ResourceTypeEnum;
 import com.gpnu.resource.manager.upload.DocumentUploadTemplate;
 import com.gpnu.resource.manager.upload.PictureUploadTemplate;
 import com.gpnu.resource.manager.upload.VideoUploadTemplate;
 import com.gpnu.resource.model.dto.pic.UploadPictureResult;
 import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
-import com.gpnu.resource.model.enums.ResourceType;
 import com.gpnu.resource.model.enums.UploadStatusEnum;
 import com.gpnu.resource.model.vo.coResource.CoResourceVO;
 import com.gpnu.resource.service.CoResourceService;
@@ -21,6 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @RestController
 @RequestMapping("/coresource")
@@ -52,10 +56,15 @@ public class CoResourceController {
     @Operation(summary = "上传图片")
     @PostMapping("/upload/picture")
     public BaseResponse<UploadPictureResult> uploadPicture(@RequestParam("file") MultipartFile file) {
+        ThrowUtils.throwIf(file == null, ErrorCode.PARAMS_ERROR, "请选择要上传的文件");
+        InputStream picInputStream = null;
         try {
+            picInputStream = file.getInputStream();
+            String originalFilename = file.getOriginalFilename();
+            Long currentSize = file.getSize();
             // 定义图片在COS中的上传路径前缀
             String uploadPathPrefix = "images/";
-            UploadPictureResult result = pictureUploadTemplate.upload(file, uploadPathPrefix);
+            UploadPictureResult result = pictureUploadTemplate.upload(picInputStream,originalFilename,currentSize, uploadPathPrefix);
             return ResultUtils.success(result);
         } catch (BusinessException e) {
             log.error("图片上传失败: {}", e.getMessage(), e);
@@ -75,10 +84,16 @@ public class CoResourceController {
     @Operation(summary = "上传文档")
     @PostMapping("/upload/document")
     public BaseResponse<CoResourceVO> uploadDocument(@RequestParam(name = "courseId") Long courseId ,@RequestParam("file") MultipartFile file) {
-
+        ThrowUtils.throwIf(file == null, ErrorCode.PARAMS_ERROR, "请选择要上传的文件");
             // 定义文档在COS中的上传路径前缀
         String uploadPathPrefix = "documents/";
-        UploadResult result = documentUploadTemplate.upload(file, uploadPathPrefix);
+        InputStream documentStream = null;
+        try {
+            documentStream = file.getInputStream();
+        }catch (IOException e){
+            return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "文档上传失败，请稍后再试");
+        }
+        UploadResult result = documentUploadTemplate.upload(documentStream,file.getOriginalFilename(),file.getSize(), uploadPathPrefix);
         if (result == null) {
                 return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "文档上传失败，请稍后再试");
             }
@@ -99,6 +114,7 @@ public class CoResourceController {
     @Operation(summary = "上传视频")
     @PostMapping("/upload/video")
     public BaseResponse<CoResourceVO> uploadVideo(@RequestParam("video") MultipartFile video) {
+        ThrowUtils.throwIf(video == null, ErrorCode.PARAMS_ERROR, "请选择要上传的视频");
         CoResource coResource = new CoResource();
         try {
             // 视频文件上传不需要指定COS路径前缀，因为它是直接上传到VOD服务，
@@ -111,7 +127,9 @@ public class CoResourceController {
             log.info("待上传视频的资源记录已创建，资源信息: {}", coResourceVO);
 
             //2、上传视频到腾讯云VOD
-            UploadResult result = videoUploadTemplate.upload(video, null);
+            InputStream videoInputStream = video.getInputStream();
+            long currentLength = video.getSize();
+            UploadResult result = videoUploadTemplate.upload(videoInputStream,video.getOriginalFilename(),currentLength, null);
             if (result == null) {
                 return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "视频上传失败，请稍后再试");
             }
@@ -121,7 +139,7 @@ public class CoResourceController {
             BeanUtils.copyProperties(coResourceVO, coResource);
             coResource.setUploadStatus(UploadStatusEnum.SUCCESS.getCode());
             log.info(UploadStatusEnum.getEnumByCode(coResource.getUploadStatus()).getCode() + "状态");
-            coResource.setType(ResourceType.getByDescription(result.getType()).getType());
+            coResource.setType(ResourceTypeEnum.getByDescription(result.getType()).getType());
             log.info("视频上传成功，资源信息: {}", coResource);
             CoResourceVO coResourceVO1 = coResourceService.updateResource(coResource);
 

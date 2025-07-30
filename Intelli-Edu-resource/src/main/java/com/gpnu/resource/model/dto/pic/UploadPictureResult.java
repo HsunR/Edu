@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * 图片上传结果VO
  */
-@EqualsAndHashCode(callSuper = true) // 确保继承父类的equals和hashCode
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 public class UploadPictureResult extends UploadResult implements Serializable {

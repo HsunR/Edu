@@ -5,7 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
-import com.gpnu.resource.manager.BaseUploadTemplate;
+import com.gpnu.resource.manager.BaseUploadTemplate; // 引入 BaseUploadTemplate
 import com.gpnu.resource.model.dto.pic.UploadPictureResult;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
@@ -14,71 +14,56 @@ import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile; // 假设输入源是MultipartFile
 
-import java.io.File;
-import java.io.IOException;
+import java.io.InputStream; // 输入源就是 InputStream
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
-public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, UploadPictureResult> {
-
+public class PictureUploadTemplate extends BaseUploadTemplate<UploadPictureResult> {
 
 
     /**
      * 校验图片输入源
-     * @param inputSource MultipartFile 图片文件
+     * @param inputStream 输入流
+     * @param originalFilename 原始文件名
+     * @param contentLength 文件内容长度
      */
     @Override
-    protected void validateInputSource(MultipartFile inputSource) {
-        if (inputSource == null || inputSource.isEmpty()) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "图片文件不能为空");
+    protected void validateInputSource(InputStream inputStream, String originalFilename, long contentLength) {
+        if (inputStream == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "图片文件输入流不能为空");
         }
-        // 进一步校验文件类型是否为图片，例如：
-        String originalFilename = inputSource.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "原始文件名不能为空");
+        }
+        if (contentLength <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件内容长度必须大于0");
+        }
+
         String suffix = FileUtil.getSuffix(originalFilename).toLowerCase();
         List<String> imageSuffixes = List.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
         if (!imageSuffixes.contains(suffix)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的图片文件格式");
         }
-        // TODO: 校验文件大小等(以后再根据业务考虑实现)
+        // TODO: 校验文件大小限制（通过 contentLength）
+        // 例如：if (contentLength > MAX_IMAGE_SIZE_BYTES) { throw new BusinessException(...); }
     }
 
-    /**
-     * 获取原始文件名
-     * @param inputSource MultipartFile 图片文件
-     * @return 原始文件名
-     */
-    @Override
-    protected String getOriginalFilename(MultipartFile inputSource) {
-        return inputSource.getOriginalFilename();
-    }
-
-    /**
-     * 将 MultipartFile 处理成临时文件
-     * @param inputSource MultipartFile 图片文件
-     * @param tempFile 临时文件对象
-     * @throws IOException 如果文件写入失败
-     */
-    @Override
-    protected void processSourceToTempFile(MultipartFile inputSource, File tempFile) throws IOException {
-        inputSource.transferTo(tempFile);
-    }
 
     /**
      * 执行图片上传到COS并处理结果
      * @param originalFilename 原始文件名
-     * @param uploadFileName COS上的文件名
-     * @param tempFile 临时文件
+     * @param uploadFileName COS上的文件名 (resource_uuid)
+     * @param inputStream 输入流
+     * @param contentLength 文件内容长度
      * @return UploadPictureResult 图片上传结果
      * @throws Exception COS上传或处理失败
      */
     @Override
-    protected UploadPictureResult doUploadAndBuildResult(String originalFilename, String uploadFileName, File tempFile) throws Exception {
+    protected UploadPictureResult doUploadAndBuildResult(String originalFilename, String uploadFileName, InputStream inputStream, long contentLength) throws Exception {
         PicOperations picOperations = new PicOperations();
         picOperations.setIsPicInfo(1); // 返回原图信息
         List<PicOperations.Rule> rules = new ArrayList<>();
@@ -92,10 +77,9 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
         rules.add(compressRule);
 
         // 缩略图处理（仅对 > 20KB的图片生成缩略图）
-        if (tempFile.length() > 20 * 1024) {
+        if (contentLength > 20 * 1024) { // 使用 contentLength 判断文件大小
             PicOperations.Rule thumbnailRule = new PicOperations.Rule();
             thumbnailRule.setBucket(cosClientConfig.getBucket());
-            // 拼接缩略图的路径，通常命名为 _thumbnail 或 _thumb
             String thumbnailKey = FileUtil.mainName(uploadFileName) + "_thumbnail." + FileUtil.getSuffix(originalFilename);
             thumbnailRule.setFileId(thumbnailKey);
             thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 128, 128)); // 缩放规则
@@ -104,10 +88,13 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
 
         picOperations.setRules(rules);
 
-        // 调用CosManager进行图片上传和处理
-        PutObjectResult putObjectResult = cosManager.putPictureObject(uploadFileName, tempFile);
+        // 调用CosManager进行图片上传和处理，直接使用 InputStream 重载方法
+        PutObjectResult putObjectResult = cosManager.putPictureObject(uploadFileName, inputStream, contentLength, picOperations);
 
         // 获取图片信息对象
+        // 注意：ImageInfo 通常来自 PutObjectResult 的 CiUploadResult.getOriginalInfo().getImageInfo()，
+        // 这个 CiUploadResult 是在 PutObjectResult 返回的。
+        // 使用 InputStream 上传，CI（图片内容识别）处理会异步进行，其结果会包含在 PutObjectResult 中。
         ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
         // 获取图片处理结果
         ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
@@ -117,7 +104,7 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
         uploadPictureResult.setResourceUuid(uploadFileName); // COS上的唯一键
         uploadPictureResult.setResourceName(originalFilename);
         uploadPictureResult.setResourceLink(cosClientConfig.getHost() + "/" + uploadFileName); // 原始图URL
-        uploadPictureResult.setResourceSize(tempFile.length());
+        uploadPictureResult.setResourceSize(contentLength); // 使用 contentLength
         uploadPictureResult.setType(imageInfo.getFormat());
         uploadPictureResult.setPicWidth(imageInfo.getWidth());
         uploadPictureResult.setPicHeight(imageInfo.getHeight());
@@ -126,7 +113,7 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
         // 处理压缩图和缩略图的URL
         if (CollUtil.isNotEmpty(objectList)) {
             CIObject compressCiObject = objectList.get(0); // 第一个通常是压缩图
-            uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + compressCiObject.getKey()); // URL指向压缩后的图片
+            uploadPictureResult.setResourceLink(cosClientConfig.getHost() + "/" + compressCiObject.getKey()); // URL指向压缩后的图片
             uploadPictureResult.setResourceSize(compressCiObject.getSize().longValue());
             uploadPictureResult.setPicWidth(compressCiObject.getWidth());
             uploadPictureResult.setPicHeight(compressCiObject.getHeight());
@@ -143,14 +130,17 @@ public class PictureUploadTemplate extends BaseUploadTemplate<MultipartFile, Upl
         return uploadPictureResult;
     }
 
+    /**
+     * 删除云存储文件
+     */
     @Override
-    public void deleteObject(String key) {
-        // 删除文档文件的逻辑
+    public void deleteObject(String key) throws BusinessException {
+        // 删除COS文件的逻辑
         try {
             cosManager.deleteObject(key);
         } catch (Exception e) {
-            log.error("删除文档文件失败: {}", e.getMessage(), e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除文档文件失败，请稍后再试");
+            log.error("删除COS文件失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除COS文件失败，请稍后再试");
         }
     }
 }

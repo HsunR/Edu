@@ -33,6 +33,7 @@
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
         <spring-ai.version>1.0.0</spring-ai.version>
         <spring-ai-alibaba.version>1.0.0.2</spring-ai-alibaba.version>
+        <dubbo.version>3.3.3</dubbo.version>
         <mysql.version>8.0.28</mysql.version>
         <druid.version>1.2.23</druid.version>
         <jedis.version>5.2.0</jedis.version>
@@ -185,6 +186,15 @@
                 <groupId>org.springframework.session</groupId>
                 <artifactId>spring-session-data-redis</artifactId>
                 <version>${spring-boot.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-bom</artifactId>
+                <version>${dubbo.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
 <!--            jwt依赖 Begin-->

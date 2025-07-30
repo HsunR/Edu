@@ -5,7 +5,7 @@ import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
 import com.gpnu.common.model.entity.resourceModel.CoResource;
 import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
-import com.gpnu.resource.model.enums.ResourceType;
+import com.gpnu.common.model.enums.resource.ResourceTypeEnum;
 import com.gpnu.resource.model.vo.coResource.CoResourceVO;
 import com.gpnu.resource.service.CoResourceService;
 import com.gpnu.resource.mapper.CoResourceMapper;
@@ -27,7 +27,7 @@ public class CoResourceServiceImpl extends ServiceImpl<CoResourceMapper, CoResou
     public CoResourceVO addResource(UploadResult uploadResult) {
         CoResource coResource = new CoResource();
         BeanUtils.copyProperties(uploadResult, coResource);
-        coResource.setType(ResourceType.getByDescription(uploadResult.getType()).getType());
+        coResource.setType(ResourceTypeEnum.getByDescription(uploadResult.getType()).getType());
         boolean saveResult = this.save(coResource);
         ThrowUtils.throwIf(!saveResult, ErrorCode.OPERATION_ERROR);
         CoResourceVO coResourceVO = new CoResourceVO();

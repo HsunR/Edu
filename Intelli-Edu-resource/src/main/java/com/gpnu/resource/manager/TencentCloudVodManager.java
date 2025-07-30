@@ -1,5 +1,6 @@
 package com.gpnu.resource.manager;
 
+import cn.hutool.core.io.FileUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.resource.config.VodClientConfig;
@@ -10,11 +11,12 @@ import com.tencentcloudapi.common.exception.TencentCloudSDKException; // 引入�
 import com.tencentcloudapi.vod.v20180717.VodClient; // 引入VOD API客户端
 import com.tencentcloudapi.vod.v20180717.models.*; // 引入VOD相关API模型（如DescribeMediaInfosRequest/Response）
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Value; // 引入Value注解
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.Resource;
-import java.io.File; // 确保File类导入
+import java.io.File; // 仍可能需要File类，但此处不是输入
+import java.io.InputStream; // 引入 InputStream
 
 /**
  * 腾讯云VOD点播服务管理器
@@ -34,46 +36,68 @@ public class TencentCloudVodManager {
     private VodClientConfig vodClientConfig; // 用于获取应用ID等配置
 
     @Value("${vod.client.region}") // VOD API请求的地域，例如 ap-shanghai
-    private String region;
+    private String region; // 这个region会在upload方法中用到
 
     /**
-     * 上传视频文件到腾讯云VOD
+     * 上传视频文件到腾讯云VOD (通过 InputStream)
      *
-     * @param mediaFilePath 本地视频文件路径
+     * @param inputStream   本地视频文件的输入流
+     * @param contentLength 文件内容长度
      * @param fileName      原始文件名 (将作为MediaName上传到VOD)
      * @param coverFilePath 视频封面文件路径 (可选)
      * @param procedureName 预设的任务流名称 (可选，用于自动转码、截图等)
      * @return VodUploadResponse 包含 FileId, MediaUrl 等信息
      * @throws BusinessException 如果上传失败
      */
-    public VodUploadResponse uploadVideo(String mediaFilePath, String fileName, String coverFilePath, String procedureName) throws BusinessException {
+    public VodUploadResponse uploadVideo(InputStream inputStream, long contentLength, String fileName, String coverFilePath, String procedureName) throws BusinessException {
         try {
             VodUploadRequest request = new VodUploadRequest();
-            request.setMediaFilePath(mediaFilePath); // 设置本地文件路径
+            // 修正：将 InputStream 和 contentLength 设置到 request 中，以便 VodUploadClient 使用
+            // 注意：VodUploadClient 的 VodUploadRequest 没有直接接受 InputStream 的 setter。
+            // 通常SDK内部会处理 InputStream 到临时文件的转换或直接流式上传。
+            // 鉴于您提供的VodUploadRequest源码只有 setMediaFilePath(String)，
+            // 这意味着您需要先将 InputStream 写入一个临时文件，然后将临时文件路径传递给 setMediaFilePath。
+            // **这与我们之前希望避免临时文件的目标有所冲突，是SDK本身的限制。**
+            // **所以，为了兼容您提供的SDK源码，我们必须在TencentCloudVodManager内部创建临时文件。**
 
-            // MediaName 是 ApplyUploadRequest 的属性，VodUploadRequest 继承了它
-            request.setMediaName(fileName); // 修正：设置媒体名称
+            File tempFile = null;
+            try {
+                String fileExtension = "";
+                if (fileName != null && fileName.contains(".")) {
+                    fileExtension = "." + FileUtil.getSuffix(fileName);
+                }
+                tempFile = File.createTempFile("vod_upload_", fileExtension);
+                FileUtil.writeFromStream(inputStream, tempFile); // 将 InputStream 写入临时文件
 
-            if (coverFilePath != null && !coverFilePath.isEmpty()) {
-                request.setCoverFilePath(coverFilePath);
+                request.setMediaFilePath(tempFile.getAbsolutePath()); // 设置本地临时文件路径
+                request.setMediaName(fileName); // 设置媒体名称
+
+                if (coverFilePath != null && !coverFilePath.isEmpty()) {
+                    request.setCoverFilePath(coverFilePath);
+                }
+                if (procedureName != null && !procedureName.isEmpty()) {
+                    request.setProcedure(procedureName);
+                }
+
+                // 设置子应用ID，从 vodClientConfig 获取 appId
+                if (vodClientConfig.getAppId() != null && vodClientConfig.getAppId() != 0) {
+                    request.setSubAppId(vodClientConfig.getAppId());
+                }
+
+                log.info("Starting VOD upload for file: {} from temp file: {}", fileName, tempFile.getAbsolutePath());
+
+                // 修正：确保 upload 方法调用语法正确，第一个参数为 region
+                VodUploadResponse response = vodUploadClient.upload(region, request);
+
+                log.info("VOD upload successful. FileId: {}, MediaUrl: {}", response.getFileId(), response.getMediaUrl());
+                return response;
+            } finally {
+                if (tempFile != null) {
+                    FileUtil.del(tempFile); // 确保删除临时文件
+                    log.info("Deleted temporary VOD upload file: {}", tempFile.getAbsolutePath());
+                }
             }
-            if (procedureName != null && !procedureName.isEmpty()) {
-                request.setProcedure(procedureName);
-            }
-
-            // 设置子应用ID，从 vodClientConfig 获取 appId
-            if (vodClientConfig.getAppId() != null && vodClientConfig.getAppId() != 0) {
-                request.setSubAppId(vodClientConfig.getAppId());
-            }
-
-            log.info("Starting VOD upload for file: {}", fileName);
-
-            // 修正：确保 upload 方法调用语法正确，参数为 request
-            VodUploadResponse response = vodUploadClient.upload(region,request);
-
-            log.info("VOD upload successful. FileId: {}, MediaUrl: {}", response.getFileId(), response.getMediaUrl());
-            return response;
-        } catch (TencentCloudSDKException e) { // 捕获腾讯云SDK特定的异常
+        } catch (TencentCloudSDKException e) {
             log.error("Failed to upload video to VOD (TencentCloudSDKException): {}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "视频上传到点播服务失败：" + e.getMessage());
         } catch (Exception e) {
@@ -95,7 +119,7 @@ public class TencentCloudVodManager {
             request.setFileIds(new String[]{fileId});
 
             // 设置子应用ID
-            if (vodClientConfig.getAppId() != null && vodClientConfig.getAppId() != 0) { // 修正: 使用 getAppId()
+            if (vodClientConfig.getAppId() != null && vodClientConfig.getAppId() != 0) {
                 request.setSubAppId(vodClientConfig.getAppId());
             }
 
