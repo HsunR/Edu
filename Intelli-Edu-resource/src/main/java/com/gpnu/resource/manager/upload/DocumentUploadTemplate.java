@@ -3,7 +3,7 @@ package com.gpnu.resource.manager.upload;
 import cn.hutool.core.io.FileUtil;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
-import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
+import com.gpnu.common.model.dto.resourceModule.resource.UploadResult;
 import com.gpnu.resource.manager.BaseUploadTemplate; // 引入改造后的 BaseUploadTemplate
 import com.qcloud.cos.model.PutObjectResult;
 

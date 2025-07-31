@@ -5,7 +5,7 @@ import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.resource.manager.BaseUploadTemplate; // 引入 BaseUploadTemplate
 import com.gpnu.resource.manager.TencentCloudVodManager; // 引入 TencentCloudVodManager
-import com.gpnu.common.model.dto.courseModule.resource.UploadResult; // 确保引入的是 intelli_edu_model 模块的 UploadResult
+import com.gpnu.common.model.dto.resourceModule.resource.UploadResult; // 确保引入的是 intelli_edu_model 模块的 UploadResult
 import com.qcloud.vod.model.VodUploadResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

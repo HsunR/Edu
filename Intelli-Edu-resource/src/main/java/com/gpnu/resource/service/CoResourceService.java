@@ -2,7 +2,7 @@ package com.gpnu.resource.service;
 
 import com.gpnu.common.model.entity.resourceModel.CoResource;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
+import com.gpnu.common.model.dto.resourceModule.resource.UploadResult;
 import com.gpnu.resource.model.vo.coResource.CoResourceVO;
 
 /**

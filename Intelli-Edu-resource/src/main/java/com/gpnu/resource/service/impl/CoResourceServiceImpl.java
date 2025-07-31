@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
 import com.gpnu.common.model.entity.resourceModel.CoResource;
-import com.gpnu.common.model.dto.courseModule.resource.UploadResult;
+import com.gpnu.common.model.dto.resourceModule.resource.UploadResult;
 import com.gpnu.common.model.enums.resource.ResourceTypeEnum;
 import com.gpnu.resource.model.vo.coResource.CoResourceVO;
 import com.gpnu.resource.service.CoResourceService;
