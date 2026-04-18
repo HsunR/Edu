@@ -4,12 +4,13 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+
 
 @SpringBootApplication
-@MapperScan("com.gpnu.**.mapper")
+@MapperScan("com.gpnu.resource.mapper")
 @EnableDiscoveryClient
-@ComponentScan(basePackages = {"com.gpnu.resource", "com.gpnu.common"})
+@EnableFeignClients(basePackages = "com.gpnu.api.client")
 public class IntelliEduResourceApplication {
 
     public static void main(String[] args) {

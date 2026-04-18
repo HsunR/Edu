@@ -1,15 +1,16 @@
 package com.gpnu.user.service.impl;
 
 
+import com.gpnu.auth.common.constants.AuthConstants;
+import com.gpnu.auth.provider.JwtTokenProvider;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
-import com.gpnu.common.jwt.JwtTokenProvider;
-import com.gpnu.common.model.entity.userModel.UsUser;
 import com.gpnu.user.model.dto.ususer.LoginRequest;
-import com.gpnu.user.model.enums.LoginTypeEnum;
+import com.gpnu.user.model.entity.User;
+import com.gpnu.user.model.enums.LoginType;
 import com.gpnu.user.model.vo.LoginResult;
 import com.gpnu.user.service.LoginStrategy;
-import com.gpnu.user.service.UsUserService;
+import com.gpnu.user.service.IUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class LoginService {
     private JwtTokenProvider jwtTokenProvider;
 
     @Resource
-    private UsUserService usUserService; // 用于获取用户信息来验证refresh token
+    private IUserService iUserService; // 用于获取用户信息来验证refresh token
 
     // Spring会自动注入所有LoginStrategy接口的实现类
     public LoginService(List<LoginStrategy> loginStrategies) {
@@ -53,11 +54,11 @@ public class LoginService {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "登录请求或类型不能为空");
         }
 
-        LoginTypeEnum loginTypeEnum = LoginTypeEnum.getByCode(request.getLoginType());
+        LoginType loginType = request.getLoginType();
 
 
         // 根据登录类型获取对应的策略
-        LoginStrategy strategy = strategies.get(loginTypeEnum.getCode());
+        LoginStrategy strategy = strategies.get(loginType.getCode());
         if (strategy == null || !strategy.supports(request)) {
             // 这通常意味着配置错误或传入的请求不符合该类型策略的要求（例如mobile为空）
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "无法处理当前登录请求，请检查参数");
@@ -85,20 +86,20 @@ public class LoginService {
         Long userId = Long.valueOf(jwtTokenProvider.getUserIdFromRefreshToken(refreshToken));
 
         // 确保用户仍然存在且未被禁用/删除
-        UsUser user = usUserService.getById(userId);
-        if (user == null || (user.getIsDelete() != null && user.getIsDelete() == 1)) {
+        User user = iUserService.getById(userId);
+        if (user == null || (user.getIsDeleted() != null && user.getIsDeleted() == 1)) {
             jwtTokenProvider.invalidateRefreshToken(userId); // 用户状态异常，吊销其刷新令牌
            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在或已被删除");
         }
 
         // 生成新的Access Token和新的Refresh Token
-        String newAccessToken = jwtTokenProvider.generateAccessToken(userId, user.getType()); // 使用用户当前类型
+        String newAccessToken = jwtTokenProvider.generateAccessToken(userId, user.getUserType().getCode()); // 使用用户当前类型
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(userId); // 生成新的Refresh Token
 
         // 吊销旧的Refresh Token (从Redis删除旧的，新生成的已经存入Redis)
         jwtTokenProvider.invalidateRefreshToken(userId); // 删除以userId为key的旧refresh token
 
-        return new LoginResult(userId, user.getType(), newAccessToken, newRefreshToken);
+        return new LoginResult(userId, user.getUserType(), newAccessToken, newRefreshToken);
     }
 
     /**
@@ -106,8 +107,8 @@ public class LoginService {
      * @param accessToken Access Token
      */
     public void logout(String accessToken) {
-        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-            accessToken = accessToken.substring(7); // 去掉"Bearer "前缀
+        if (accessToken != null && accessToken.startsWith(AuthConstants.BEARER_PREFIX)) {
+            accessToken = accessToken.substring(AuthConstants.BEARER_PREFIX_LENGTH);
         }
 
         // 将Access Token加入黑名单，防止其在有效期内继续使用

@@ -1,9 +1,4 @@
-server:
-  port: 8081
-
-
 spring:
-  application:
-    name: Intelli-Edu-Ai
   profiles:
-    active: local  #自己进行更改，现在激活的为local
+    active: dev
+

@@ -11,8 +11,8 @@ import com.gpnu.common.common.BaseResponse;
 import com.gpnu.common.common.ResultUtils;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
-import com.gpnu.common.utils.contextHolder.UserContextHolder;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/chatList")
+@Tag(name = "ChatListController", description = "提供聊天会话列表相关的接口")
 public class ChatListController {
 
     @Resource
@@ -27,30 +28,29 @@ public class ChatListController {
 
     @PostMapping("/getUserChatList")
     @Operation(summary = "获取当前用户的聊天会话列表")
-    public BaseResponse<List<ChatListVO>> getUserChatList(@RequestBody ChatListQueryRequest queryRequest) {
+    public List<ChatListVO> getUserChatList(@RequestBody ChatListQueryRequest queryRequest) {
         ThrowUtils.throwIf(queryRequest == null, ErrorCode.PARAMS_ERROR,"查询请求体不能为空");
         ThrowUtils.throwIf( queryRequest.getUserId()== null  , ErrorCode.PARAMS_ERROR,"用户ID不能为空");
         List<ChatListVO> chatList = chatListService.getChatListByUserId(queryRequest.getUserId());
-        return ResultUtils.success(chatList);
+        return chatList;
     }
 
     @PostMapping("/getChatListByConversationId")
     @Operation(summary = "根据会话ID获取聊天记录")
-    public BaseResponse<ChatListVO> getChatListByConversationId(@RequestBody ChatListQueryRequest queryRequest) {
+    public ChatListVO getChatListByConversationId(@RequestBody ChatListQueryRequest queryRequest) {
         ThrowUtils.throwIf(queryRequest == null, ErrorCode.PARAMS_ERROR,"查询请求体不能为空");
         ThrowUtils.throwIf(queryRequest.getConversationId() == null || queryRequest.getConversationId().isEmpty(), ErrorCode.PARAMS_ERROR,"会话ID不能为空");
-        ChatListVO chatList = chatListService.getChatListByConversationId(queryRequest.getConversationId());
-        return ResultUtils.success(chatList);
+        ChatListVO vo = chatListService.getChatListByConversationId(queryRequest.getConversationId());
+        return vo;
     }
 
 
     @PostMapping("/createChatList")
     @Operation(summary = "创建聊天会话")
-    public BaseResponse<ChatListVO> createChatList(@RequestBody ChatListAddRequest chatListAddRequest){
+    public ChatListVO createChatList(@RequestBody ChatListAddRequest chatListAddRequest){
         ThrowUtils.throwIf(chatListAddRequest == null, ErrorCode.PARAMS_ERROR,"请求体不能为空");
         ChatListVO vo = chatListService.createChatList(chatListAddRequest);
-
-        return ResultUtils.success(vo);
+        return vo;
     }
 
     @PostMapping("/updateChatList")

@@ -1,19 +1,19 @@
 package com.gpnu.user.service.impl;
 
 
+import com.gpnu.auth.provider.JwtTokenProvider;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
-import com.gpnu.common.jwt.JwtTokenProvider;
 import com.gpnu.common.service.RedisService;
-import com.gpnu.common.model.entity.userModel.UsUser;
 import com.gpnu.user.model.dto.ususer.LoginRequest;
-import com.gpnu.user.model.enums.LoginTypeEnum;
+import com.gpnu.user.model.entity.User;
+import com.gpnu.user.model.enums.LoginType;
+import com.gpnu.user.model.enums.UserStatus;
 import com.gpnu.user.model.vo.LoginResult;
 import com.gpnu.user.service.LoginStrategy;
-import com.gpnu.user.service.UsUserService;
+import com.gpnu.user.service.IUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
@@ -24,10 +24,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MobileCodeLoginStrategy implements LoginStrategy {
 
-    @Autowired
+    @Resource
     private RedisService redisService;
-    @Autowired
-    private UsUserService usUserService;
+    @Resource
+    private IUserService iUserService;
 
     @Resource
     private JwtTokenProvider jwtTokenProvider;
@@ -36,12 +36,12 @@ public class MobileCodeLoginStrategy implements LoginStrategy {
 
     @Override
     public boolean supports(LoginRequest request) {
-        return request.getLoginType() == getSupportedLoginType().getCode(); // 2代表手机验证码登录
+        return request.getLoginType() == getSupportedLoginType(); // 2代表手机验证码登录
     }
 
     @Override
-    public LoginTypeEnum getSupportedLoginType() {
-        return LoginTypeEnum.MOBILE_CODE;
+    public LoginType getSupportedLoginType() {
+        return LoginType.MOBILE_CODE;
     }
 
     @Override
@@ -58,17 +58,20 @@ public class MobileCodeLoginStrategy implements LoginStrategy {
         redisService.deleteObject(LOGIN_CODE_PREFIX_MOBILE + request.getMobile());
         log.info("手机号 {} 验证码校验成功", request.getMobile());
 
-        UsUser user = usUserService.getByMobile(request.getMobile());
+        User user = iUserService.getByMobile(request.getMobile());
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         }
-        if (user.getIsDelete() != null && user.getIsDelete() == 1) {
+        if (user.getIsDeleted() != null && user.getIsDeleted() == 1) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "用户已被禁用或删除");
+        }
+        if(user.getStatus()== UserStatus.BAN){
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "用户已被禁用");
         }
 
         log.info("用户 {} 通过手机验证码登录成功", user.getUserId());
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getUserId(), user.getType());
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getUserId(), user.getUserType().getCode());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
-        return new LoginResult(user.getUserId(), user.getType(), accessToken, refreshToken);
+        return new LoginResult(user.getUserId(), user.getUserType(), accessToken, refreshToken);
     }
 }

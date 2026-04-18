@@ -157,11 +157,6 @@
         </dependency>
 
 <!--        数据库相关的依赖Begin-->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-        </dependency>
-
         <!--Jedis 支撑起Redis向量数据库的构建 -->
         <dependency>
             <groupId>redis.clients</groupId>
@@ -205,8 +200,8 @@
         <!--        该系统自定义的通用模块包-->
         <dependency>
             <groupId>com.gpnu</groupId>
-            <artifactId>Intelli-Edu-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>Intelli-Edu-auth-resource-sdk</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

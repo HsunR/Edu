@@ -19,10 +19,12 @@
         <module>Intelli-Edu-user</module>
         <module>Intelli-Edu-resource</module>
         <module>Intelli-Edu-course</module>
+        <module>Intelli-Edu-api</module>
+        <module>Intelli-Edu-auth</module>
     </modules>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -33,8 +35,9 @@
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
         <spring-ai.version>1.0.0</spring-ai.version>
         <spring-ai-alibaba.version>1.0.0.2</spring-ai-alibaba.version>
+        <spring-openfeign.version>4.1.1</spring-openfeign.version>
         <dubbo.version>3.3.3</dubbo.version>
-        <mysql.version>8.0.28</mysql.version>
+        <postgresql.version>42.7.8</postgresql.version>
         <druid.version>1.2.23</druid.version>
         <jedis.version>5.2.0</jedis.version>
         <mybatis-plus.version>3.5.12</mybatis-plus.version>
@@ -78,6 +81,18 @@
                 <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>${spring-openfeign.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
             </dependency>
 
             <!-- AI  Begin-->
@@ -224,10 +239,11 @@
             </dependency>
 
             <!-- ORM & 数据库 -->
+
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.version}</version>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
@@ -403,8 +419,5 @@
         </repository>
     </repositories>
 
-
-
-    
 
 </project>

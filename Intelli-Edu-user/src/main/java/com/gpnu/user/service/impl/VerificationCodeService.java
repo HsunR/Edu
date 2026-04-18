@@ -8,10 +8,10 @@ import com.gpnu.common.utils.validator.ValidationUtil;
 import com.gpnu.user.constants.CaptchaConstants;
 import com.gpnu.user.model.dto.ususer.SendRegisterCodeRequest;
 import com.gpnu.user.model.dto.ususer.RegisterRequest;
-import com.gpnu.user.model.enums.LoginTypeEnum;
-import com.gpnu.user.model.enums.RegisterTypeEnum;
+import com.gpnu.user.model.enums.LoginType;
+import com.gpnu.user.model.enums.RegisterType;
 import com.gpnu.user.service.EmailService;
-import com.gpnu.user.service.UsUserService;
+import com.gpnu.user.service.IUserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.groups.Default;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class VerificationCodeService {
     private RedisService redisService;
 
     @Resource
-    private UsUserService usUserService;
+    private IUserService iUserService;
 
     @Resource
     private EmailService emailService;
@@ -47,17 +47,17 @@ public class VerificationCodeService {
     public void sendRegisterVerificationCode(@Validated({Default.class, SendRegisterCodeRequest.MobileGroup.class, SendRegisterCodeRequest.EmailGroup.class}) SendRegisterCodeRequest request) {
         String keyPrefix;
         String account;
-        Integer type =request.getRegisterType();
-        if (type == RegisterTypeEnum.MOBILE_CODE.getCode()) { // 手机注册
+        Integer type =request.getRegisterType().getCode();
+        if (type == RegisterType.MOBILE_CODE.getCode()) { // 手机注册
             account = request.getMobile();
             keyPrefix = CaptchaConstants.REGISTER_CODE_PREFIX_MOBILE;
-            if (usUserService.existsByMobile(account)) {
+            if (iUserService.existsByMobile(account)) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR,"该手机号已注册");
             }
-        } else if (type == RegisterTypeEnum.EMAIL_CODE.getCode()) { // 邮箱注册
+        } else if (type == RegisterType.EMAIL_CODE.getCode()) { // 邮箱注册
             account = request.getEmail();
             keyPrefix = CaptchaConstants.REGISTER_CODE_PREFIX_EMAIL;
-            if (usUserService.existsByEmail(account)) {
+            if (iUserService.existsByEmail(account)) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR,"该邮箱已注册");
             }
         } else {
@@ -87,9 +87,9 @@ public class VerificationCodeService {
         // } else {
         //     emailService.sendEmail(account, "注册验证码", "您的注册验证码是：" + code + "，请在5分钟内使用。");
         // }
-        if( type == RegisterTypeEnum.MOBILE_CODE.getCode()) {
+        if( type == RegisterType.MOBILE_CODE.getCode()) {
             // smsService.sendSms(account, "您的登录验证码是：" + code + "，请在5分钟内使用。");
-        } else if (type == RegisterTypeEnum.EMAIL_CODE.getCode()) {
+        } else if (type == RegisterType.EMAIL_CODE.getCode()) {
             emailService.sendVerifiedCode(account, code);
         } else {
             throw new BusinessException(ErrorCode.OPERATION_ERROR,"不支持的登录类型");
@@ -103,14 +103,14 @@ public class VerificationCodeService {
      */
     public void sendLoginVerificationCode(String account, Integer type) {
         String keyPrefix;
-        if (type == LoginTypeEnum.MOBILE_CODE.getCode()) {
+        if (type == LoginType.MOBILE_CODE.getCode()) {
             keyPrefix = CaptchaConstants.LOGIN_CODE_PREFIX_MOBILE;
-            if (!usUserService.existsByMobile(account)) {
+            if (!iUserService.existsByMobile(account)) {
                 throw new BusinessException( ErrorCode.NOT_FOUND_ERROR,"该手机号未注册");
             }
-        } else if (type == LoginTypeEnum.EMAIL_CODE.getCode()) {
+        } else if (type == LoginType.EMAIL_CODE.getCode()) {
             keyPrefix =CaptchaConstants. LOGIN_CODE_PREFIX_EMAIL;
-            if (!usUserService.existsByEmail(account)) {
+            if (!iUserService.existsByEmail(account)) {
                 throw new BusinessException( ErrorCode.NOT_FOUND_ERROR,"该邮箱未注册");
             }
         } else {
@@ -132,10 +132,10 @@ public class VerificationCodeService {
         log.info("为 {} 生成登录验证码：{}，有效期 {} 分钟", account, code,CaptchaConstants. CODE_EXPIRATION_SECONDS / 60);
 
         // TODO: 实际发送逻辑
-        if( type == LoginTypeEnum.MOBILE_CODE.getCode()) {
+        if( type == LoginType.MOBILE_CODE.getCode()) {
             //手机短信发送逻辑待实现
             // smsService.sendSms(account, "您的登录验证码是：" + code + "，请在5分钟内使用。");
-        } else if (type == LoginTypeEnum.EMAIL_CODE.getCode()) {
+        } else if (type == LoginType.EMAIL_CODE.getCode()) {
             emailService.sendVerifiedCode(account, code);
         } else {
             throw new BusinessException(ErrorCode.OPERATION_ERROR,"不支持的登录类型");
@@ -153,11 +153,11 @@ public class VerificationCodeService {
         String key;
         String account;
 
-        if (request.getRegisterType() == RegisterTypeEnum.MOBILE_CODE.getCode()) {
+        if (request.getRegisterType() == RegisterType.MOBILE_CODE) {
             ValidationUtil.validateAndThrow(request, Default.class, RegisterRequest.MobileGroup.class);
             account = request.getMobile();
             key = CaptchaConstants.REGISTER_CODE_PREFIX_MOBILE + account;
-        } else if (request.getRegisterType() == RegisterTypeEnum.EMAIL_CODE.getCode()) {
+        } else if (request.getRegisterType() == RegisterType.EMAIL_CODE) {
             ValidationUtil.validateAndThrow(request, Default.class, RegisterRequest.EmailGroup.class);
             account = request.getEmail();
             key = CaptchaConstants.REGISTER_CODE_PREFIX_EMAIL + account;
@@ -171,21 +171,22 @@ public class VerificationCodeService {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"验证码错误或已过期");
         }
 
+        // 用户唯一性校验
+        if (request.getRegisterType() == RegisterType.MOBILE_CODE&& iUserService.existsByMobile(request.getMobile())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"该手机号已注册");
+        }
+        if (request.getRegisterType() == RegisterType.EMAIL_CODE && iUserService.existsByEmail(request.getEmail())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"该邮箱已注册");
+        }
 
         // 验证码校验成功后立即删除，防止重复使用
         redisService.deleteObject(key);
         log.info("账户 {} 注册验证码校验成功，已从Redis删除", account);
 
-        // 用户唯一性校验
-        if (request.getRegisterType() == RegisterTypeEnum.MOBILE_CODE.getCode() && usUserService.existsByMobile(request.getMobile())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"该手机号已注册");
-        }
-        if (request.getRegisterType() == RegisterTypeEnum.EMAIL_CODE.getCode() && usUserService.existsByEmail(request.getEmail())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"该邮箱已注册");
-        }
+
 
         // 创建新用户
-        usUserService.registerUser(request);
+        iUserService.registerUser(request);
         log.info("用户 {} 注册成功", request.getName());
     }
 

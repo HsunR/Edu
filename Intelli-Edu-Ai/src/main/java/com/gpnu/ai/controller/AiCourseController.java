@@ -7,24 +7,21 @@ import com.gpnu.ai.rag.AICourseDocumentLoader;
 import com.gpnu.ai.rag.MyTokenTextSplitter;
 import com.gpnu.ai.service.ChatListService;
 import com.gpnu.ai.rag.SelfReflectingRagService;
+import com.gpnu.auth.resource.context.UserContextHolder;
 import com.gpnu.common.common.BaseResponse;
 import com.gpnu.common.common.ResultUtils;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
-import com.gpnu.common.utils.contextHolder.UserContextHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.filter.Filter;
-import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,38 +50,33 @@ public class AiCourseController {
     private SelfReflectingRagService selfReflectingRagService;
 
     @Operation(summary = "基础的聊天接口仅提供记忆功能")
-    @PostMapping("/doChatByStream")
-    public Flux<BaseResponse<String>> doChatByStream(@RequestBody ChatRequest request){
+    @PostMapping(value = "/doChatByStream",produces =  MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> doChatByStream(@RequestBody ChatRequest request){
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR,"会话体不能为空");
         ThrowUtils.throwIf(request.getConversationId() == null || request.getConversationId().isEmpty(), ErrorCode.PARAMS_ERROR,"会话ID不能为空");
         ThrowUtils.throwIf(request.getUserPrompt() == null || request.getUserPrompt().isEmpty(), ErrorCode.PARAMS_ERROR,"用户输入不能为空");
-        return aiCourseAPP.doChatByStream(request.getUserPrompt(), request.getConversationId())
-                .map(ResultUtils::success)
-                .onErrorResume(e -> Flux.just(new BaseResponse<>(ErrorCode.OPERATION_ERROR.getCode(), null, "聊天失败: " + e.getMessage())));
+        return aiCourseAPP.doChatByStream(request.getUserPrompt(), request.getConversationId());
     }
 
 
     @Operation(summary = "开启了RAG的聊天接口")
-    @PostMapping("/doChatWithRagByStream")
-    public Flux<BaseResponse<String>> doChatWithRagByStream(@RequestBody ChatRequest request){
+    @PostMapping(value = "/doChatWithRagByStream",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> doChatWithRagByStream(@RequestBody ChatRequest request){
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR,"会话体不能为空");
         ThrowUtils.throwIf(request.getConversationId() == null || request.getConversationId().isEmpty(), ErrorCode.PARAMS_ERROR,"会话ID不能为空");
         ThrowUtils.throwIf(request.getUserPrompt() == null || request.getUserPrompt().isEmpty(), ErrorCode.PARAMS_ERROR,"用户输入不能为空");
-        return selfReflectingRagService.ask(request)
-                .map(ResultUtils :: success)
-                .onErrorResume(e -> Flux.just(new BaseResponse<>(ErrorCode.OPERATION_ERROR.getCode(), null, "聊天失败: " + e.getMessage())));
+        return selfReflectingRagService.ask(request);
     }
 
 
     @Operation(summary = "开启了工具调用和RAG的聊天接口(多模态响应)")
-    @PostMapping("/doChatWithToolAndRagByStream")
-    public Flux<BaseResponse<String>> doChatWithToolAndRag(@RequestBody ChatRequest request) {
+    @PostMapping(value="/doChatWithToolAndRagByStream" ,produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> doChatWithToolAndRag(@RequestBody ChatRequest request) {
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR,"会话体不能为空");
         ThrowUtils.throwIf(request.getConversationId() == null || request.getConversationId().isEmpty(), ErrorCode.PARAMS_ERROR,"会话ID不能为空");
         ThrowUtils.throwIf(request.getUserPrompt() == null || request.getUserPrompt().isEmpty(), ErrorCode.PARAMS_ERROR,"用户输入不能为空");
-        return aiCourseAPP.doChatWithToolsByStream(request)
-                .map(ResultUtils::success)
-                .onErrorResume(e -> Flux.just(new BaseResponse<>(ErrorCode.OPERATION_ERROR.getCode(), null, "聊天失败: " + e.getMessage())));
+        return aiCourseAPP.doChatWithToolsByStream(request);
+
 
     }
 

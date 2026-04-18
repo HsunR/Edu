@@ -3,18 +3,17 @@ package com.gpnu.resource.manager;
 import cn.hutool.core.io.FileUtil;
 import com.gpnu.resource.config.CosClientConfig;
 import com.qcloud.cos.COSClient;
-import com.qcloud.cos.model.COSObject;
-import com.qcloud.cos.model.GetObjectRequest;
-import com.qcloud.cos.model.ObjectMetadata;
-import com.qcloud.cos.model.PutObjectRequest;
-import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.http.HttpMethodName;
+import com.qcloud.cos.model.*;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -141,5 +140,32 @@ public class CosManager {
      */
     public String getFileAccessUrl(String key) {
         return String.format("%s/%s", cosClientConfig.getHost(), key);
+    }
+
+    /**
+     * 生成 COS 预签名上传 URL
+     *
+     * @param key               COS 存储 key
+     * @param expirationMinutes 有效期（分钟）
+     * @param contentType       限制上传的 Content-Type
+     * @return 预签名 URL
+     */
+    public URL generatePresignedUploadUrl(String key, long expirationMinutes, String contentType) {
+        Date expiration = new Date(System.currentTimeMillis() + expirationMinutes * 60 * 1000);
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(
+                cosClientConfig.getBucket(), key, HttpMethodName.PUT);
+        request.setExpiration(expiration);
+        if (contentType != null) {
+            request.setContentType(contentType);
+        }
+        return cosClient.generatePresignedUrl(request);
+    }
+
+
+    /**
+     * 获取对象元数据（文件大小、Content-Type 等）
+     */
+    public ObjectMetadata getObjectMetadata(String key) {
+        return cosClient.getObjectMetadata(cosClientConfig.getBucket(), key);
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = "datasource.enabled", havingValue = "true", matchIfMissing = false)
 public class DataSourceConfig {
 
-    // 只有当 datasource.enabled=true 时才会注入这些属性和创建 Bean
 
     @Value("${spring.datasource.url}")
     private String url;

@@ -30,7 +30,7 @@ public class DocumentParsingUtil {
                     return file.getOriginalFilename();
                 }
             };
-            // 使用 TikaDocumentReader 解析多格式文档内容 :contentReference[oaicite:1]{index=1}
+            // 使用 TikaDocumentReader 解析多格式文档内容
             return new TikaDocumentReader(resource).read();
         } catch (Exception e) {
             // 可追加日志记录 e.printStackTrace() 或使用 Logger

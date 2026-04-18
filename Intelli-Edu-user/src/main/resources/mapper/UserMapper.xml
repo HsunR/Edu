@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gpnu.user.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.gpnu.user.model.entity.User">
+        <id property="userId" column="user_id" jdbcType="CHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="userType" column="user_type" jdbcType="VARCHAR"/>
+        <result property="openId" column="open_id" jdbcType="VARCHAR"/>
+        <result property="sex" column="sex" jdbcType="TINYINT"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="CHAR"/>
+        <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
+        <result property="personalSignature" column="personal_signature" jdbcType="VARCHAR"/>
+        <result property="school" column="school" jdbcType="VARCHAR"/>
+        <result property="version" column="version" jdbcType="INTEGER"/>
+        <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+        <result property="createdAt" column="created_at"
+                jdbcType="TIMESTAMP_WITH_TIMEZONE"
+                javaType="java.time.OffsetDateTime"
+                typeHandler="org.apache.ibatis.type.OffsetDateTimeTypeHandler"/>
+
+        <result property="updatedAt" column="updated_at"
+                jdbcType="TIMESTAMP_WITH_TIMEZONE"
+                javaType="java.time.OffsetDateTime"
+                typeHandler="org.apache.ibatis.type.OffsetDateTimeTypeHandler"/>
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id,name,password,
+        user_type,open_id,sex,
+        email,mobile,avatar_url,
+        personal_signature,school,version,
+        is_deleted,created_at,updated_at
+    </sql>
+</mapper>

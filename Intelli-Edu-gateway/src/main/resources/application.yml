@@ -5,6 +5,6 @@ spring:
   application:
     name: Intelli-Edu-gateway
   profiles:
-    active: local  #自己进行更改，现在激活的为local
+    active: dev  #自己进行更改，现在激活的为dev
 
 

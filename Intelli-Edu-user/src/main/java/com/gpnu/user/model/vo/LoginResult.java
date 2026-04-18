@@ -1,5 +1,6 @@
 package com.gpnu.user.model.vo;
 
+import com.gpnu.user.model.enums.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ public class LoginResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long userId;
-    private String userType;
+    private UserType userType;
     private String accessToken;
     private String refreshToken;
 }

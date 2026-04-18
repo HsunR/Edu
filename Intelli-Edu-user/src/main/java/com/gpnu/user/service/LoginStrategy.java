@@ -2,7 +2,7 @@ package com.gpnu.user.service;
 
 
 import com.gpnu.user.model.dto.ususer.LoginRequest;
-import com.gpnu.user.model.enums.LoginTypeEnum;
+import com.gpnu.user.model.enums.LoginType;
 import com.gpnu.user.model.vo.LoginResult;
 
 import javax.security.auth.login.LoginException;
@@ -16,7 +16,7 @@ public interface LoginStrategy {
      * 获取当前策略支持的登录类型
      * @return 登录类型枚举
      */
-    LoginTypeEnum getSupportedLoginType(); // 新增方法
+    LoginType getSupportedLoginType(); // 新增方法
 
 
     /**

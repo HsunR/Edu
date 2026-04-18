@@ -107,6 +107,97 @@ public class TencentCloudVodManager {
     }
 
     /**
+     * 【新方法】申请腾讯云VOD视频上传，获取预签名URL和会话Key。
+     * 调用 VOD API 客户端的 ApplyUpload 接口。
+     *
+     * @param mediaName        媒体名称 (e.g., "my_video.mp4")
+     * @param coverType        封面类型 (可选，如 "jpg", "png")
+     * @param procedureName    VOD预设的任务流名称 (可选，用于上传后自动转码)
+     * @param classId          VOD分类ID (可选)
+     * @param sourceContext    来源上下文，透传信息
+     * @param sessionContext   会话上下文，透传信息
+     * @return ApplyUploadResponse 包含 VodSessionKey, MediaUploadUrls 等信息
+     * @throws BusinessException 如果获取失败
+     */
+    public ApplyUploadResponse applyVodUpload(String mediaName, String mediaType, String coverType, String procedureName, Long classId, String sourceContext, String sessionContext) throws BusinessException {
+        try {
+            ApplyUploadRequest request = new ApplyUploadRequest();
+            request.setMediaName(mediaName);
+            request.setMediaType(mediaType); // 媒体类型，通常是文件后缀，如 "mp4", "mov"
+
+            if (coverType != null && !coverType.isEmpty()) {
+                request.setCoverType(coverType);
+            }
+            if (procedureName != null && !procedureName.isEmpty()) {
+                request.setProcedure(procedureName);
+            }
+            if (classId != null) {
+                request.setClassId(classId);
+            }
+            if (sourceContext != null && !sourceContext.isEmpty()) {
+                request.setSourceContext(sourceContext);
+            }
+            if (sessionContext != null && !sessionContext.isEmpty()) {
+                request.setSessionContext(sessionContext);
+            }
+
+            // 设置子应用ID
+            if (vodClientConfig.getAppId() != null && vodClientConfig.getAppId() != 0) {
+                request.setSubAppId(vodClientConfig.getAppId());
+            }
+
+            log.info("Applying VOD upload for media: {} (Type: {})", mediaName, mediaType);
+            // 调用 VOD API 客户端的 ApplyUpload 方法
+            ApplyUploadResponse response = vodClient.ApplyUpload(request);
+
+            log.info("Applied VOD upload successfully. VodSessionKey: {}, RequestId: {}", response.getVodSessionKey(), response.getRequestId());
+            return response;
+        } catch (TencentCloudSDKException e) {
+            log.error("Failed to apply VOD upload (TencentCloudSDKException): {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "申请视频上传失败：" + e.getMessage());
+        } catch (Exception e) {
+            log.error("Failed to apply VOD upload (General Exception): {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "申请视频上传失败，系统内部错误");
+        }
+    }
+
+
+
+    /**
+     * 【新方法】确认腾讯云VOD文件上传完成。
+     * 调用 VOD API 客户端的 CommitUpload 接口。
+     *
+     * @param vodSessionKey 上传会话的唯一标识，取申请上传接口的返回值 VodSessionKey
+     * @return CommitUploadResponse 确认上传的响应
+     * @throws BusinessException 如果确认失败
+     */
+    public CommitUploadResponse commitVodUpload(String vodSessionKey) throws BusinessException { // 修正参数为 vodSessionKey
+        try {
+            CommitUploadRequest request = new CommitUploadRequest();
+            request.setVodSessionKey(vodSessionKey); // 修正：使用 setVodSessionKey
+
+            // 设置子应用ID
+            if (vodClientConfig.getAppId() != null && vodClientConfig.getAppId() != 0) {
+                request.setSubAppId(vodClientConfig.getAppId());
+            }
+
+            log.info("Committing VOD upload for VodSessionKey: {}", vodSessionKey);
+            // 调用 VOD API 客户端的 CommitUpload 方法
+            CommitUploadResponse response = vodClient.CommitUpload(request);
+
+            log.info("VOD upload committed successfully. FileId: {}, MediaUrl: {}", response.getFileId(), response.getMediaUrl());
+            return response;
+        } catch (TencentCloudSDKException e) {
+            log.error("Failed to commit VOD upload (TencentCloudSDKException): {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "确认视频上传失败：" + e.getMessage());
+        } catch (Exception e) {
+            log.error("Failed to commit VOD upload (General Exception): {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "确认视频上传失败，系统内部错误");
+        }
+    }
+
+
+    /**
      * 根据FileId获取媒体播放URL（通常转码后会有多个URL，这里获取默认的）
      *
      * @param fileId VOD的媒体文件ID

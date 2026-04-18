@@ -1,12 +1,9 @@
 package com.gpnu.ai.model.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.gpnu.ai.model.entity.ChatMessage;
+
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 @Data

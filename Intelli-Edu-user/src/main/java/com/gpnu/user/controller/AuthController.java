@@ -1,7 +1,9 @@
 package com.gpnu.user.controller;
 
+import com.gpnu.auth.common.constants.AuthConstants;
 import com.gpnu.common.common.BaseResponse;
 import com.gpnu.common.common.ResultUtils;
+import com.gpnu.common.constants.Constant;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.utils.validator.ValidationUtil;
@@ -9,8 +11,8 @@ import com.gpnu.user.model.dto.ususer.LoginRequest;
 import com.gpnu.user.model.dto.ususer.SendLoginCodeRequest;
 import com.gpnu.user.model.dto.ususer.SendRegisterCodeRequest;
 import com.gpnu.user.model.dto.ususer.RegisterRequest;
-import com.gpnu.user.model.enums.LoginTypeEnum;
-import com.gpnu.user.model.enums.RegisterTypeEnum;
+import com.gpnu.user.model.enums.LoginType;
+import com.gpnu.user.model.enums.RegisterType;
 import com.gpnu.user.model.vo.LoginResult;
 import com.gpnu.user.service.impl.LoginService;
 import com.gpnu.user.service.impl.VerificationCodeService;
@@ -18,7 +20,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -44,18 +49,19 @@ public class AuthController {
      */
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public BaseResponse<LoginResult> login( @RequestBody LoginRequest request) {
+    public BaseResponse<LoginResult> login(@RequestBody @Validated LoginRequest request, HttpServletRequest servletRequest) {
         log.info("接收到用户登录请求，登录类型：{}", request.getLoginType());
-        LoginTypeEnum loginTypeEnum = LoginTypeEnum.getByCode(request.getLoginType());
-        if (loginTypeEnum == null) {
+        LoginType loginType = request.getLoginType();
+        if (loginType == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的登录类型");
         }
 
-        if(loginTypeEnum == LoginTypeEnum.MOBILE_CODE){
+        log.info("Header requestId = {}", servletRequest.getHeader(Constant.REQUEST_ID_HEADER));
+        if(loginType == LoginType.MOBILE_CODE){
             ValidationUtil.validateAndThrow(request, LoginRequest.MobileCodeGroup.class);
-        }else if(loginTypeEnum == LoginTypeEnum.EMAIL_CODE){
+        }else if(loginType == LoginType.EMAIL_CODE){
             ValidationUtil.validateAndThrow(request, LoginRequest.EmailCodeGroup.class);
-        }else if(loginTypeEnum == LoginTypeEnum.USERNAME_PASSWORD){
+        }else if(loginType == LoginType.USERNAME_PASSWORD){
             ValidationUtil.validateAndThrow(request, LoginRequest.UsernamePasswordGroup.class);
         }
 
@@ -74,12 +80,8 @@ public class AuthController {
      */
     @Operation(summary = "用户注册")
     @PostMapping("/register")
-    public BaseResponse<Boolean> register(@RequestBody RegisterRequest request) {
+    public BaseResponse<Boolean> register(@RequestBody @Validated RegisterRequest request) {
         log.info("接收到用户注册请求：{}", request.getName());
-        // 校验注册类型
-        if (request.getRegisterType() == null || RegisterTypeEnum.getByCode(request.getRegisterType()) == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的注册类型");
-        }
         // 根据注册类型动态选择
         verificationCodeService.verifyRegisterAndRegisterUser(request);
         return ResultUtils.success(true);
@@ -97,10 +99,10 @@ public class AuthController {
     @Operation(summary = "用户注销")
     @PostMapping("/logout")
     public void logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith(AuthConstants.BEARER_PREFIX)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "无效的Authorization头");
         }
-        String accessToken = authorizationHeader.substring(7); // 提取Bearer后的Token
+        String accessToken = authorizationHeader.substring(AuthConstants.BEARER_PREFIX_LENGTH); // 提取Bearer后的Token
         log.info("接收到用户注销请求，Access Token: {}", accessToken);
         loginService.logout(accessToken);
     }
@@ -116,14 +118,15 @@ public class AuthController {
     @PostMapping("/register/send-code")
     public void sendRegisterCode(@RequestBody SendRegisterCodeRequest request) {
         log.info("接收到发送注册验证码请求：{}", request);
-        RegisterTypeEnum registerTypeEnum = RegisterTypeEnum.getByCode(request.getRegisterType());
-        if (registerTypeEnum == null) {
+        RegisterType registerType = request.getRegisterType();
+        if (registerType == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的注册验证码类型");
         }
-        if(registerTypeEnum == RegisterTypeEnum.MOBILE_CODE){
+
+        if(registerType == RegisterType.MOBILE_CODE){
             ValidationUtil.validateAndThrow(request, SendRegisterCodeRequest.MobileGroup.class);
             verificationCodeService.sendRegisterVerificationCode(request);
-        }else if(registerTypeEnum == RegisterTypeEnum.EMAIL_CODE){
+        }else if(registerType == RegisterType.EMAIL_CODE){
             // 手动校验邮箱格式
             ValidationUtil.validateAndThrow(request, SendRegisterCodeRequest.EmailGroup.class);
             verificationCodeService.sendRegisterVerificationCode(request);
@@ -146,17 +149,17 @@ public class AuthController {
     @PostMapping("/login/send-code")
     public void sendLoginCode(@RequestBody SendLoginCodeRequest request) {
         log.info("接收到发送登录验证码请求：{}", request);
-        LoginTypeEnum loginTypeEnum = LoginTypeEnum.getByCode(request.getLoginType());
-        if (loginTypeEnum == null) {
+        LoginType loginType = LoginType.getByCode(request.getLoginType());
+        if (loginType == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的登录类型");
         }
         // 根据登录类型动态校验并发送验证码
-        if (request.getLoginType() == LoginTypeEnum.MOBILE_CODE.getCode()) { // 手机登录
+        if (request.getLoginType() == LoginType.MOBILE_CODE.getCode()) { // 手机登录
             ValidationUtil.validateAndThrow(request, SendLoginCodeRequest.MobileGroup.class);
-            verificationCodeService.sendLoginVerificationCode(request.getMobile(), LoginTypeEnum.MOBILE_CODE.getCode());
-        } else if (request.getLoginType() == LoginTypeEnum.EMAIL_CODE.getCode()) { // 邮箱登录
+            verificationCodeService.sendLoginVerificationCode(request.getMobile(), LoginType.MOBILE_CODE.getCode());
+        } else if (request.getLoginType() == LoginType.EMAIL_CODE.getCode()) { // 邮箱登录
             ValidationUtil.validateAndThrow(request, SendLoginCodeRequest.EmailGroup.class);
-            verificationCodeService.sendLoginVerificationCode(request.getEmail(), LoginTypeEnum.EMAIL_CODE.getCode());
+            verificationCodeService.sendLoginVerificationCode(request.getEmail(), LoginType.EMAIL_CODE.getCode());
         } else {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "错误的登录操作");
         }
