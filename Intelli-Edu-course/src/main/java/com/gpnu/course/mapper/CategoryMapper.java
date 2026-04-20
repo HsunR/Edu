@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 /**
 * @author Chenxingdong
 * @description 针对表【co_category(课程分类表)】的数据库操作Mapper
-* @createDate 2026-04-19 22:13:45
 * @Entity com.gpnu.course.model.entity.CoCategory
 */
 public interface CategoryMapper extends BaseMapper<Category> {
