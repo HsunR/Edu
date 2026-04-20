@@ -23,6 +23,7 @@ import com.gpnu.user.model.entity.StudentProfile;
 import com.gpnu.user.model.entity.TeacherProfile;
 import com.gpnu.user.model.entity.User;
 
+import com.gpnu.user.model.enums.UserType;
 import com.gpnu.user.model.vo.user.StudentProfileVO;
 import com.gpnu.user.model.vo.user.TeacherProfileVO;
 import com.gpnu.user.model.vo.user.UserDetailVO;
@@ -164,12 +165,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUpdatedAt(OffsetDateTime.now());
         user.setAvatarUrl(userDefaultsConfig.getAvatarUrl());
         user.setPersonalSignature(userDefaultsConfig.getPersonalSignature());
-
+        boolean save = this.save(user);
         StudentProfile studentProfile = new StudentProfile();
         BeanUtil.copyProperties(registerRequest, studentProfile);
         studentProfile.setUserId(user.getUserId());
         studentProfileMapper.insert(studentProfile);
-        return this.save(user);
+        return save;
     }
 
 
@@ -369,5 +370,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         UserAuthDTO authDTO = new UserAuthDTO();
         BeanUtil.copyProperties(user, authDTO);
         return authDTO;
+    }
+
+    @Transactional
+    @Override
+    public void assignTeacher(AssignTeacherRequest request) {
+
+
+        // 1. 校验目标用户存在且当前是学生
+        User targetUser = userMapper.selectById(request.getUserId());
+        if (targetUser == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+        }
+
+        // 2. 更新身份为教师
+        targetUser.setUserType(UserType.TEACHER);
+        userMapper.updateById(targetUser);
+
+        // 3. 创建教师档案
+        TeacherProfile profile = new TeacherProfile();
+        profile.setUserId(request.getUserId());
+        profile.setTeacherNo(request.getTeacherNo());
+        profile.setTitle(request.getTitle());
+        profile.setDepartment(request.getDepartment());
+        profile.setBio(request.getBio());
+        int result = teacherProfileMapper.insert(profile);
+        ThrowUtils.throwIf(result <= 0, ErrorCode.OPERATION_ERROR, "创建教师档案失败");
+
+        // 4、删除学生档案
+        int deleted = studentProfileMapper.deleteById(request.getUserId());
+        ThrowUtils.throwIf(deleted <= 0, ErrorCode.OPERATION_ERROR, "删除学生档案失败");
+
     }
 }

@@ -26,7 +26,9 @@ public class LoginRequest implements Serializable {
     private String username;
 
     @NotBlank(message = "密码不能为空", groups = UsernamePasswordGroup.class)
-    @Schema(description = "密码,仅在用户名密码登录时必填", example = "123456")
+    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+...]).{6,20}$",
+            message = "密码必须包含字母、数字和特殊字符且长度在6到20之间",groups = UsernamePasswordGroup.class)
+    @Schema(description = "密码,仅在用户名密码登录时必填", example = "1234utf-+")
     private String password;
 
     @NotBlank(message = "手机号不能为空", groups = MobileCodeGroup.class)

@@ -63,4 +63,6 @@ public interface IUserService extends IService<User> {
     public UserAuthDTO getUserForAuthByEmail(String email);
 
     public UserAuthDTO getUserForAuthByMobile(String mobile);
+
+    public void assignTeacher( AssignTeacherRequest request);
 }

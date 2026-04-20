@@ -4,7 +4,6 @@ import com.gpnu.api.dto.user.UserAuthDTO;
 import com.gpnu.api.dto.user.UserSimpleDTO;
 import com.gpnu.user.service.IUserService;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 

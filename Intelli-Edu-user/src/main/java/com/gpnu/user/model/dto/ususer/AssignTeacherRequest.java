@@ -10,10 +10,20 @@ import java.io.Serializable;
 @Schema(description = "注册教师请求对象")
 public class AssignTeacherRequest implements Serializable {
 
+    @NotBlank
+    @Schema(description = "将要分配教师的用户ID",example = "123456789")
+    private Long userId;
+
     @NotBlank(message = "工号不能为空")
+    @Schema(description = "教师工号", example = "T12345")
     private String teacherNo;
 
-    private String title;               // 职称（选填）
-    private String department;          // 院系（选填）
-    private String bio;                 // 简介（选填）
+    @Schema(description = "教师职称",example = "教授")
+    private String title;
+
+    @Schema(description = "教师所属院系",example = "计算机科学与技术学院")
+    private String department;
+
+    @Schema(description = "教师个人简介",example = "具有10年教学经验，专注于人工智能领域的研究和教学。")
+    private String bio;
 }

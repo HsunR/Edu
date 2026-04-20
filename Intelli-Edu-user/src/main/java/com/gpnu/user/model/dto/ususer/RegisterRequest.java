@@ -31,7 +31,7 @@ public class RegisterRequest implements Serializable {
     private String password;
 
     @NotNull(message = "注册类型不能为空")
-    @Schema(description = "注册类型：MOBILE_CODE-手机号注册，EMAIL_CODE-邮箱验证码注册,WECHAT_OPENID-微信OpenID注册",example = "EMAIL_CODE")
+    @Schema(description = "注册类型：1-手机号注册，2-邮箱验证码注册,3-微信OpenID注册",example = "2")
     private RegisterType registerType;
 
     // --- 手机/邮箱/验证码（保持不变） ---

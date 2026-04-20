@@ -2,6 +2,7 @@ package com.gpnu.user.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.gpnu.auth.common.constants.AuthConstants;
 import com.gpnu.auth.resource.context.UserContextHolder;
 import com.gpnu.common.common.BaseResponse;
 import com.gpnu.common.common.ResultUtils;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 @Slf4j
-@Tag(name = "UserController", description = "提供用户增删改查等功能")
+@Tag(name = "用户相关接口", description = "提供用户增删改查等功能")
 public class UserController {
 
     @Resource
@@ -80,7 +81,6 @@ public class UserController {
         if (!isDeleted) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户未找到或删除失败");
         }
-        return ;
     }
 
 
@@ -119,6 +119,17 @@ public class UserController {
         Long userId = UserContextHolder.getUserId();
         userService.updatePassword(userId, request);
     }
+
+
+    @Operation(summary = "分配教师角色",description = "管理员将用户提升为教师")
+    @PutMapping("/{userId}/assign-teacher")
+    public void assignTeacher(@RequestBody AssignTeacherRequest request){
+        Long currentLoginUser = UserContextHolder.getUserId();
+        Integer userType = Integer.valueOf(UserContextHolder.getUserType());
+        ThrowUtils.throwIf(!userType.equals(AuthConstants.ROLE_ADMIN),ErrorCode.NO_AUTH_ERROR,"只有管理员才能分配教师角色");
+        userService.assignTeacher(request);
+    }
+
 
 
 

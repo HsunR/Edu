@@ -1,8 +1,7 @@
 package com.gpnu.user.controller;
 
 import com.gpnu.auth.common.constants.AuthConstants;
-import com.gpnu.common.common.BaseResponse;
-import com.gpnu.common.common.ResultUtils;
+
 import com.gpnu.common.constants.Constant;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
@@ -28,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/auth")
 @Slf4j
-@Tag(name = "AuthController", description = "提供用户注册、登录等功能")
+@Tag(name = "用户鉴权", description = "提供用户注册、登录等功能")
 public class AuthController {
 
 
@@ -49,7 +48,7 @@ public class AuthController {
      */
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public BaseResponse<LoginResult> login(@RequestBody @Validated LoginRequest request, HttpServletRequest servletRequest) {
+    public LoginResult login(@RequestBody @Validated LoginRequest request, HttpServletRequest servletRequest) {
         log.info("接收到用户登录请求，登录类型：{}", request.getLoginType());
         LoginType loginType = request.getLoginType();
         if (loginType == null) {
@@ -67,7 +66,7 @@ public class AuthController {
 
         LoginResult loginResult = loginService.login(request);
         log.info("用户登录成功，用户ID：{}", loginResult.getUserId());
-        return ResultUtils.success(loginResult);
+        return loginResult;
 
     }
 
@@ -80,11 +79,11 @@ public class AuthController {
      */
     @Operation(summary = "用户注册")
     @PostMapping("/register")
-    public BaseResponse<Boolean> register(@RequestBody @Validated RegisterRequest request) {
+    public void register(@RequestBody @Validated RegisterRequest request) {
         log.info("接收到用户注册请求：{}", request.getName());
         // 根据注册类型动态选择
         verificationCodeService.verifyRegisterAndRegisterUser(request);
-        return ResultUtils.success(true);
+
     }
 
 
@@ -177,15 +176,13 @@ public class AuthController {
      */
     @Operation(summary = "刷新Access Token")
     @PostMapping("/refresh-token")
-    public BaseResponse<LoginResult> refreshToken(@RequestParam("refreshToken") String refreshToken) {
+    public LoginResult refreshToken(@RequestParam("refreshToken") String refreshToken) {
         log.info("接收到刷新令牌请求");
         try {
             LoginResult loginResult = loginService.refreshToken(refreshToken);
-            return ResultUtils.success(loginResult);
+            return loginResult;
         } catch (BusinessException e) {
             log.warn("刷新令牌失败：{}", e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("刷新令牌时发生未知异常", e);
         }
         return null;
     }
