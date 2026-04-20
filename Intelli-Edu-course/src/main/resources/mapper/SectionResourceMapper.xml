@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gpnu.course.mapper.SectionResourceMapper">
+
+    <resultMap id="BaseResultMap" type="com.gpnu.course.model.entity.SectionResource">
+            <id property="id" column="id" />
+            <result property="sectionId" column="section_id" />
+            <result property="resourceId" column="resource_id" />
+            <result property="resourceType" column="resource_type" />
+            <result property="orderIndex" column="order_index" />
+            <result property="isDeleted" column="is_deleted" />
+            <result property="createdAt" column="created_at" />
+            <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,section_id,resource_id,resource_type,order_index,is_deleted,
+        created_at,updated_at
+    </sql>
+</mapper>

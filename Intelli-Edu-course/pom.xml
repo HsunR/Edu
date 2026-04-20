@@ -50,15 +50,6 @@
             <scope>test</scope>
         </dependency>
 
-<!--        Dubbo-->
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -75,6 +66,12 @@
             <version>${project.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.gpnu</groupId>
+            <artifactId>Intelli-Edu-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 
         <!--        该系统自定义的通用模块包 End-->

@@ -7,16 +7,6 @@ import com.gpnu.common.exception.ErrorCode;
 
 /**
  * 用户上下文持有者（基于 ThreadLocal）
- * <p>
- * 数据流：Gateway 写入 Header → {@link com.gpnu.auth.resource.interceptor.UserInfoRelayInterceptor}
- * 从 Header 读取并调用 {@link #set} 存入 ThreadLocal → 业务代码通过本类静态方法获取。
- * </p>
- *
- * <pre>
- * 改造说明：
- *   合并了原 UserContext（仅存 userId）和 UserContextHolder（每次从 Header 读取）两个类，
- *   统一为 ThreadLocal 存取，同时持有 userId 和 userType。
- * </pre>
  */
 public final class UserContextHolder {
 
@@ -26,7 +16,6 @@ public final class UserContextHolder {
     private UserContextHolder() {
     }
 
-    // ==================== 写入（由拦截器调用） ====================
 
     /**
      * 将用户信息存入当前线程上下文
@@ -47,7 +36,6 @@ public final class UserContextHolder {
         USER_TYPE.remove();
     }
 
-    // ==================== 读取（由业务代码调用） ====================
 
     /**
      * 获取当前登录用户的 userId
