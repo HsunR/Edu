@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/innder/users")
+@RequestMapping("/inner/users")
 @Hidden
 public class InnerUserController {
 
