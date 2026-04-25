@@ -49,9 +49,9 @@ public class UserController {
 
 
 
-    @GetMapping()
+    @GetMapping
     @Operation(summary = "多条件查询", description = "多条件查询")
-    public Page<UserVO> listUsers(@RequestBody UserQueryRequest queryRequest) {
+    public Page<UserVO> listUsers(UserQueryRequest queryRequest) {
         if (queryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "查询条件不能为空");
         }
