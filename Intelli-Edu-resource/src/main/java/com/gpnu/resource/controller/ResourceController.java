@@ -55,13 +55,15 @@ public class ResourceController {
     @PostMapping("/confirm")
     @Operation(summary = "确认资源上传完成", description = "客户端上传完成后调用此接口，确认资源已成功上传并持久化相关信息")
     public ResourceVO confirmUpload(@RequestBody @Validated UploadConfirmRequest request) {
-        return resourceService.confirmCosUpload(request);
+        Long userId = UserContextHolder.getUserId();
+        return resourceService.confirmCosUpload(userId,request);
     }
 
     @PostMapping("/confirm/video")
     @Operation(summary = "确认视频资源上传完成", description = "客户端上传完成后调用此接口，确认视频资源已成功上传并持久化相关信息")
     public ResourceDetailVO confirmVideoUpload(@RequestBody @Validated VideoConfirmRequest request) {
-        return resourceService.confirmVodUpload(request);
+        Long userId = UserContextHolder.getUserId();
+        return resourceService.confirmVodUpload(userId,request);
     }
 
     // --- 查询/删除 ---

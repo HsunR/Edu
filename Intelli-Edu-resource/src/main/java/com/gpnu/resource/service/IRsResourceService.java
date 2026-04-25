@@ -22,7 +22,6 @@ import java.util.List;
  * </p>
  *
  * @author chenxingdong
- * @since 2026-04-11
  */
 public interface IRsResourceService extends IService<RsResource> {
 
@@ -30,9 +29,9 @@ public interface IRsResourceService extends IService<RsResource> {
 
     public VodPresignedUrlVO generateVodPresignedUrl(Long userId, PresignRequest request);
 
-    public ResourceVO confirmCosUpload(UploadConfirmRequest request);
+    public ResourceVO confirmCosUpload(Long userId,UploadConfirmRequest request);
 
-    public ResourceDetailVO confirmVodUpload(VideoConfirmRequest request);
+    public ResourceDetailVO confirmVodUpload(Long userId,VideoConfirmRequest request);
 
     public ResourceDetailVO getResourceDetail(Long resourceId);
 
@@ -43,4 +42,6 @@ public interface IRsResourceService extends IService<RsResource> {
     public ResourceSimpleDTO getResourceSimple(Long resourceId);
 
     public List<ResourceSimpleDTO> getResourceSimpleBatch(List<Long> resourceIds);
+
+    public void cleanExpiredUploadResources();
 }

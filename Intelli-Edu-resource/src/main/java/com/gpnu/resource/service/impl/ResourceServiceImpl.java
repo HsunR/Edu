@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URL;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,8 +49,6 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
 
     @Resource
     private CosManager cosManager;
-
-
 
 
     @Resource
@@ -70,6 +69,11 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
         String fileName = request.getFileName();
         String fileFormat = FileUtil.getSuffix(fileName).toLowerCase();
         validateFileFormat(fileFormat, resourceType);
+
+        long maxSize = ResourceConstants.getMaxSize(resourceType.getCode());
+        if (request.getFileSize() == null || request.getFileSize() <= 0 || request.getFileSize() > maxSize) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不合法");
+        }
 
         // 2. 生成 COS key
         String storageKey = buildStorageKey(resourceType, fileFormat);
@@ -111,6 +115,11 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
         String fileName = request.getFileName();
         String fileFormat = FileUtil.getSuffix(fileName).toLowerCase();
         validateFileFormat(fileFormat, ResourceType.VIDEO);
+
+        long maxSize = ResourceConstants.getMaxSize(ResourceType.VIDEO.getCode());
+        if (request.getFileSize() == null || request.getFileSize() <= 0 || request.getFileSize() > maxSize) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不合法");
+        }
 
         // 2. 调腾讯云申请上传
         ApplyUploadResponse applyResponse = tencentCloudVodManager.applyVodUpload(
@@ -156,11 +165,15 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
 
     @Override
     @Transactional
-    public ResourceVO confirmCosUpload(UploadConfirmRequest request) {
+    public ResourceVO confirmCosUpload(Long userId,UploadConfirmRequest request) {
         // 1. 查询资源记录
         RsResource resource = getResourceOrThrow(request.getResourceId());
         if (!UploadStatus.PENDING.getCode().equals(resource.getUploadStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "该资源不处于待确认状态");
+        }
+
+        if (!resource.getUploaderId().equals(userId)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权确认他人的资源");
         }
 
         // 2. 从 COS 查实际文件大小并校验
@@ -185,7 +198,7 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
 
         // 3. 更新资源记录
         resource.setFileSize(actualSize);
-        resource.setAccessUrl(request.getAccessUrl());
+        resource.setAccessUrl(cosManager.getFileAccessUrl(resource.getStorageKey()));
         resource.setUploadStatus(UploadStatus.SUCCESS);
         baseMapper.updateById(resource);
 
@@ -195,11 +208,15 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
 
     @Override
     @Transactional
-    public ResourceDetailVO confirmVodUpload(VideoConfirmRequest request) {
+    public ResourceDetailVO confirmVodUpload(Long userId,VideoConfirmRequest request) {
         // 1. 查询资源记录
         RsResource resource = getResourceOrThrow(request.getResourceId());
         if (!UploadStatus.PENDING.getCode().equals(resource.getUploadStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "该资源不处于待确认状态");
+        }
+
+        if (!resource.getUploaderId().equals(userId)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权确认他人的资源");
         }
 
         // 2. 从 Redis 获取 sessionKey
@@ -225,7 +242,7 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
             videoMetaMapper.updateById(videoMeta);
         }
 
-        // 6. 用完即删
+        // 6. 用完删除
         redisService.deleteObject(redisKey);
 
         log.info("VOD upload confirmed, resource={}, fileId={}", resource.getResourceId(), commitResponse.getFileId());
@@ -357,6 +374,74 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
     }
 
 
+    @Transactional
+    @Override
+    public void cleanExpiredUploadResources() {
+        OffsetDateTime expireTime = OffsetDateTime.now().minusHours(1);
+        int batchSize = 100;
+
+        int totalSuccess = 0;
+        int totalFailed = 0;
+        int batchNo = 0;
+
+        while (true) {
+            batchNo++;
+
+            List<RsResource> expiredResources = this.list(new LambdaQueryWrapper<RsResource>()
+                    .in(RsResource::getUploadStatus, UploadStatus.FAILED, UploadStatus.PENDING)
+                    .lt(RsResource::getCreatedAt, expireTime)
+                    .last("LIMIT " + batchSize)
+            );
+
+            if (expiredResources.isEmpty()) {
+                break;
+            }
+
+            int batchSuccess = 0;
+            int batchFailed = 0;
+
+            for (RsResource resource : expiredResources) {
+                try {
+                    cleanSingleExpiredUploadResource(resource);
+                    batchSuccess++;
+                } catch (Exception e) {
+                    batchFailed++;
+                    log.error(
+                            "Failed to clean expired upload resource, resourceId={}, resourceType={}, storageKey={}",
+                            resource.getResourceId(),
+                            resource.getResourceType(),
+                            resource.getStorageKey(),
+                            e
+                    );
+                }
+            }
+
+            totalSuccess += batchSuccess;
+            totalFailed += batchFailed;
+
+            log.info(
+                    "Clean expired upload resources batch finished, batchNo={}, batchSize={}, success={}, failed={}",
+                    batchNo,
+                    expiredResources.size(),
+                    batchSuccess,
+                    batchFailed
+            );
+
+            if (expiredResources.size() < batchSize) {
+                break;
+            }
+        }
+
+        log.info(
+                "Clean expired upload resources finished, totalSuccess={}, totalFailed={}",
+                totalSuccess,
+                totalFailed
+        );
+    }
+
+
+
+
     // ==================== 私有方法 ====================
 
     /**
@@ -429,4 +514,94 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
 
         return vo;
     }
+
+
+    private void cleanSingleExpiredUploadResource(RsResource resource) {
+        Long resourceId = resource.getResourceId();
+
+        if (ResourceType.VIDEO.equals(resource.getResourceType())) {
+            cleanExpiredVodResource(resource);
+        } else {
+            cleanExpiredCosResource(resource);
+        }
+
+
+        boolean removed = this.removeById(resourceId);
+        if (!removed) {
+            log.warn("Expired resource db record remove returned false, resourceId={}", resourceId);
+        }
+
+        log.info("Expired upload resource cleaned, resourceId={}, type={}",
+                resourceId, resource.getResourceType());
+    }
+
+    private void cleanExpiredCosResource(RsResource resource) {
+        String storageKey = resource.getStorageKey();
+
+        if (storageKey == null || storageKey.isBlank()) {
+            log.info("Expired COS resource has empty storageKey, skip COS delete, resourceId={}",
+                    resource.getResourceId());
+            return;
+        }
+
+        try {
+            cosManager.deleteObject(storageKey);
+            log.info("Deleted expired COS object, resourceId={}, storageKey={}",
+                    resource.getResourceId(), storageKey);
+        } catch (Exception e) {
+
+            log.warn("Failed to delete expired COS object, resourceId={}, storageKey={}",
+                    resource.getResourceId(), storageKey, e);
+        }
+    }
+
+
+    private void cleanExpiredVodResource(RsResource resource) {
+        Long resourceId = resource.getResourceId();
+
+        // 1. 删除 Redis 中残留的 VOD 上传会话
+        String redisKey = ResourceConstants.VOD_SESSION_PREFIX + resourceId;
+        try {
+            redisService.deleteObject(redisKey);
+            log.info("Deleted expired VOD session key, resourceId={}, redisKey={}", resourceId, redisKey);
+        } catch (Exception e) {
+            log.warn("Failed to delete expired VOD session key, resourceId={}, redisKey={}",
+                    resourceId, redisKey, e);
+        }
+
+        // 2. 查询视频元数据
+        RsVideoMeta videoMeta = videoMetaMapper.selectById(resourceId);
+
+        /*
+         * 3. 删除 VOD 媒资。
+
+         */
+        String vodFileId = null;
+        if (videoMeta != null && videoMeta.getVodFileId() != null && !videoMeta.getVodFileId().isBlank()) {
+            vodFileId = videoMeta.getVodFileId();
+        } else if (resource.getStorageKey() != null && !resource.getStorageKey().isBlank()) {
+            vodFileId = resource.getStorageKey();
+        }
+
+        if (vodFileId != null && !vodFileId.isBlank()) {
+            try {
+                tencentCloudVodManager.deleteVodMedia(vodFileId);
+                log.info("Deleted expired VOD media, resourceId={}, vodFileId={}", resourceId, vodFileId);
+            } catch (Exception e) {
+                log.warn("Failed to delete expired VOD media, resourceId={}, vodFileId={}",
+                        resourceId, vodFileId, e);
+            }
+        } else {
+            log.info("Expired VOD resource has no vodFileId, skip VOD media delete, resourceId={}", resourceId);
+        }
+
+        // 4. 删除视频元数据
+        try {
+            int deleted = videoMetaMapper.deleteById(resourceId);
+            log.info("Deleted expired video meta, resourceId={}, deleted={}", resourceId, deleted);
+        } catch (Exception e) {
+            log.warn("Failed to delete expired video meta, resourceId={}", resourceId, e);
+        }
+    }
+
 }
