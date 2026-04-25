@@ -178,13 +178,8 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public LoginResult refreshToken(@RequestParam("refreshToken") String refreshToken) {
         log.info("接收到刷新令牌请求");
-        try {
-            LoginResult loginResult = loginService.refreshToken(refreshToken);
-            return loginResult;
-        } catch (BusinessException e) {
-            log.warn("刷新令牌失败：{}", e.getMessage(), e);
-        }
-        return null;
+        LoginResult loginResult = loginService.refreshToken(refreshToken);
+        return loginResult;
     }
 
 }

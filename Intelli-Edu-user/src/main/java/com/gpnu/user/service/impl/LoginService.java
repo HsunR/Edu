@@ -85,6 +85,9 @@ public class LoginService {
 
         Long userId = Long.valueOf(jwtTokenProvider.getUserIdFromRefreshToken(refreshToken));
 
+        // 吊销旧的Refresh Token ，删除以userId为key的旧refresh token
+        jwtTokenProvider.invalidateRefreshToken(userId); //
+
         // 确保用户仍然存在且未被禁用/删除
         User user = iUserService.getById(userId);
         if (user == null || (user.getIsDeleted() != null && user.getIsDeleted() == 1)) {
@@ -93,11 +96,13 @@ public class LoginService {
         }
 
         // 生成新的Access Token和新的Refresh Token
-        String newAccessToken = jwtTokenProvider.generateAccessToken(userId, user.getUserType().getCode()); // 使用用户当前类型
-        String newRefreshToken = jwtTokenProvider.generateRefreshToken(userId); // 生成新的Refresh Token
+        String newAccessToken = jwtTokenProvider.generateAccessToken(userId, user.getUserType().getCode());
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(userId);
 
-        // 吊销旧的Refresh Token (从Redis删除旧的，新生成的已经存入Redis)
-        jwtTokenProvider.invalidateRefreshToken(userId); // 删除以userId为key的旧refresh token
+        //todo以后可以在这里加上通过用户状态（userStatus)表示用户是否被禁用
+//        if (user.getStatus() != null && user.getStatus() == 0) {
+//            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "用户已被禁用");
+//        }
 
         return new LoginResult(userId, user.getUserType(), newAccessToken, newRefreshToken);
     }
