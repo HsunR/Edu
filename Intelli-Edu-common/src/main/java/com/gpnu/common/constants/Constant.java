@@ -7,11 +7,12 @@ public final class Constant {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
-    public static final String REQUEST_ID_HEADER = "requestId";
-    public static final String REQUEST_FROM_HEADER = "x-request-from";
 
-    public static final String GATEWAY_ORIGIN_NAME = "gateway";
-    public static final String FEIGN_ORIGIN_NAME = "feign";
+
+    public static final String REQUEST_ID_HEADER = "X-Request-Id";
+
+
+    public static final String REQUEST_ID_MDC_KEY = "requestId";
 
     // 数据字段 - id
     public static final String DATA_FIELD_NAME_ID = "id";

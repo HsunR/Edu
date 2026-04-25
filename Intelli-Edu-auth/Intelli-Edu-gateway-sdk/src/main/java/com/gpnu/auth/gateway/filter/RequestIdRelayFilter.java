@@ -1,5 +1,6 @@
 package com.gpnu.auth.gateway.filter;
 
+import com.gpnu.auth.common.constants.AuthConstants;
 import com.gpnu.auth.gateway.config.AuthFilterProperties;
 import com.gpnu.auth.gateway.support.MdcContextLifter;
 import com.gpnu.common.constants.Constant;
@@ -34,7 +35,7 @@ public class RequestIdRelayFilter implements GlobalFilter, Ordered {
         exchange = exchange.mutate().request(builder -> {
             builder.header(Constant.REQUEST_ID_HEADER, requestId);
             if (!isSkipOriginPath(path)) {
-                builder.header(Constant.REQUEST_FROM_HEADER, Constant.GATEWAY_ORIGIN_NAME);
+                builder.header(AuthConstants.REQUEST_FROM_HEADER, AuthConstants.REQUEST_FROM_GATEWAY);
             }
         }).build();
 
@@ -43,7 +44,7 @@ public class RequestIdRelayFilter implements GlobalFilter, Ordered {
         // 4. 将 requestId 写入 Reactor Context，触发 MdcContextLifter 同步到 MDC
         return chain.filter(exchange)
                 .contextWrite(ctx -> ctx.put(
-                        MdcContextLifter.MDC_CONTEXT_PREFIX + Constant.REQUEST_ID_HEADER,
+                        MdcContextLifter.MDC_CONTEXT_PREFIX + Constant.REQUEST_ID_MDC_KEY,
                         requestId));
     }
 

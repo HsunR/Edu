@@ -38,17 +38,23 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         ServerHttpResponse response = exchange.getResponse();
         String path = request.getPath().value();
 
+        log.info("Gateway filter incoming request path: {}", path);
 
+        /*
+         * 先清理所有外部可能伪造的内部身份 Header。
+         */
         ServerHttpRequest sanitizedRequest = request.mutate()
-                .headers(h -> {
-                    h.remove(AuthConstants.USER_ID_HEADER);
-                    h.remove(AuthConstants.USER_TYPE_HEADER);
+                .headers(headers -> {
+                    headers.remove(AuthConstants.USER_ID_HEADER);
+                    headers.remove(AuthConstants.USER_TYPE_HEADER);
+                    headers.remove(AuthConstants.REQUEST_FROM_HEADER);
+                    headers.remove(AuthConstants.INTERNAL_TIMESTAMP_HEADER);
+                    headers.remove(AuthConstants.INTERNAL_SIGN_HEADER);
                 })
                 .build();
+
         exchange = exchange.mutate().request(sanitizedRequest).build();
         request = sanitizedRequest;
-
-        log.info("Gateway filter incoming request path: {}", path);
 
         // 1. 白名单路径直接放行
         if (isPathIgnored(path)) {
@@ -62,8 +68,11 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         if (authHeader == null || !authHeader.startsWith(AuthConstants.BEARER_PREFIX)) {
             log.warn("Missing or invalid Authorization header for path: {}", path);
             return GatewayResponseHelper.writeErrorResponse(
-                    response, HttpStatus.UNAUTHORIZED,
-                    ErrorCode.NOT_LOGIN_ERROR.getCode(), "缺少身份认证信息或格式错误");
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    ErrorCode.NOT_LOGIN_ERROR.getCode(),
+                    "缺少身份认证信息或格式错误"
+            );
         }
 
         String token = authHeader.substring(AuthConstants.BEARER_PREFIX_LENGTH);
@@ -73,36 +82,63 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无效或已过期的身份认证信息");
             }
 
-            // 3. 解析用户信息，传递到下游服务
+            // 3. 解析用户信息
             String userId = jwtTokenProvider.getUserIdFromAccessToken(token);
             Integer userType = jwtTokenProvider.getUserTypeFromAccessToken(token);
 
+            if (userId == null || userId.isBlank() || userType == null) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "身份认证信息不完整");
+            }
+
+            /*
+             * 4. 写入可信内部 Header，转发给下游服务。
+             *
+             * X-Request-From 只表示来源，不应单独作为安全依据。
+             * 后续加入内部签名后，下游应同时校验 X-Internal-Sign。
+             */
             ServerHttpRequest modifiedRequest = request.mutate()
-                    .header(AuthConstants.USER_ID_HEADER, userId)
-                    .header(AuthConstants.USER_TYPE_HEADER, userType.toString())
+                    .headers(headers -> {
+                        headers.set(AuthConstants.USER_ID_HEADER, userId);
+                        headers.set(AuthConstants.USER_TYPE_HEADER, userType.toString());
+                        headers.set(AuthConstants.REQUEST_FROM_HEADER, AuthConstants.REQUEST_FROM_GATEWAY);
+                    })
                     .build();
 
-            log.info("Request authenticated. User ID: {}, User Type: {}. Forwarding to downstream service.",
-                    userId, userType);
+            log.info(
+                    "Request authenticated. User ID: {}, User Type: {}. Forwarding to downstream service.",
+                    userId,
+                    userType
+            );
+
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
 
         } catch (BusinessException e) {
             log.error("JWT validation failed for path {}: {}", path, e.getMessage());
             return GatewayResponseHelper.writeErrorResponse(
-                    response, HttpStatus.UNAUTHORIZED,
-                    e.getCode(), e.getMessage());
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    e.getCode(),
+                    e.getMessage()
+            );
         } catch (Exception e) {
             log.error("Unexpected error during JWT validation for path {}: {}", path, e.getMessage(), e);
             return GatewayResponseHelper.writeErrorResponse(
-                    response, HttpStatus.UNAUTHORIZED,
-                    ErrorCode.SYSTEM_ERROR.getCode(), "身份认证失败，系统内部错误");
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    ErrorCode.SYSTEM_ERROR.getCode(),
+                    "身份认证失败，系统内部错误"
+            );
         }
     }
 
     /**
-     * 判断请求路径是否命中白名单
+     * 判断请求路径是否命中白名单。
      */
     private boolean isPathIgnored(String path) {
+        if (properties.getIgnorePaths() == null || properties.getIgnorePaths().isEmpty()) {
+            return false;
+        }
+
         for (String pattern : properties.getIgnorePaths()) {
             if (pathMatcher.match(pattern, path)) {
                 return true;

@@ -1,5 +1,6 @@
 package com.gpnu.common.config.mvc;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.gpnu.common.common.BaseResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.MethodParameter;
@@ -17,15 +18,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType,
+                            Class<? extends HttpMessageConverter<?>> converterType) {
         // 1. 如果已经是 BaseResponse，不包装
         if (BaseResponse.class.isAssignableFrom(returnType.getParameterType())) {
             return false;
         }
 
-        // 2. 如果是 Flux ，不包装，交给 Controller 自己处理
-        if (returnType.getParameterType() != null &&
-                returnType.getParameterType().getName().equals("reactor.core.publisher.Flux")) {
+        // 2. 如果是 Flux，不包装，交给 Controller 自己处理
+        if (returnType.getParameterType() != null
+                && returnType.getParameterType().getName().equals("reactor.core.publisher.Flux")) {
             return false;
         }
 
@@ -43,14 +45,12 @@ public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
         String path = request.getURI().getPath();
 
-        if (path.contains("/v2/api-docs")
-                || path.contains("/v3/api-docs")
-                || path.contains("/swagger")
-                || path.contains("/doc.html")) {
+        // Swagger / Knife4j / 内部 Feign 接口不包装
+        if (shouldSkipWrap(path, selectedContentType)) {
             return body;
         }
 
-        // 关键：SSE 响应不包装（text/event-stream）
+        // SSE 响应不包装
         if (MediaType.TEXT_EVENT_STREAM.includes(selectedContentType)) {
             return body;
         }
@@ -65,10 +65,10 @@ public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             return body;
         }
 
-
+        // String 类型需要特殊处理，否则会发生类型转换异常
         if (StringHttpMessageConverter.class.isAssignableFrom(selectedConverterType)) {
             try {
-                return com.fasterxml.jackson.databind.json.JsonMapper.builder()
+                return JsonMapper.builder()
                         .build()
                         .writeValueAsString(BaseResponse.success(body));
             } catch (Exception e) {
@@ -78,5 +78,17 @@ public class WrapperResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
         // 普通对象统一包装
         return BaseResponse.success(body);
+    }
+
+    /**
+     * 判断是否跳过统一响应包装。
+     */
+    private boolean shouldSkipWrap(String path, MediaType selectedContentType) {
+        return path.contains("/v2/api-docs")
+                || path.contains("/v3/api-docs")
+                || path.contains("/swagger")
+                || path.contains("/doc.html")
+                || path.contains("/inner/")
+                || MediaType.TEXT_EVENT_STREAM.includes(selectedContentType);
     }
 }

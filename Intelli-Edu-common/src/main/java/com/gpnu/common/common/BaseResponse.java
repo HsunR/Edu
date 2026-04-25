@@ -1,5 +1,6 @@
 package com.gpnu.common.common;
 
+import com.gpnu.common.constants.Constant;
 import com.gpnu.common.exception.ErrorCode;
 import lombok.Data;
 import org.slf4j.MDC;
@@ -103,6 +104,6 @@ public class BaseResponse<T> implements Serializable {
     }
 
     private String getCurrentRequestId() {
-        return MDC.get("requestId");
+        return MDC.get(Constant.REQUEST_ID_MDC_KEY);
     }
 }

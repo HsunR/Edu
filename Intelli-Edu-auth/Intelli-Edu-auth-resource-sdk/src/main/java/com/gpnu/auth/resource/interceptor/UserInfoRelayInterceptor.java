@@ -21,8 +21,12 @@ public class UserInfoRelayInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
-        String requestFrom = request.getHeader(Constant.REQUEST_FROM_HEADER);
-        if (!Constant.GATEWAY_ORIGIN_NAME.equals(requestFrom)) {
+        String requestFrom = request.getHeader(AuthConstants.REQUEST_FROM_HEADER);
+
+        boolean trustedSource = AuthConstants.REQUEST_FROM_GATEWAY.equals(requestFrom)
+                        || AuthConstants.REQUEST_FROM_FEIGN.equals(requestFrom);
+
+        if (!trustedSource) {
             return true;
         }
 
