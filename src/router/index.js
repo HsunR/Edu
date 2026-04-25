@@ -39,7 +39,7 @@ export const constantRoutes = [
   },
   {
     path: "/login",
-    component: () => import("@/views/loginNew"),
+    component: () => import("@/views/login/loginNew.vue"),
     hidden: true,
   },
   {
@@ -59,7 +59,7 @@ export const constantRoutes = [
     children: [
       {
         path: "/index",
-        component: () => import("@/views/index"),
+        component: () => import("@/views/home/index.vue"),
         name: "Index",
         meta: { title: "首页", icon: "dashboard", affix: true },
       },

@@ -4,7 +4,7 @@ import { Edit, Delete } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
 
@@ -13,6 +13,10 @@ interface ListItem {
   imgUrl: string
   name: string
 }
+
+import api from '@/temp/index.js';
+import axios from "axios";
+const { CourseController, coResourceController } = api;
 
 const loading = ref(true)
 const lists = ref<ListItem[]>([])
@@ -54,41 +58,122 @@ const courseFormRef = ref();
 
 const CourseForm = reactive({
   courseName: '',
-  courseDescribe: '',
-  courseCover: '',
+  description: '',
+  coverUrl: '',
+  categoryId: null,
+  isPublic: null
 })
 
 const addCourse = () => {
   isEdit.value = false
   dialogFormVisible.value = true
 }
-const editCourse = (id) => {
+const editCourse = async (id) => {
   console.log("编辑：", id);
   isEdit.value = true
   dialogFormVisible.value = true
+
+  // 获取课程详情
+  const res = await CourseController.courseDetail(id)
+  console.log(res.data)
+  const detail = res.data.data
+  if(res.data){
+    CourseForm.courseName = detail?.courseName
+    CourseForm.description = detail?.description
+    CourseForm.coverUrl = detail?.coverUrl
+    CourseForm.categoryId = detail?.categoryId
+    CourseForm.isPublic = detail?.isPublic
+    imageUrl.value = detail?.coverUrl
+  }else {
+    ElMessage.error("获取课程详情失败")
+  }
 }
 
 // 上传图片
 const imageUrl = ref('')
-// 上传成功返回url地址  response.url
-const handleUploadSuccess: UploadProps['onSuccess'] = (
-  response,
-  uploadFile
-) => {
-  imageUrl.value = URL.createObjectURL(uploadFile.raw!)
+
+const selectedFile = ref(null)
+const uploadStatus = ref('idle') // idle, uploading, confirming, success, error
+const errorMessage = ref('')
+const finalResource = ref({})
+// COS 上传完成后的访问地址
+const urlAccess = ref('')
+
+const resourceForm = reactive({
+  fileName: '',
+  fileSize: 0
+})
+const handleFileChange = async (file) => {
+  resourceForm.fileName = file.raw.name
+  resourceForm.fileSize = file.size
+  imageUrl.value = URL.createObjectURL(file.raw)
+  console.log("上传图片")
+  console.log(resourceForm.fileName, resourceForm.fileSize)
+
+  selectedFile.value = file.raw
 }
 
-const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
-  if (rawFile.size / 1024 / 1024 > 2) {
-    ElMessage.error('图片大小不能超过2MB!')
-    return false
+
+const handleUpload = ()=>{
+  uploadFileProcess(selectedFile.value)
+}
+
+// 完整上传流程
+const uploadFileProcess = async (file) => {
+  uploadStatus.value = 'uploading'
+  errorMessage.value = ''
+
+  try {
+    // 1: 调用预签名接口
+    const presignResponse = await coResourceController.uploadImagePresign(resourceForm)
+    console.log(presignResponse.data)
+
+    const presignData = presignResponse.data
+
+    if (!presignData || !presignData.uploadUrl) {
+      throw new Error('获取预签名URL失败')
+    }
+
+    const { resourceId, uploadUrl, accessUrl } = presignData
+    // 赋值给 创建课程表 中的封面url
+    CourseForm.coverUrl = accessUrl
+
+    // 2: 直传腾讯云 COS
+    await axios.put(uploadUrl, file, {
+      headers: {
+        'Content-Type': file.type
+      }
+    })
+
+    // 3: 确认上传完成
+    uploadStatus.value = 'confirming'
+
+    const confirmResponse = await coResourceController.uploadConfirm({
+      resourceId: resourceId,
+      accessUrl: accessUrl,
+      fileSize: file.size
+    })
+
+    // 上传成功
+    finalResource.value = confirmResponse.data
+    uploadStatus.value = 'success'
+
+  } catch (err) {
+    console.error(err)
+    errorMessage.value = err.response?.data?.message || err.message || '未知错误'
+    uploadStatus.value = 'error'
   }
-  return true
 }
 
+
+// 移除封面
 const handleRemove = () => {
   imageUrl.value = "";
-  CourseForm.courseCover = '';
+  CourseForm.coverUrl = '';
+  selectedFile.value = null
+  uploadStatus.value = 'idle'
+  errorMessage.value = ''
+  finalResource.value = {}
 }
 
 // 跳转课程详情页
@@ -107,6 +192,29 @@ const toggleOverlay = (index, isShow) => {
 const handleDelete = (id) => {
   console.log("删除：", id);
 };
+const open = (id) => {
+  ElMessageBox.confirm(
+      '确认删除该课程吗?',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+  )
+      .then(() => {
+        handleDelete(id)
+        ElMessage({
+          type: 'success',
+          message: '删除成功',
+        })
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '删除失败',
+        })
+      })
+}
 
 const handleCancle = () => {
   dialogFormVisible.value = false
@@ -116,15 +224,15 @@ const handleCancle = () => {
 const handleSubmit = () => {
   courseFormRef.value.validate(async (valid) => {
     if (valid) {
-      // const res = isEdit.value ? await editCourse() : await addCourse()
-      // console.log(res)
-      // if(res.data.data){
-      //   ElMessage.success(isEdit.value ? '修改成功' : '新增成功')
-      //   dialogFormVisible.value = false
-      //   resetForm()
-      // }else {
-      //   ElMessage.error(isEdit.value ? '修改失败' : '新增失败')
-      // }
+      const res = isEdit.value ? await CourseController.updateCourse(CourseForm) : await CourseController.createCourse(CourseForm)
+      console.log(res)
+      if(res.data.data){
+        ElMessage.success(isEdit.value ? '修改成功' : '新增成功')
+        dialogFormVisible.value = false
+        resetForm()
+      }else {
+        ElMessage.error(isEdit.value ? '修改失败' : '新增失败')
+      }
 
     } else {
       ElMessage.error('请填写完整')
@@ -137,7 +245,14 @@ const handleSubmit = () => {
 const resetForm = () => {
   courseFormRef.value?.resetFields();
   imageUrl.value = '';
+  CourseForm.coverUrl = '';
+  selectedFile.value = null
+  uploadStatus.value = 'idle'
+  errorMessage.value = ''
+  finalResource.value = {}
 };
+
+
 </script>
 
 <template>
@@ -184,11 +299,12 @@ const resetForm = () => {
                     <Edit />
                   </el-icon>编辑
                 </el-button>
-                <el-button type="danger" round @click="handleDelete(item.id)" style="width: 6vh;">
+                <el-button type="danger" @click="open(item.id)" round style="width: 6vh;">
                   <el-icon>
                     <Delete />
                   </el-icon>删除
                 </el-button>
+
               </div>
             </el-card>
           </div>
@@ -204,19 +320,50 @@ const resetForm = () => {
         <el-form-item label="课程名字" prop="courseName" :label-width="formLabelWidth">
           <el-input v-model="CourseForm.courseName" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="课程封面" prop="courseCover" :label-width="formLabelWidth">
-          <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-            :show-file-list="false" :on-success="handleUploadSuccess" :before-upload="beforeUpload">
+        <el-form-item label="课程封面" prop="coverUrl" :label-width="formLabelWidth">
+          <el-upload
+              class="avatar-uploader"
+              action=""
+              :auto-upload="false"
+              :on-change="handleFileChange"
+              :show-file-list="false"
+              :limit="1">
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon">
               <Plus />
             </el-icon>
-            <el-button v-if="imageUrl" @click.stop="handleRemove">删除图片</el-button>
+            <el-button v-if="imageUrl" @click.stop="handleRemove">删除封面</el-button>
+            <el-button v-if="imageUrl" @click.stop="handleUpload">上传封面</el-button>
           </el-upload>
+          <!-- 状态显示 -->
+          <div v-if="uploadStatus === 'uploading'" class="status">
+            正在上传到云端...
+          </div>
+          <div v-if="uploadStatus === 'confirming'" class="status">
+            正在确认资源...
+          </div>
+          <div v-if="uploadStatus === 'success'" class="status">
+            上传成功！
+          </div>
+          <div v-if="uploadStatus === 'error'" class="error">
+            上传失败: {{ errorMessage }}
+          </div>
         </el-form-item>
 
-        <el-form-item label="课程详细描述" prop="courseDescribe" :label-width="formLabelWidth">
-          <el-input v-model="CourseForm.courseDescribe" autocomplete="off" type="textarea" />
+
+        <el-form-item label="课程详细描述" prop="description" :label-width="formLabelWidth">
+          <el-input v-model="CourseForm.description" autocomplete="off" type="textarea" />
+        </el-form-item>
+
+        <el-form-item label="课程分类ID" prop="categoryId" :label-width="formLabelWidth">
+          <el-input v-model="CourseForm.categoryId" autocomplete="off" />
+        </el-form-item>
+
+        <el-form-item label="课程是否公开" prop="isPublic" :label-width="formLabelWidth">
+          <el-select v-model="CourseForm.isPublic" filterable placeholder="请选择">
+            <el-option label="私有" value="0" />
+            <el-option label="公开" value="1" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -271,5 +418,15 @@ const resetForm = () => {
 
 .gradient-btn {
   color: #fff;
+}
+
+.status {
+  margin-top: 15px;
+  color: #007bff;
+  font-weight: bold;
+}
+.error {
+  margin-top: 15px;
+  color: #dc3545;
 }
 </style>

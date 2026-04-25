@@ -7,7 +7,7 @@ export async function login(
   body: API.LoginRequest,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseLoginResult>(`/user/auth/login`, {
+  return request<API.BaseResponseLoginResult>(`user/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,7 +22,7 @@ export async function sendLoginCode(
   body: API.SendLoginCodeRequest,
   options?: { [key: string]: any }
 ) {
-  return request<any>(`/user/auth/login/send-code`, {
+  return request<any>(`user/auth/login/send-code`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export async function sendLoginCode(
 
 /** 用户注销 POST /auth/logout */
 export async function logout(options?: { [key: string]: any }) {
-  return request<any>(`/user/auth/logout`, {
+  return request<any>(`user/auth/logout`, {
     method: "POST",
     ...(options || {}),
   });
@@ -46,7 +46,7 @@ export async function refreshToken(
   params: API.refreshTokenParams,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseLoginResult>(`/user/auth/refresh-token`, {
+  return request<API.BaseResponseLoginResult>(`user/auth/refresh-token`, {
     method: "POST",
     params: {
       ...params,
@@ -60,7 +60,7 @@ export async function register(
   body: API.RegisterRequest,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseBoolean>(`/user/auth/register`, {
+  return request<API.BaseResponseBoolean>(`user/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export async function sendRegisterCode(
   body: API.SendRegisterCodeRequest,
   options?: { [key: string]: any }
 ) {
-  return request<any>(`/user/auth/register/send-code`, {
+  return request<any>(`user/auth/register/send-code`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

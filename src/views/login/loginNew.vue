@@ -34,8 +34,8 @@
 
           <!-- 验证码 -->
           <el-form-item v-if="loginForm.loginType === 1 || loginForm.loginType === 2" prop="code">
-            <el-input v-model="loginForm.code" class="form_input" placeholder="请输入验证码" style="width: 200px;" />
-            <el-button type="primary" style="margin-left: 10px; width: 140px;" @click="LoginCode"
+            <el-input v-model="loginForm.code" class="form_input" placeholder="请输入验证码" style="width: 230px;" />
+            <el-button type="primary" style="margin-left: 10px; width: 160px;" @click="LoginCode"
               :disabled="codeButtonDisabled">
               {{ codeButtonText }}
             </el-button>
@@ -70,9 +70,19 @@
           @submit.prevent="handleRegister">
           <h2 class="form_title title">注册</h2>
 
-          <!-- 用户名 -->
           <el-form-item prop="name">
-            <el-input v-model="registerForm.name" class="form_input" placeholder="用户名" :prefix-icon="User" />
+            <el-input v-model="registerForm.name" class="form_input" placeholder="姓名" :prefix-icon="User" />
+          </el-form-item>
+
+          <!-- 密码 -->
+          <el-form-item prop="password">
+            <el-input v-model="registerForm.password" class="form_input" type="password" placeholder="密码"
+                      :prefix-icon="Lock" show-password />
+          </el-form-item>
+
+          <!--    学号      -->
+          <el-form-item prop="studentNo">
+            <el-input v-model="registerForm.studentNo" class="form_input" placeholder="学号" :prefix-icon="Tickets" />
           </el-form-item>
 
           <!-- 手机号码注册 v-if="registerForm.registerType === 1"-->
@@ -85,19 +95,25 @@
             <el-input v-model="registerForm.email" class="form_input" placeholder="邮箱" :prefix-icon="Message" />
           </el-form-item>
 
-          <!-- 密码 -->
-          <el-form-item prop="password">
-            <el-input v-model="registerForm.password" class="form_input" type="password" placeholder="密码"
-              :prefix-icon="Lock" show-password />
-          </el-form-item>
-
           <!-- 验证码 -->
           <el-form-item prop="code" v-if="registerForm.registerType === 1 || registerForm.registerType === 2">
-            <el-input v-model="registerForm.code" class="form_input" placeholder="请输入验证码" style="width: 200px;" />
-            <el-button type="primary" style="margin-left: 10px;  width: 140px;" @click="RegisterCode"
+            <el-input v-model="registerForm.code" class="form_input" placeholder="请输入验证码" style="width: 230px;" />
+            <el-button type="primary" style="margin-left: 10px;  width: 160px;" @click="RegisterCode"
               :disabled="codeButtonDisabledRegister">
               {{ codeButtonTextRegister }}
             </el-button>
+          </el-form-item>
+
+          <el-form-item prop="major">
+            <el-input v-model="registerForm.major" class="form_input" placeholder="专业" />
+          </el-form-item>
+
+          <el-form-item prop="grade">
+            <el-input v-model="registerForm.grade" class="form_input" placeholder="年级" />
+          </el-form-item>
+
+          <el-form-item prop="school">
+            <el-input v-model="registerForm.school" class="form_input" placeholder="学校" />
           </el-form-item>
 
           <span class="form_span">选择注册方式</span>
@@ -111,9 +127,6 @@
             </el-icon>
             <el-icon class="iconfont" @click="registerByWechat">
               <svg-icon icon-class="wechat" class="el-input__icon input-icon" />
-            </el-icon>
-            <el-icon class="iconfont" @click="registerByUser">
-              <User />
             </el-icon>
           </div>
 
@@ -143,13 +156,13 @@
 </template>
 
 <script setup>
-import api from '@/services/user/user/index.js';
+// import api from '@/services/user/user/index.js';
+import api from '@/temp/index.js';
 const { userController,authController } = api;
-// import api from '@/temp/index';
 
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import useUserStore from '@/store/modules/user'
+import useUserStore from '@/store/modules/user.js'
 import { onMounted } from 'vue'
 
 const router = useRouter()
@@ -164,8 +177,10 @@ import {
   User,
   Message,
   Iphone,
-  Lock
+  Lock,
+  Tickets
 } from '@element-plus/icons-vue'
+import {ElMessage} from "element-plus";
 
 // 显示登录页面
 const isLoginVisible = ref(true)
@@ -179,19 +194,21 @@ const loginForm = reactive({
   "password": "",
   "mobile": "",
   "email": "",
-  "code": "",
-  "openId": ""
+  "code": ""
 })
 
 const registerForm = reactive({
   "name": "",
-  "userId": "",
+  "studentNo": "",
   "password": "",
-  "registerType": 2,
+  "registerType": 1,
   "mobile": "",
   "email": "",
   "code": "",
-  "version": 1
+  "grade": "",
+  "major": "",
+  "enrollmentYear": "",
+  "school": ""
 })
 
 // 加载状态
@@ -209,12 +226,13 @@ const countdownRegister = ref(60)
 
 const loginByPhone = () => {
   loginForm.loginType = 1
+  ElMessage.info('已切换为手机号登录')
 }
 
 const loginByEmail = () => {
   loginForm.loginType = 2
+  ElMessage.info('已切换为邮箱登录')
 }
-
 
 const loginByWeChat = () => {
   loginForm.loginType = 3
@@ -223,23 +241,22 @@ const loginByWeChat = () => {
 
 const loginByUser = () => {
   loginForm.loginType = 4
-}
-
-const registerByEmail = () => {
-  registerForm.registerType = 2
+  ElMessage.info('已切换为用户名密码登录')
 }
 
 const registerByPhone = () => {
   registerForm.registerType = 1
+  ElMessage.info('已切换为手机号注册')
+}
+
+const registerByEmail = () => {
+  registerForm.registerType = 2
+  ElMessage.info('已切换为邮箱注册')
 }
 
 const registerByWechat = () => {
   registerForm.registerType = 3
   ElMessage.info('微信注册功能尚未开发')
-}
-
-const registerByUser = () => {
-  registerForm.registerType = 4
 }
 
 // 确保切换函数正确切换状态
@@ -282,7 +299,7 @@ const loginRules = reactive({
     {
       min: 6,
       max: 20,
-      message: '密码长度在6到20个字符之间',
+      message: '密码必须包含字母、数字和特殊字符且长度在6到20之间',
       trigger: 'blur'
     }
   ],
@@ -302,8 +319,8 @@ const registerRules = reactive({
       trigger: 'blur'
     }
   ],
-  userId: [
-    { required: true, message: '请输入用户ID', trigger: 'blur' }
+  studentNo: [
+    { required: true, message: '请输入学号', trigger: 'blur' }
   ],
   mobile: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
@@ -326,7 +343,7 @@ const registerRules = reactive({
     {
       min: 6,
       max: 20,
-      message: '密码长度在6到20个字符之间',
+      message: '密码必须包含字母、数字和特殊字符且长度在6到20之间',
       trigger: 'blur'
     }
   ],
@@ -337,11 +354,11 @@ const registerRules = reactive({
 
 // 发送登录验证码
 const LoginCode = async () => {
-  if (loginForm.loginType === 1) {
-    ElMessage.info('通过手机号获取验证码还未实现')
-  }
+  // if (loginForm.loginType === 1) {
+  //   ElMessage.info('通过手机号获取验证码还未实现')
+  // }
   // 获取验证码(邮箱)
-  if (loginForm.loginType === 2) {
+  if (loginForm.loginType === 1 || loginForm.loginType === 2) {
     const data = {
       "loginType": loginForm.loginType,
       "mobile": loginForm.mobile,
@@ -349,7 +366,7 @@ const LoginCode = async () => {
     }
     const res = await authController.sendLoginCode(data)
     console.log(res)
-    if (res.data === '') {
+    if (!res.data.data || res.data.data === "" || res.data.message === 'ok') {
       // 倒计时
       codeButtonDisabled.value = true
       codeButtonText.value = `${countdown.value}秒后重新获取`
@@ -375,19 +392,20 @@ const LoginCode = async () => {
 
 // 发送注册验证码
 const RegisterCode = async () => {
-  if (registerForm.registerType === 1) {
-    ElMessage.info('通过手机号获取验证码还未实现')
-  }
-  // 获取验证码(邮箱)
-  if (registerForm.registerType === 2) {
+  // if (registerForm.registerType === 1) {
+  //   ElMessage.info('通过手机号获取验证码还未实现')
+  // }
+  // 获取验证码
+  if (registerForm.registerType === 1 || registerForm.registerType === 2) {
     const data = {
       "registerType": registerForm.registerType,
       "mobile": registerForm.mobile,
       "email": registerForm.email
     }
     const res = await authController.sendRegisterCode(data)
+    console.log(res)
 
-    if (!res.data || res.data === "") {
+    if (!res.data.data || res.data.data === "" || res.data.message === 'ok') {
       // 倒计时
       codeButtonDisabledRegister.value = true
       codeButtonTextRegister.value = `${countdownRegister.value}秒后重新获取`
@@ -443,7 +461,7 @@ const handleRegister = () => {
       try {
         const res = await authController.register(registerForm)
         console.log('注册结果:', res)
-        if (res.data.data) {
+        if (res.data.message === 'ok') {
           ElMessage.success('注册成功')
           // 注册成功后，跳转到登录页
           isLoginVisible.value = true
@@ -487,15 +505,16 @@ const resetForm = () => {
 
 .shell {
   position: relative;
-  width: 1000px;
-  min-width: 1000px;
-  min-height: 700px;
+  width: 1100px;
+  min-width: 1100px;
+  min-height: 850px;
   height: 700px;
   padding: 25px;
   background-color: #ecf0f3;
   box-shadow: 10px 10px 10px 10px #d1d9e6;
   border-radius: 12px;
   overflow: hidden;
+  transform: scale(0.8);
 }
 
 /* 响应式 */
@@ -557,8 +576,9 @@ const resetForm = () => {
 
 .iconfont:hover {
   opacity: 1;
-  transition: 0.15s;
+  transition: 0.25s;
   cursor: pointer;
+  transform: scale(1.2);
 }
 
 ::v-deep .el-input__wrapper {
@@ -581,7 +601,7 @@ const resetForm = () => {
 }
 
 .form_input {
-  width: 350px;
+  width: 400px;
   height: 40px;
   margin: 4px 0;
   padding-left: 25px;
@@ -595,6 +615,8 @@ const resetForm = () => {
   margin-top: 30px;
   margin-bottom: 12px;
   font-size: 16px;
+  color: #2d2d2d;
+  font-weight: 600;
 }
 
 .form_link {
@@ -614,14 +636,16 @@ const resetForm = () => {
 }
 
 .description {
-  font-size: 14px;
+  font-size: 18px;
   letter-spacing: 0.25px;
   line-height: 1.6;
   text-align: center;
+  color: #2d2d2d;
+  font-weight: 600;
 }
 
 .button {
-  width: 180px;
+  width: 200px;
   height: 50px;
   border-radius: 25px;
   margin-top: 30px;

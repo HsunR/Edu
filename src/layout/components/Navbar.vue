@@ -9,8 +9,7 @@
       <template v-if="appStore.device !== 'mobile'">
         <!-- 邀请码 -->
         <div class="invite right-menu-item">
-          <PlusCircleTwoTone />
-          <span>邀请码</span>
+          <span @click="inviteFormVisible = true">输入邀请码</span>
         </div>
 
         <header-search id="header-search" class="right-menu-item" />
@@ -25,8 +24,9 @@
 
       <el-dropdown @command="handleCommand" class="avatar-container right-menu-item hover-effect" trigger="hover">
         <div class="avatar-wrapper">
-          <img :src="headPortrait" class="user-avatar" />
-          <span class="user-nickname"> {{ userStore.name }} </span>
+          <el-avatar v-if="userStore.username" class="user-avatar"> {{ userStore.username }} </el-avatar>
+
+          <el-avatar v-else class="user-avatar" :icon="UserFilled"/>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -40,11 +40,25 @@
         </template>
       </el-dropdown>
     </div>
+
+    <el-dialog v-model="inviteFormVisible" title="请输入邀请码" width="45%" center :before-close="handleCancel" style="border-radius: 20px;">
+      <el-form :model="inviteForm">
+        <el-form-item>
+          <el-input v-model="inviteForm.inviteCode" autocomplete="off" placeholder="请输入课程邀请码" style="margin: 10px 50px;height: 40px;line-height: 40px; border-radius: 20px;"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button color="#626aef" plain round @click="handleCancel" style="margin-right: 50px;width: 10vw;">取 消</el-button>
+          <el-button color="#626aef" round @click="submitForm" style="width: 10vw;">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ElMessageBox } from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import Breadcrumb from '@/components/Breadcrumb'
 import TopNav from '@/components/TopNav'
 import Hamburger from '@/components/Hamburger'
@@ -53,14 +67,17 @@ import useAppStore from '@/store/modules/app'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
 
-import {
-  PlusCircleTwoTone
-} from '@ant-design/icons-vue';
+
 const appStore = useAppStore()
 const userStore = useUserStore()
 const settingsStore = useSettingsStore()
 
-const headPortrait = ref(localStorage.getItem("headPortrait")) || ref("")
+const headPortrait = ref("")
+
+import api from '@/temp/index.js';
+const { ClassController } = api;
+
+import { UserFilled } from '@element-plus/icons-vue'
 
 function toggleSideBar() {
   appStore.toggleSideBar()
@@ -80,7 +97,7 @@ function handleCommand(command) {
 }
 
 function logout() {
-  ElMessageBox.confirm('确定注销并退出系统吗？', '提示', {
+  ElMessageBox.confirm('确定退出系统吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
@@ -98,6 +115,26 @@ function setLayout() {
 
 function toggleTheme() {
   settingsStore.toggleTheme()
+}
+
+// 输入邀请码加入班级
+const inviteFormVisible = ref(false)
+const inviteForm = ref({
+  inviteCode: ""
+})
+const submitForm = () => {
+  const res = ClassController.joinClassByInvite(inviteForm.value)
+  if(res.data.data){
+    ElMessage.success('加入成功')
+    dialogFormVisible.value = false
+    inviteForm.value = {inviteCode: ""}
+  }else {
+    ElMessage.error('加入失败')
+  }
+}
+const handleCancel =()=>{
+  inviteFormVisible.value = false
+  inviteForm.value = {inviteCode: ""}
 }
 </script>
 

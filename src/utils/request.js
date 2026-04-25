@@ -5,7 +5,9 @@ import errorCode from '@/utils/errorCode'
 import { tansParams, blobValidate } from '@/utils/ruoyi'
 import { saveAs } from 'file-saver'
 import useUserStore from '@/store/modules/user'
+import JSONbig from 'json-bigint';
 
+const JSONbigString = JSONbig({ storeAsString: true });
 let downloadLoadingInstance
 // 是否显示重新登录
 export let isRelogin = { show: false }
@@ -13,7 +15,16 @@ export let isRelogin = { show: false }
 // 创建axios实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
-  timeout: 10000
+  timeout: 10000,
+  transformResponse: [
+    function (data) {
+      try {
+        return JSONbigString.parse(data);
+      } catch (err) {
+        return data;
+      }
+    }
+  ]
 })
 
 // request拦截器
@@ -31,7 +42,7 @@ service.interceptors.request.use(config => {
 
   if (getToken() && !isToken) {
     config.headers['Authorization'] = 'Bearer ' + getToken() 
-    console.log(getToken())
+    // console.log(getToken())
   }
   // get请求映射params参数
   // if (config.method === 'get' && config.params) {

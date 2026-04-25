@@ -31,32 +31,3 @@ export async function getUserInfo(
   });
 }
 
-/** 多条件查询 多条件查询 POST /user/list */
-export async function listUsers(
-  body: API.UsUserQueryRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponsePageUsUserVO>(`/user/list`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 更新用户信息 根据用户ID更新用户信息 POST /user/update */
-export async function updateUserInfo(
-  body: API.UsUserUpdateRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseUsUserVO>(`/user/update`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
-}

@@ -1,8 +1,8 @@
 {
-  "name": "智慧在线学习平台",
+  "name": "智慧教育平台",
   "version": "3.9.0",
-  "description": "智慧在线学习平台",
-  "author": "智慧在线学习平台",
+  "description": "智慧教育平台",
+  "author": "智慧教育平台",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -32,6 +32,7 @@
     "js-beautify": "1.14.11",
     "js-cookie": "3.0.5",
     "jsencrypt": "3.3.2",
+    "json-bigint": "^1.0.0",
     "marked": "^16.0.0",
     "moment": "^2.30.1",
     "nprogress": "0.2.0",

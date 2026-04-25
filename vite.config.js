@@ -60,12 +60,20 @@ export default defineConfig(({ mode, command }) => {
           target: "http://localhost:8896",
           changeOrigin: true,
         },
-        "/api/user": {
+        "/api/user/users": {
           target: "http://localhost:8891",
           changeOrigin: true,
         },
-        "/api/resource": {
-          target: "http://localhost:8890",
+        "/api/user/auth": {
+          target: "http://localhost:8891",
+          changeOrigin: true,
+        },
+        "/api/resource/resources": {
+          target: "http://localhost:8892",
+          changeOrigin: true,
+        },
+        "/api/course": {
+          target: "http://localhost:8893",
           changeOrigin: true,
         },
       },

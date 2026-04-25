@@ -2,47 +2,73 @@
 /* eslint-disable */
 import request from "../utils/request";
 
-/** 上传文档 POST /coresource/upload/document */
-export async function uploadDocument(data) {
-  return request<API.BaseResponseCoResourceVO>({
-    url: `/resource/coresource/upload/document`,
-    method: "POST",
-    headers: {
-      "Content-Type": "multipart/form-data",
-      },
-    data
-  });
+/** 生成图片资源的预签名URL  */
+export async function uploadImagePresign(data) {
+    return request({
+        url: `/resource/resources/presign/image`,
+        method: "POST",
+        data
+    });
 }
 
-/** 上传图片 POST /coresource/upload/picture */
-export async function uploadPicture(
-  body: {},
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseUploadPictureResult>(
-    `/resource/coresource/upload/picture`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      data: body,
-      ...(options || {}),
-    }
-  );
+/** 生成文档资源的预签名URL  */
+export async function uploadDocumentPresign(data) {
+    return request({
+        url: `/resource/resources/presign/document`,
+        method: "POST",
+        data
+    });
 }
 
-/** 上传视频 POST /coresource/upload/video */
-export async function uploadVideo(body: {}, options?: { [key: string]: any }) {
-  return request<API.BaseResponseCoResourceVO>(
-    `/resource/coresource/upload/video`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      data: body,
-      ...(options || {}),
-    }
-  );
+/** 生成视频资源的预签名URL  */
+export async function uploadVideoPresign(data) {
+    return request({
+        url: `/resource/resources/presign/video`,
+        method: "POST",
+        data
+    });
+}
+
+
+/** 确认资源上传完成  */
+export async function uploadConfirm(data) {
+    return request({
+        url: `/resource/resources/confirm`,
+        method: "POST",
+        data
+    });
+}
+
+/** 确认视频资源上传完成  */
+export async function uploadConfirmVideo(data) {
+    return request({
+        url: `/resource/resources/confirm/video`,
+        method: "POST",
+        data
+    });
+}
+
+/** 获取资源详情  */
+export async function getResource(resourceId) {
+    return request({
+        url: `/resource/resources/${resourceId}`,
+        method: "get"
+    });
+}
+
+/** 分页查询我的资源  */
+export async function getResourceList(data) {
+    return request({
+        url: `/resource/resources`,
+        method: "get",
+        data
+    });
+}
+
+/** 删除资源  */
+export async function deleteResource(resourceId) {
+    return request({
+        url: `/resource/resources/${resourceId}`,
+        method: "delete"
+    });
 }
