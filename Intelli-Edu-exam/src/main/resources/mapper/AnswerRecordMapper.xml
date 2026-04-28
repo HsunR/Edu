@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gpnu.exam.exam.mapper.AnswerRecordMapper">
+    <resultMap id="BaseResultMap" type="com.gpnu.exam.exam.model.entity.AnswerRecord">
+        <id property="recordId" column="record_id"/>
+        <result property="sheetId" column="sheet_id"/>
+        <result property="questionId" column="question_id"/>
+        <result property="answerContent" column="answer_content"/>
+        <result property="score" column="score"/>
+        <result property="isCorrect" column="is_correct"/>
+        <result property="gradingStatus" column="grading_status"/>
+        <result property="graderId" column="grader_id"/>
+        <result property="comment" column="comment"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        record_id, sheet_id, question_id, answer_content, score,
+        is_correct, grading_status, grader_id, comment,
+        is_deleted, created_at, updated_at
+    </sql>
+</mapper>

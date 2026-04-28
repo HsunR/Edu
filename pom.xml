@@ -19,6 +19,7 @@
         <module>Intelli-Edu-user</module>
         <module>Intelli-Edu-resource</module>
         <module>Intelli-Edu-course</module>
+        <module>Intelli-Edu-exam</module>
         <module>Intelli-Edu-api</module>
         <module>Intelli-Edu-auth</module>
     </modules>

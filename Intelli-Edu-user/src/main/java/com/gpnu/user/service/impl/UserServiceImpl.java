@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+
 import com.gpnu.api.dto.user.UserAuthDTO;
 import com.gpnu.api.dto.user.UserSimpleDTO;
 import com.gpnu.auth.common.constants.AuthConstants;
@@ -62,6 +63,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private PasswordEncoder passwordEncoder;
+
+
 
 
     @Override
