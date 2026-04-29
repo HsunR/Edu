@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { marked } from 'marked';
-import api from '@/temp/ai/index'
+import api from '@/api/ai/index'
 const {
   fileUploadController,
   chatListController,

@@ -14,7 +14,7 @@ interface ListItem {
   name: string
 }
 
-import api from '@/temp/index.js';
+import api from '@/api';
 import axios from "axios";
 const { CourseController, coResourceController } = api;
 
@@ -96,8 +96,6 @@ const selectedFile = ref(null)
 const uploadStatus = ref('idle') // idle, uploading, confirming, success, error
 const errorMessage = ref('')
 const finalResource = ref({})
-// COS 上传完成后的访问地址
-const urlAccess = ref('')
 
 const resourceForm = reactive({
   fileName: '',

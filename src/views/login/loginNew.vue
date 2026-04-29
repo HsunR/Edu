@@ -157,7 +157,7 @@
 
 <script setup>
 // import api from '@/services/user/user/index.js';
-import api from '@/temp/index.js';
+import api from '@/api/index.ts';
 const { userController,authController } = api;
 
 import { ref, reactive } from 'vue'

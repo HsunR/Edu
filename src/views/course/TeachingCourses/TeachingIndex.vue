@@ -12,8 +12,10 @@ import {
   FundProjectionScreenOutlined,
   FolderOpenOutlined,
   BookOutlined,
-  RadarChartOutlined
+  RadarChartOutlined,
+  SettingOutlined
 } from '@ant-design/icons-vue';
+
 onMounted(() => {
   console.log(route.params.id)
 })
@@ -65,6 +67,10 @@ const handleClick = menuInfo => {
         <a-menu-item key="/KnowledgePointsTeaching" style="height: 50px; line-height: 50px;">
           <RadarChartOutlined />
           <span>知识点</span>
+        </a-menu-item>
+        <a-menu-item key="/SettingManagementTeaching" style="height: 50px; line-height: 50px;">
+          <SettingOutlined />
+          <span>管理</span>
         </a-menu-item>
       </a-menu>
     </div>

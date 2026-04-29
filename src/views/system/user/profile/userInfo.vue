@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import api from '@/temp/index';
+import api from '@/api/index.js';
 const { userController } = api;
 
 import { ElMessage } from "element-plus"

@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import api from '@/temp/index';
+import api from '@/api/index.js';
 // import api from '@/services/user/user/index.js';
 const { userController } = api;
 

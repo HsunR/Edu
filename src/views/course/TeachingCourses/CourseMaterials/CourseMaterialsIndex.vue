@@ -3,7 +3,10 @@ import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useRoute, useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
-import { uploadDocument } from '@/temp/resource'
+import api from '@/api/index.ts';
+import axios from "axios";
+const { coResourceController } = api;
+
 const route = useRoute()
 const router = useRouter()
 
@@ -127,6 +130,7 @@ const handleRemoveDocument = () => {
   DocumentUrl.value = '';
 };
 
+// 上传
 const customUpload = async (options) => {
   const form = new FormData();
   const courseId = route.params.id

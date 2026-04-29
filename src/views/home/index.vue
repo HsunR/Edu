@@ -14,7 +14,7 @@ const userStore = useUserStore()
 // 2. 使用 storeToRefs 解构
 const { loginUserInfo, userInfo } = storeToRefs(userStore)
 
-import api from '@/temp/index.js';
+import api from '@/api/index.ts';
 const { userController } = api;
 
 onMounted(async () => {

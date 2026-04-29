@@ -14,6 +14,18 @@ type Data = RenderContentContext['data']
 
 let id = 1000
 
+const filterText = ref('')
+const treeRef = ref()
+
+watch(filterText, (val) => {
+  treeRef.value.filter(val)
+})
+
+const filterNode = (value, data) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
+
 const append = (data: Data) => {
   const newChild = { id: id++, label: 'testtest', children: [] }
   if (!data.children) {
@@ -97,9 +109,19 @@ const dataSource = ref<Tree[]>([
       </template>
 
       <div class="custom-tree-container">
-        <el-button class="gradient-btn" round style="color: #fff; margin-bottom: 10px;">新建目录</el-button>
-        <el-tree style="max-width: 400px;border-right: 1px solid #eee;" :data="dataSource" node-key="id"
-          default-expand-all :expand-on-click-node="false">
+        <div class="top">
+          <el-button class="gradient-btn" round style="color: #fff; margin-bottom: 10px;">新建目录</el-button>
+          <div class="empty"></div>
+          <el-input
+              v-model="filterText"
+              placeholder="搜索"
+              class="input"
+              style="height: 5vh;"
+          />
+        </div>
+
+        <el-tree ref="treeRef" style="border-right: 1px solid #eee; padding: 20px;" :data="dataSource" node-key="id"
+          default-expand-all :expand-on-click-node="false" :filter-node-method="filterNode" >
           <template #default="{ node, data }">
             <div class="custom-tree-node">
               <span class="custom-node">
@@ -132,6 +154,10 @@ const dataSource = ref<Tree[]>([
   font-size: 14px;
   padding-right: 8px;
 
+  .custom-node{
+    width: 200px;
+  }
+
   .icon-parent {
     padding: 5px 8px;
     margin: 20px 10px;
@@ -139,10 +165,13 @@ const dataSource = ref<Tree[]>([
 
   .icon-cicle {
     background-color: orange;
-    padding: 5px 8px;
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    padding: 7px;
+    margin: 0 10px;
     border-radius: 60%;
-    margin: 10px;
-    font-size: 12px;
+    font-size: 10px;
     color: #f0f7ff;
   }
 }
@@ -150,7 +179,7 @@ const dataSource = ref<Tree[]>([
 
 .el-tree {
   --el-tree-node-hover-bg-color: #f5f7fa;
-  --el-tree-node-content-height: 50px;
+  --el-tree-node-content-height: 60px;
 }
 
 /* 单个树节点的样式 */
@@ -160,7 +189,25 @@ const dataSource = ref<Tree[]>([
 
 /* 节点内容区域（包含图标和文字） */
 .el-tree-node__content {
-  height: 50px;
-  line-height: 50px;
+  height: 60px;
+  line-height: 60px;
+}
+
+.top{
+  display: flex;
+  
+  .gradient-btn{
+    flex: 1;
+  }
+
+  .empty{
+    flex: 4;
+  }
+
+  .input{
+    flex: 2;
+    margin-top: 10px;
+  }
+  
 }
 </style>

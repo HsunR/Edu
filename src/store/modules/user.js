@@ -1,5 +1,5 @@
 import router from "@/router";
-import api from '@/temp/index';
+import api from '@/api/index.js';
 const { userController,authController } = api;
 
 import { getToken, setToken, removeToken } from "@/utils/auth";

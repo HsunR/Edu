@@ -74,7 +74,7 @@ const settingsStore = useSettingsStore()
 
 const headPortrait = ref("")
 
-import api from '@/temp/index.js';
+import api from '@/api/index.ts';
 const { ClassController } = api;
 
 import { UserFilled } from '@element-plus/icons-vue'

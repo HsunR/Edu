@@ -273,6 +273,16 @@ export const constantRoutes = [
             hidden: true,
             meta: { title: "题库管理" },
           },
+          {
+            path: "SettingManagementTeaching",
+            component: () =>
+                import(
+                    "@/views/course/TeachingCourses/SettingManagement/SettingManagementIndex.vue"
+                    ),
+            name: "SettingManagementTeaching",
+            hidden: true,
+            meta: { title: "管理" },
+          },
         ],
       },
       // 创建题目

@@ -158,8 +158,8 @@ const resetForm = () => {
           </el-scrollbar>
         </div>
 
-        <div class="right">
-          <div class="right-head" style="width:120vh;">
+        <div class="right" style="width:90vw;">
+          <div class="right-head" >
             <el-popover placement="top-start" :width="50" trigger="hover" content="邀请码">
               <template #reference>
                 <el-button :icon="Grid" class="right-head-btn"></el-button>

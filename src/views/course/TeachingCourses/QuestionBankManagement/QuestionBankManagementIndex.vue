@@ -100,7 +100,7 @@ const handleSelectionChange = (val) => {
 </script>
 
 <template>
-  <div>
+  <div >
     <el-card>
       <template #header>
         <div class="card-header">
@@ -145,7 +145,7 @@ const handleSelectionChange = (val) => {
       </template>
 
       <!-- 表格 -->
-      <el-table ref="exportContent" :data="list" height="500" border style="width: 100%"
+      <el-table ref="exportContent" :data="list" height="450" border style="width: 100%"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" prop="index" label="序号" width="120" align="center" />

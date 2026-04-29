@@ -63,7 +63,7 @@ import "vue-cropper/dist/index.css"
 import { VueCropper } from "vue-cropper"
 import useUserStore from "@/store/modules/user"
 
-import api from '@/temp/index';
+import api from '@/api/index.js';
 // import api from '@/services/user/user/index.js';
 const { userController,coResourceController } = api;
 
