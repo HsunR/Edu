@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request from "../utils/request";
+import request from "../../utils/request";
 
 /** 获取课程简要信息  */
 export async function getCoursesInfo(courseId) {

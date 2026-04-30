@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Open } from '@element-plus/icons-vue';
 import { ref, watch } from 'vue'
-import type { FilterNodeMethodFunction, TreeInstance } from 'element-plus'
+import {ElButton, FilterNodeMethodFunction, TreeInstance} from 'element-plus'
 
 // 完成任务点
 const CompletedPoints = ref(0)
@@ -19,7 +19,7 @@ const defaultProps = {
 }
 
 
-const data: Tree[] = [
+const dataSource: Tree[] = [
   {
     id: 1,
     label: 'Level one 1',
@@ -100,38 +100,38 @@ const handleNodeClick = (data: Tree) => {
             <el-breadcrumb-item>章节学习</el-breadcrumb-item>
           </el-breadcrumb>
 
-          <div class="finish">
-            <span>已完成任务点：{{ CompletedPoints }} / {{ TotalPoints }}</span>
-            <span><el-progress :text-inside="true" :stroke-width="20" :percentage="percentage" /></span>
-          </div>
+          <div class="top">
 
+            <div class="finish">
+              <span>已完成任务点：{{ CompletedPoints }} / {{ TotalPoints }}</span>
+              <span><el-progress :text-inside="true" :stroke-width="20" :percentage="percentage" /></span>
+            </div>
+
+            <div class="empty"></div>
+
+            <el-input v-model="filterText" placeholder="搜索" class="input">
+              <template #prefix>
+                <el-icon class="el-input__icon">
+                  <search />
+                </el-icon>
+              </template>
+            </el-input>
+          </div>
         </div>
       </template>
 
       <div class="chapter">
-        <div class="left">
-          <el-input v-model="filterText" style="max-width: 90vh;" placeholder="搜索">
-            <template #prefix>
-              <el-icon class="el-input__icon">
-                <search />
-              </el-icon>
-            </template>
-          </el-input>
-
-          <el-tree ref="treeRef" style="max-width: 600px" class="filter-tree" :data="data" :props="defaultProps"
-            default-expand-all :filter-node-method="filterNode" @node-click="handleNodeClick">
-            <template #default="{ node, data }">
-              <span class="custom-node">
-                <i v-if="data.children && data.children.length" class="icon-parent"></i>
-                <i class="icon-cicle" v-else>{{ node.id }}</i>
-                <span>{{ node.label }}</span>
-              </span>
-            </template>
-          </el-tree>
-        </div>
-        <div class="right">
-
-        </div>
+        <el-tree ref="treeRef" style="border-right: 1px solid #eee; padding: 20px;" :data="dataSource" node-key="id"
+                 default-expand-all :expand-on-click-node="false" :filter-node-method="filterNode" >
+          <template #default="{ node, data }">
+            <div class="custom-tree-node"><span class="custom-node">
+              <i v-if="data.children && data.children.length" class="icon-parent"></i>
+              <i class="icon-cicle" v-else>{{ node.id }}</i>
+              <span>{{ node.label }}</span>
+            </span>
+            </div>
+          </template>
+        </el-tree>
       </div>
 
     </el-card>
@@ -151,51 +151,71 @@ const handleNodeClick = (data: Tree) => {
   }
 }
 
-.chapter {
-  margin: 20px;
+.custom-tree-node {
+  flex: 1;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
 
-  .left {
-    width: 300px;
-    padding-right: 5px;
-    border-right: 1px solid #eee;
-
-    :deep(.filter-tree .el-tree-node__content) {
-      height: 60px;
-      line-height: 60px;
-      font-size: 16px;
-    }
-
-    :deep(.filter-tree .el-tree-node__content.special-node) {
-      height: 60px;
-      line-height: 60px;
-      background-color: #f0f7ff;
-    }
-
-    .icon-parent {
-      padding: 5px 8px;
-      margin: 20px 10px;
-    }
-
-    .icon-cicle {
-      background-color: orange;
-      padding: 5px 8px;
-      border-radius: 60%;
-      margin: 10px;
-      font-size: 12px;
-      color: #f0f7ff;
-    }
-
-
+  .custom-node{
+    width: 200px;
   }
 
+  .icon-parent {
+    padding: 5px 8px;
+    margin: 20px 10px;
+  }
+
+  .icon-cicle {
+    background-color: orange;
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    padding: 7px;
+    margin: 0 10px;
+    border-radius: 60%;
+    font-size: 10px;
+    color: #f0f7ff;
+  }
 }
 
 .el-progress {
   width: 100px;
 }
 
-.el-tree .el-tree-node {
-  padding-left: 0;
+
+.el-tree {
+  --el-tree-node-hover-bg-color: #f5f7fa;
+  --el-tree-node-content-height: 60px;
+}
+
+.el-tree-node {
+  padding: 5px 0;
+}
+
+.el-tree-node__content {
+  height: 60px;
+  line-height: 60px;
+}
+
+.top{
+  display: flex;
+
+  .gradient-btn{
+    flex: 1;
+  }
+
+  .empty{
+    flex: 4;
+  }
+
+  .input{
+    flex: 2;
+    margin-top: 20px;
+    height: 40px;
+  }
+
 }
 </style>

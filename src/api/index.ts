@@ -1,14 +1,14 @@
 // @ts-ignore
 /* eslint-disable */
 
-import * as userController from "./user";
-import * as authController from "./login";
-import * as coResourceController from "./resource"
-import * as CourseController from "./course"
-import * as ChapterController from "./chapters"
-import * as SectionController from "./section"
-import * as InnerController from "./inner"
-import * as ClassController from "./class"
+import * as userController from "./user/user";
+import * as authController from "./user/login";
+import * as coResourceController from "./resource/resource"
+import * as CourseController from "./course/course"
+import * as ChapterController from "./course/chapters"
+import * as SectionController from "./course/section"
+import * as InnerController from "./course/inner"
+import * as ClassController from "./course/class"
 export default {
   authController,
   userController,

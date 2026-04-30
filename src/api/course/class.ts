@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request from "../utils/request";
+import request from "../../utils/request";
 
 /** 创建班级  */
 export async function addClass(data) {

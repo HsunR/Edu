@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request from "../utils/request";
+import request from "../../utils/request";
 
 /** 创建课程  */
 export async function createCourse(data) {

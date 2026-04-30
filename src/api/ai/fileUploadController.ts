@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from "../../utils/request";
 
-/** 此处后端没有提供注释 POST /upload */
+/**  POST /upload */
 export async function uploadFile(body: {}, options?: { [key: string]: any }) {
   return request<string>(`/ai/upload`, {
     method: "POST",

@@ -77,18 +77,18 @@ export const constantRoutes = [
       },
     ],
   },
-  {
-    path: "/message",
-    component: Layout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/message/index"),
-        name: "Message",
-        meta: { title: "消息", icon: "message" },
-      },
-    ],
-  },
+  // {
+  //   path: "/message",
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: "",
+  //       component: () => import("@/views/message/index"),
+  //       name: "Message",
+  //       meta: { title: "消息", icon: "message" },
+  //     },
+  //   ],
+  // },
   {
     path: "/",
     component: Layout,

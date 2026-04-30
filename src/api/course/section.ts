@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request from "../utils/request";
+import request from "../../utils/request";
 
 /** 添加节  */
 export async function addSections(chapterId, data) {

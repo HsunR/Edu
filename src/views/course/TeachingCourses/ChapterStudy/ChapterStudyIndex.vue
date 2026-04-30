@@ -182,12 +182,10 @@ const dataSource = ref<Tree[]>([
   --el-tree-node-content-height: 60px;
 }
 
-/* 单个树节点的样式 */
 .el-tree-node {
   padding: 5px 0;
 }
 
-/* 节点内容区域（包含图标和文字） */
 .el-tree-node__content {
   height: 60px;
   line-height: 60px;

@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request from "../utils/request";
+import request from "../../utils/request";
 
 /** 生成图片资源的预签名URL  */
 export async function uploadImagePresign(data) {
