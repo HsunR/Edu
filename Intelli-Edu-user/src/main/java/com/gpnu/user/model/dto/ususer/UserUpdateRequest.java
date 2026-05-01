@@ -14,7 +14,7 @@ public class UserUpdateRequest implements Serializable {
     @Schema(description = "姓名", example = "张三")
     private String name;
 
-    @Schema(description = "UNKNOWN-未知，MALE-男,FEMALE-女", example="UNKNOWN")
+    @Schema(description = "0-未知，1-男,2-女", example="0")
     private SexType sex;
 
     @Schema(description = "学校", example = "广东技术师范大学")

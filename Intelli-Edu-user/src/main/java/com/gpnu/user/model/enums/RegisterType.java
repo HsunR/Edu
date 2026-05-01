@@ -70,7 +70,6 @@ public enum RegisterType {
         if(registerType == null){
             throw new IllegalArgumentException("无效的注册类型: " + code);
         }
-
         return getByCode(code);
     }
 }

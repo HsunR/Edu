@@ -19,7 +19,6 @@ public enum SexType {
      * 性别代码（对应数据库存储值）
      */
     @EnumValue
-
     private final Integer code;
 
     /**
@@ -44,7 +43,7 @@ public enum SexType {
     }
 
     @JsonCreator
-    public static SexType fromCode(Integer code) {
+    public static SexType fromCode(int code) {
         return getByCode(code);
     }
 }
