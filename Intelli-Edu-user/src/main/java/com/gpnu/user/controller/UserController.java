@@ -84,10 +84,9 @@ public class UserController {
     }
 
 
+    @Operation(summary = "更新用户头像", description = "根据用户ID更新用户头像")
     @PutMapping("/me/avatar")
     public void updateAvatar(@RequestParam @NotBlank String avatarUrl) {
-
-
         Long userId = UserContextHolder.getUserId();
         userService.updateAvatar(userId, avatarUrl);
     }
