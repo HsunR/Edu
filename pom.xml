@@ -13,7 +13,6 @@
 
     <modules>
         <module>Intelli-Edu-common</module>
-        <module>Intelli-Edu-model</module>
         <module>Intelli-Edu-gateway</module>
         <module>Intelli-Edu-Ai</module>
         <module>Intelli-Edu-user</module>
@@ -22,6 +21,7 @@
         <module>Intelli-Edu-exam</module>
         <module>Intelli-Edu-api</module>
         <module>Intelli-Edu-auth</module>
+        <module>Intelli-Edu-Knowledge</module>
     </modules>
 
     <properties>
