@@ -4,7 +4,6 @@ package com.gpnu.user.model.enums;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.gpnu.common.model.enums.BaseEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
