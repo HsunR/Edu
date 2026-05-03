@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gpnu.api.client.resource.ResourceFeignClient;
 import com.gpnu.api.dto.resource.ResourceSimpleDTO;
+import com.gpnu.api.dto.section.SectionSimpleDTO;
 import com.gpnu.clazz.service.IClassService;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
@@ -252,6 +253,19 @@ public class SectionServiceImpl extends ServiceImpl<SectionMapper, Section>
     }
 
     // ==================== 私有方法 ====================
+
+    @Override
+    public SectionSimpleDTO getSectionSimple(Long sectionId) {
+        Section section = getById(sectionId);
+        if (section == null) {
+            return null;
+        }
+        SectionSimpleDTO dto = new SectionSimpleDTO();
+        dto.setSectionId(section.getSectionId());
+        dto.setCourseId(section.getCourseId());
+        dto.setTitle(section.getTitle());
+        return dto;
+    }
 
     private void checkCourseOwner(Long courseId, Long teacherId) {
         Course course = courseService.getById(courseId);

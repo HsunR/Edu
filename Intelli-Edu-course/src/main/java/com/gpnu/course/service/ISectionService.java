@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.gpnu.course.model.vo.section.SectionDetailVO;
 import com.gpnu.course.model.vo.section.SectionResourceVO;
 import com.gpnu.course.model.vo.section.SectionVO;
+import com.gpnu.api.dto.section.SectionSimpleDTO;
 
 import java.util.List;
 
@@ -34,5 +35,7 @@ public interface ISectionService extends IService<Section> {
     void reorderResources(Long teacherId, Long sectionId, List<OrderItem> orderItems);
 
     SectionDetailVO getSectionDetail(Long sectionId, Long currentUserId, Integer userType);
+
+    SectionSimpleDTO getSectionSimple(Long sectionId);
 
 }

@@ -26,4 +26,9 @@ public interface IQuestionService extends IService<Question> {
      * 批量查询题目（含选项），用于试卷快照
      */
     List<QuestionVO> listByIds(List<Long> questionIds);
+
+    /**
+     * 获取题目所属课程ID
+     */
+    Long getQuestionCourseId(Long questionId);
 }

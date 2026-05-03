@@ -182,6 +182,16 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
                 .toList();
     }
 
+    @Override
+    public Long getQuestionCourseId(Long questionId) {
+        Question question = getById(questionId);
+        if (question == null) {
+            return null;
+        }
+        QuestionBank bank = questionBankService.getById(question.getBankId());
+        return bank != null ? bank.getCourseId() : null;
+    }
+
     // ==================== 私有方法 ====================
 
     private void saveOptions(Long questionId, List<QuestionOptionDTO> optionDTOs) {

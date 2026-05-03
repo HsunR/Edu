@@ -1,8 +1,10 @@
 package com.gpnu.course.controller;
 
 import com.gpnu.api.dto.course.CourseSimpleDTO;
+import com.gpnu.api.dto.section.SectionSimpleDTO;
 import com.gpnu.clazz.service.IClassService;
 import com.gpnu.course.service.ICourseService;
+import com.gpnu.course.service.ISectionService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +25,9 @@ public class InnerCourseController {
     @Resource
     private IClassService classService;
 
+    @Resource
+    private ISectionService sectionService;
+
     @GetMapping("/courses/{courseId}")
     @Operation(summary = "获取课程简要信息")
     public CourseSimpleDTO getCourseSimple(@PathVariable Long courseId) {
@@ -40,5 +45,11 @@ public class InnerCourseController {
     public Boolean checkMember(@PathVariable Long classId,
                                @RequestParam Long studentId) {
         return classService.checkMember(classId, studentId);
+    }
+
+    @GetMapping("/sections/{sectionId}")
+    @Operation(summary = "获取章节简要信息")
+    public SectionSimpleDTO getSectionSimple(@PathVariable Long sectionId) {
+        return sectionService.getSectionSimple(sectionId);
     }
 }

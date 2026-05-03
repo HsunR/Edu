@@ -2,6 +2,7 @@ package com.gpnu.api.client.course.fallback;
 
 import com.gpnu.api.client.course.CourseFeignClient;
 import com.gpnu.api.dto.course.CourseSimpleDTO;
+import com.gpnu.api.dto.section.SectionSimpleDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,11 @@ public class CourseFeignFallback implements FallbackFactory<CourseFeignClient> {
             @Override
             public Boolean checkMember(Long classId, Long studentId) {
                 return false;
+            }
+
+            @Override
+            public SectionSimpleDTO getSectionSimple(Long sectionId) {
+                return null;
             }
         };
     }
