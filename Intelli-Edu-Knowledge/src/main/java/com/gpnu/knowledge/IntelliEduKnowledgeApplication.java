@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @MapperScan(basePackages = {
-        "com.gpnu.knowledge",
+        "com.gpnu.knowledge.mapper",
 })
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.gpnu.api.client")
