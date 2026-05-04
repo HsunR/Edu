@@ -1,78 +1,56 @@
 <template>
   <div>
-    <template v-for="(item, index) in options">
-      <template v-if="values.includes(item.value)">
-        <span
-          v-if="(item.elTagType == 'default' || item.elTagType == '') && (item.elTagClass == '' || item.elTagClass == null)"
-          :key="item.value"
-          :index="index"
-          :class="item.elTagClass"
-        >{{ item.label + " " }}</span>
-        <el-tag
-          v-else
-          :disable-transitions="true"
-          :key="item.value + ''"
-          :index="index"
-          :type="item.elTagType"
-          :class="item.elTagClass"
-        >{{ item.label + " " }}</el-tag>
-      </template>
+    <template v-for="(item, index) in options" :key="item.value + ''">
+      <span
+        v-if="(item.elTagType == 'default' || item.elTagType == '') && (item.elTagClass == '' || item.elTagClass == null) && values.includes(item.value)"
+      >{{ item.label + " " }}</span>
+      <el-tag
+        v-else-if="values.includes(item.value)"
+        :disable-transitions="true"
+        :type="item.elTagType === 'default' || item.elTagType === '' ? '' : item.elTagType"
+        :class="item.elTagClass"
+      >{{ item.label + " " }}</el-tag>
     </template>
-    <template v-if="unmatch && showValue">
-      {{ unmatchArray | handleArray }}
-    </template>
+    <span v-if="unmatchedLabels.length">{{ unmatchedLabels.join(' ') }}</span>
   </div>
 </template>
 
-<script setup>
-// 记录未匹配的项
-const unmatchArray = ref([])
+<script setup lang="ts">
+import { computed } from 'vue'
 
-const props = defineProps({
-  // 数据
-  options: {
-    type: Array,
-    default: null,
-  },
-  // 当前的值
-  value: [Number, String, Array],
-  // 当未找到匹配的数据时，显示value
-  showValue: {
-    type: Boolean,
-    default: true,
-  },
-  separator: {
-    type: String,
-    default: ",",
-  }
+interface DictOption {
+  label: string
+  value: string | number
+  elTagType?: '' | 'default' | 'success' | 'warning' | 'danger' | 'info'
+  elTagClass?: string
+}
+
+const props = withDefaults(defineProps<{
+  options: DictOption[]
+  value?: string | number | Array<string | number>
+  showValue?: boolean
+  separator?: string
+}>(), {
+  showValue: true,
+  separator: ',',
 })
 
 const values = computed(() => {
-  if (props.value === null || typeof props.value === 'undefined' || props.value === '') return []
-  return Array.isArray(props.value) ? props.value.map(item => '' + item) : String(props.value).split(props.separator)
+  if (props.value === null || props.value === undefined || props.value === '') return []
+  return Array.isArray(props.value)
+    ? props.value.map(item => '' + item)
+    : String(props.value).split(props.separator)
 })
 
-const unmatch = computed(() => {
-  unmatchArray.value = []
-  // 没有value不显示
-  if (props.value === null || typeof props.value === 'undefined' || props.value === '' || !Array.isArray(props.options) || props.options.length === 0) return false
-  // 传入值为数组
-  let unmatch = false // 添加一个标志来判断是否有未匹配项
-  values.value.forEach(item => {
-    if (!props.options.some(v => v.value === item)) {
-      unmatchArray.value.push(item)
-      unmatch = true // 如果有未匹配项，将标志设置为true
-    }
-  })
-  return unmatch // 返回标志的值
+const unmatchedLabels = computed(() => {
+  if (!Array.isArray(props.options) || props.options.length === 0) return []
+  const matchedValues = props.options
+    .filter(opt => values.value.includes(String(opt.value)))
+    .map(opt => String(opt.value))
+  return values.value
+    .filter(v => !matchedValues.includes(v))
+    .map(v => String(v))
 })
-
-function handleArray(array) {
-  if (array.length === 0) return ""
-  return array.reduce((pre, cur) => {
-    return pre + " " + cur
-  })
-}
 </script>
 
 <style scoped>

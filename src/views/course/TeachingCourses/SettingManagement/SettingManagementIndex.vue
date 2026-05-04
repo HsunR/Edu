@@ -6,7 +6,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { useCourseStore } from '@/stores/course'
 import { updateCourse, publishCourse, archiveCourse } from '@/api/course/course'
 import type { CourseUpdateRequest } from '@/api/course/types'
-import { CourseStatus } from '@/types/enums'
+import { CourseStatus, YesNo } from '@/types/enums'
 import { presignImage, confirmUpload } from '@/api/resource/resource'
 import type { FormInstance, FormRules, UploadProps } from 'element-plus'
 import axios from 'axios'
@@ -19,7 +19,7 @@ const loading = ref(false)
 const saving = ref(false)
 const formRef = ref<FormInstance>()
 
-const form = reactive<CourseUpdateRequest & { isPublic: 0 | 1 | null }>({
+const form = reactive<CourseUpdateRequest & { isPublic: YesNo | null }>({
   courseName: '',
   description: '',
   coverUrl: '',
@@ -243,8 +243,8 @@ onMounted(loadCourse)
 
           <el-form-item label="是否公开" prop="isPublic">
             <el-radio-group v-model="form.isPublic">
-              <el-radio :value="0">私有</el-radio>
-              <el-radio :value="1">公开</el-radio>
+              <el-radio :value="YesNo.No">私有</el-radio>
+              <el-radio :value="YesNo.Yes">公开</el-radio>
             </el-radio-group>
           </el-form-item>
 

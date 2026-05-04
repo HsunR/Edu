@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/user'
 import { getCourseClasses } from '@/api/course/course'
 import { joinClass } from '@/api/course/class'
 import type { ClassVO } from '@/api/course/types'
-import { CourseStatus } from '@/types/enums'
+import { CourseStatus, YesNo, ClassStatus } from '@/types/enums'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
@@ -99,7 +99,7 @@ onUnmounted(() => courseStore.clearCurrentCourse())
             >
               {{ statusMap[courseStore.currentCourse.status]?.label || '未知' }}
             </el-tag>
-            <el-tag v-if="courseStore.currentCourse.isPublic === 1" type="success" size="small">公开</el-tag>
+            <el-tag v-if="courseStore.currentCourse.isPublic === YesNo.Yes" type="success" size="small">公开</el-tag>
             <el-tag v-else type="info" size="small">私有</el-tag>
           </div>
           <h1 class="info-title">{{ courseStore.currentCourse.courseName }}</h1>
@@ -158,7 +158,7 @@ onUnmounted(() => courseStore.clearCurrentCourse())
                 class="section-item"
               >
                 <span class="section-title-text">
-                  <el-tag size="small" type="warning" v-if="section.isFree === 1">免费</el-tag>
+                  <el-tag size="small" type="warning" v-if="section.isFree === YesNo.Yes">免费</el-tag>
                   {{ section.title }}
                 </span>
                 <span class="section-resources">
@@ -187,10 +187,10 @@ onUnmounted(() => courseStore.clearCurrentCourse())
             <el-table-column label="状态" width="100">
               <template #default="{ row }">
                 <el-tag
-                  :type="row.status === 0 ? 'success' : row.status === 1 ? '' : 'info'"
+                  :type="row.status === ClassStatus.Enrolling ? 'success' : row.status === ClassStatus.InProgress ? '' : 'info'"
                   size="small"
                 >
-                  {{ row.status === 0 ? '招生中' : row.status === 1 ? '进行中' : '已结束' }}
+                  {{ row.status === ClassStatus.Enrolling ? '招生中' : row.status === ClassStatus.InProgress ? '进行中' : '已结束' }}
                 </el-tag>
               </template>
             </el-table-column>

@@ -244,6 +244,8 @@
 <script setup name="Role">
 import { addRole, changeRoleStatus, dataScope, delRole, getRole, listRole, updateRole, deptTreeSelect } from "@/api/system/role"
 import { roleMenuTreeselect, treeselect as menuTreeselect } from "@/api/system/menu"
+import { download } from "@/api/request"
+import { addDateRange, resetForm } from "@/utils"
 
 const router = useRouter()
 const { proxy } = getCurrentInstance()
@@ -299,7 +301,7 @@ const { queryParams, form, rules } = toRefs(data)
 /** 查询角色列表 */
 function getList() {
   loading.value = true
-  listRole(proxy.addDateRange(queryParams.value, dateRange.value)).then(response => {
+  listRole(addDateRange(queryParams.value, dateRange.value)).then(response => {
     roleList.value = response.rows
     total.value = response.total
     loading.value = false
@@ -315,7 +317,7 @@ function handleQuery() {
 /** 重置按钮操作 */
 function resetQuery() {
   dateRange.value = []
-  proxy.resetForm("queryRef")
+  resetForm("queryRef")
   handleQuery()
 }
 
@@ -332,7 +334,7 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download("system/role/export", {
+  download("system/role/export", {
     ...queryParams.value,
   }, `role_${new Date().getTime()}.xlsx`)
 }
@@ -413,7 +415,7 @@ function reset() {
     deptCheckStrictly: true,
     remark: undefined
   }
-  proxy.resetForm("roleRef")
+  resetForm("roleRef")
 }
 
 /** 添加角色 */

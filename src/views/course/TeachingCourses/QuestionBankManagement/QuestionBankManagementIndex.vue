@@ -22,7 +22,7 @@ import type {
   QuestionUpdateRequest,
   QuestionOptionDTO
 } from '@/api/exam/types'
-import { QuestionType } from '@/types/enums'
+import { QuestionType, Difficulty } from '@/types/enums'
 import type { FormInstance, FormRules } from 'element-plus'
 
 const route = useRoute()
@@ -40,7 +40,7 @@ const questions = ref<QuestionVO[]>([])
 const questionTotal = ref(0)
 const questionPage = ref(1)
 const questionPageSize = ref(10)
-const questionFilterType = ref<0 | 1 | 2 | 3 | 4 | undefined>(undefined)
+const questionFilterType = ref<QuestionType | undefined>(undefined)
 const questionKeyword = ref('')
 
 const bankDialogVisible = ref(false)
@@ -60,13 +60,13 @@ const questionDialogVisible = ref(false)
 const isEditQuestion = ref(false)
 const editingQuestionId = ref<number | null>(null)
 const questionFormRef = ref<FormInstance>()
-const questionForm = reactive<QuestionCreateRequest & { questionType: 0 | 1 | 2 | 3 | 4; stem: string; score: number }>({
-  questionType: 0,
+const questionForm = reactive<QuestionCreateRequest & { questionType: QuestionType; stem: string; score: number }>({
+  questionType: QuestionType.SingleChoice,
   stem: '',
   analysis: '',
   answer: '',
   score: 5,
-  difficulty: 3,
+  difficulty: Difficulty.Medium,
   options: []
 })
 
@@ -208,12 +208,12 @@ function openCreateQuestion() {
   }
   isEditQuestion.value = false
   editingQuestionId.value = null
-  questionForm.questionType = 0
+  questionForm.questionType = QuestionType.SingleChoice
   questionForm.stem = ''
   questionForm.analysis = ''
   questionForm.answer = ''
   questionForm.score = 5
-  questionForm.difficulty = 3
+  questionForm.difficulty = Difficulty.Medium
   questionForm.options = [
     { label: 'A', content: '', isCorrect: false, orderIndex: 0 },
     { label: 'B', content: '', isCorrect: false, orderIndex: 1 },
@@ -515,7 +515,7 @@ onMounted(loadBanks)
           </el-form-item>
         </template>
 
-        <template v-if="questionForm.questionType === 2">
+        <template v-if="questionForm.questionType === QuestionType.TrueFalse">
           <el-form-item label="答案">
             <el-radio-group v-model="questionForm.answer">
               <el-radio value="正确">正确</el-radio>
@@ -524,12 +524,12 @@ onMounted(loadBanks)
           </el-form-item>
         </template>
 
-        <template v-if="questionForm.questionType === 3 || questionForm.questionType === 4">
+        <template v-if="questionForm.questionType === QuestionType.FillBlank || questionForm.questionType === QuestionType.ShortAnswer">
           <el-form-item label="标准答案">
             <el-input
               v-model="questionForm.answer"
-              :type="questionForm.questionType === 4 ? 'textarea' : 'text'"
-              :rows="questionForm.questionType === 4 ? 3 : 1"
+              :type="questionForm.questionType === QuestionType.ShortAnswer ? 'textarea' : 'text'"
+              :rows="questionForm.questionType === QuestionType.ShortAnswer ? 3 : 1"
               placeholder="请输入标准答案"
             />
           </el-form-item>

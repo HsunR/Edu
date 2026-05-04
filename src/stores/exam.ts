@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { enterExam, getMySheet, saveAnswer, submitExam } from '@/api/exam/index'
 import type { AnswerSheetDetailVO } from '@/api/exam/types'
+import { SheetStatus } from '@/types/enums'
 
 export const useExamStore = defineStore('exam', () => {
   const currentSheet = ref<AnswerSheetDetailVO | null>(null)
@@ -9,7 +10,7 @@ export const useExamStore = defineStore('exam', () => {
   const remainingSeconds = ref(0)
   const countdownTimer = ref<ReturnType<typeof setInterval> | null>(null)
 
-  const isAnswering = computed(() => currentSheet.value?.status === 1)
+  const isAnswering = computed(() => currentSheet.value?.status === SheetStatus.InProgress)
   const answeredCount = computed(() => answers.value.size)
 
   async function enterExamAction(examId: number) {
@@ -31,7 +32,7 @@ export const useExamStore = defineStore('exam', () => {
         }
       }
     }
-    if (currentSheet.value?.deadline && currentSheet.value.status === 1) {
+    if (currentSheet.value?.deadline && currentSheet.value.status === SheetStatus.InProgress) {
       startCountdown()
     }
   }
@@ -45,7 +46,7 @@ export const useExamStore = defineStore('exam', () => {
     await submitExam(sheetId)
     stopCountdown()
     if (currentSheet.value) {
-      currentSheet.value.status = 2
+      currentSheet.value.status = SheetStatus.Ended
     }
   }
 

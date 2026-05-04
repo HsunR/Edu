@@ -1,11 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { marked } from 'marked';
-import api from '@/api/ai/index'
-const {
-  fileUploadController,
-  chatListController,
-  aiCourseController, } = api
+import { marked } from 'marked'
+import { createChatList, getChatListByConversationId, getUserChatList } from '@/api/ai/chat'
+import type { ChatListAddRequest } from '@/api/ai/types'
 
 const inputMessage = ref('');
 const messages = ref([])
@@ -13,19 +10,18 @@ const userAvatar = ref(localStorage.getItem("headPortrait")) || ref('@/assets/im
 const botAvatar = ref('@/assets/images/botAvatar.png')
 const loading = ref(false)
 
-// 解析消息内容
 const parseMessageContent = (content) => {
   const parts = []
   let remaining = content
-  while (remaining.includes("<think>") && remaining.includes("</think>")) {
-    const thinkStart = remaining.indexOf("<think>")
-    const thinkEnd = remaining.indexOf("</think>") + "</think>".length
+  while (remaining.includes("<think") && remaining.includes("</think")) {
+    const thinkStart = remaining.indexOf("<think")
+    const thinkEnd = remaining.indexOf("</think") + "</think".length
 
     if (thinkStart > 0) {
       parts.push({ text: remaining.slice(0, thinkStart), isThink: false })
     }
 
-    const thinkContent = remaining.slice(thinkStart + "<think>".length, thinkEnd - "</think>".length)
+    const thinkContent = remaining.slice(thinkStart + "<think".length, thinkEnd - "</think".length)
     parts.push({ text: thinkContent, isThink: true })
 
     remaining = remaining.slice(thinkEnd)
@@ -36,16 +32,13 @@ const parseMessageContent = (content) => {
   }
   return parts
 }
-// 渲染markdown
 const renderMarkdown = (content) => {
   return marked(content)
 }
 
-// 发送消息 并接收AI回复
 const sendMessage = async () => {
   if (!inputMessage.value.trim()) return;
 
-  // 添加用户消息
   const userMessage = {
     sender: 'user',
     content: inputMessage.value,
@@ -53,7 +46,6 @@ const sendMessage = async () => {
   };
   messages.value.push(userMessage);
 
-  // 添加bot消息，初始状态为loading
   const botMessage = {
     sender: 'bot',
     content: '',
@@ -82,7 +74,7 @@ const sendMessage = async () => {
 
     eventSource.onerror = () => {
       const lastBotMessage = messages.value[messages.value.length - 1];
-      lastBotMessage.loading = false; 
+      lastBotMessage.loading = false;
       eventSource.close();
     };
 
@@ -93,26 +85,22 @@ const sendMessage = async () => {
   }
 };
 
-// 随机生成会话ID
 const generateConversationId = () => {
   return 'conv-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11);
 };
 
-// 根据会话ID获取聊天记录
-const getChatListByConversationId = async (conversationId) => {
+const getChatList = async (conversationId) => {
   try {
-    const res = await chatListController.getChatListByConversationId(conversationId)
+    const res = await getChatListByConversationId(conversationId)
     console.log(res)
-    // messages.value = res.data?.slrt((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   } catch (error) {
     console.error(error)
   }
 }
-// 获取当前用户的聊天会话列表
-const getUserChatList = async () => {
+const fetchUserChatList = async () => {
   try {
     const userId = localStorage.getItem('userId')
-    const res = await chatListController.getUserChatList(userId)
+    const res = await getUserChatList(userId)
     console.log(res)
   } catch (error) {
     console.error(error)
@@ -122,11 +110,11 @@ const getUserChatList = async () => {
 onMounted(async() => {
   const conversationId = localStorage.getItem('LastConversationId') || ''
   if (conversationId) {
-    await getChatListByConversationId(conversationId)
+    await getChatList(conversationId)
   } else {
     createChat()
   }
-  await getUserChatList()
+  await fetchUserChatList()
 })
 
 const count = ref(0)
@@ -134,24 +122,22 @@ const load = () => {
   count.value += 2
 }
 
-// 创建聊天会话
 const createChat = async () => {
   const userId = localStorage.getItem('userId')
   const conversationId = generateConversationId()
   localStorage.setItem('LastConversationId', conversationId)
-  const chatListAddRequest = {
-    "userId": userId,
-    "conversationId": conversationId,
-    "conversationTitle": ""
+  const chatListAddRequest: ChatListAddRequest = {
+    userId: userId || undefined,
+    conversationId: conversationId,
+    conversationTitle: ""
   }
-  const res = await chatListController.createChatList(chatListAddRequest)
+  const res = await createChatList(chatListAddRequest)
   console.log(res)
 }
 </script>
 
 <template>
   <div class="chat-container">
-    <!-- 历史记录 + 创建新窗口 -->
     <div class="chat-left">
       <div class="chat-left-top">
         <el-button @click="createChat" class="btn">创建新对话</el-button>
@@ -170,33 +156,27 @@ const createChat = async () => {
       </div>
     </div>
 
-    <!--  聊天窗口  -->
     <div class="chat-box" ref="chatBox">
       <div class="message-content-wrapp">
-        <!-- 已有消息列表 -->
         <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.sender]">
           <img :src="msg.sender === 'user' ? userAvatar : botAvatar" alt="avatar" :class="['avatar', msg.sender]">
           <div class="message-content">
             <template v-if="msg.sender === 'bot'">
               <span v-for="(part, index) in parseMessageContent(msg.content)" :key="index"
                 :class="part.isThink && part.text.trim() ? 'think-content' : ''">
-                <!-- 思考内容 -->
                 <span v-if="part.isThink && part.text.trim()">
                   <span v-html="renderMarkdown(part.text)"></span>
                 </span>
-                <!-- 回答内容 -->
                 <span v-else>
                   <span v-html="renderMarkdown(part.text)"></span>
                 </span>
                 <br v-if="part.isThink && part.text.trim()">
               </span>
             </template>
-            <!-- 用户提问内容 -->
             <template v-else>
               {{ msg.content }}
             </template>
 
-            <!-- 添加加载状态指示器 -->
             <div v-if="msg.sender === 'bot' && msg.loading" class="thinking-indicator">
               <span class="dot"></span>
               <span class="dot"></span>
@@ -209,17 +189,12 @@ const createChat = async () => {
     </div>
 
 
-    <!--  输入区域  -->
     <div class="input-area">
       <el-input v-model="inputMessage" placeholder="请输入内容" class="message-input" @keyup.enter="sendMessage"
         type="textarea" :autosize="{ minRows: 4, maxRows: 6 }" resize="none"></el-input>
-      <!-- <el-upload v-model:file-list="fileList" class="upload-demo"
-        action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" multiple :on-preview="handlePreview"
-        :on-remove="handleRemove" :before-remove="beforeRemove" :limit="3" :on-exceed="handleExceed"> -->
       <el-button class="upload-btn"><el-icon>
           <UploadFilled />
         </el-icon></el-button>
-      <!-- </el-upload> -->
       <el-button @click="sendMessage" class="send-button">发送</el-button>
     </div>
 
@@ -289,14 +264,12 @@ const createChat = async () => {
       margin-bottom: 10px;
       display: flex;
       justify-content: flex-start;
-      /* 默认左对齐 */
       align-items: flex-start;
 
     }
 
     .message.user {
       justify-content: flex-end;
-      /* 用户消息右对齐 */
     }
 
     .message.bot .message-content {
@@ -375,7 +348,6 @@ const createChat = async () => {
   }
 }
 
-/* 思考指示器样式 */
 .thinking-indicator {
   display: flex;
   align-items: center;

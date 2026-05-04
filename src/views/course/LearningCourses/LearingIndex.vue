@@ -6,14 +6,14 @@ const route = useRoute()
 import { ref, watch, onMounted } from 'vue'
 
 import {
-  StarTwoTone,
-  FileTextOutlined,
-  FileDoneOutlined,
-  FundProjectionScreenOutlined,
-  FolderOpenOutlined,
-  ClusterOutlined,
-  FileExcelOutlined
-} from '@ant-design/icons-vue';
+  StarFilled,
+  Document,
+  DocumentChecked,
+  Monitor,
+  FolderOpened,
+  Share,
+  DocumentDelete
+} from '@element-plus/icons-vue'
 
 onMounted(() => {
   console.log(route.params.id)
@@ -26,52 +26,32 @@ watch(
   }
 )
 
+const activeIndex = ref('/')
 
-const selectedKeys = ref(['/']);
-const handleClick = menuInfo => {
-  console.log('click ', menuInfo);
-  selectedKeys.value = menuInfo.key
-  router.push(`/course/LearningCourses/CourseDetails/${route.params.id}` + menuInfo.key )
-};
+const menuItems = [
+  { key: '/AITeachingAssistantLearning', label: 'AI助教', icon: StarFilled },
+  { key: '/ChapterStudyLearning', label: '章节学习', icon: Document },
+  { key: '/CourseWorkLearning', label: '课程作业', icon: DocumentChecked },
+  { key: '/CourseExamsLearning', label: '课程考试', icon: Monitor },
+  { key: '/CourseMaterialsLearning', label: '课程资料', icon: FolderOpened },
+  { key: '/CurriculumMapLearning', label: '课程图谱', icon: Share },
+  { key: '/ErrorSetLearning', label: '错题集', icon: DocumentDelete },
+]
+
+function handleSelect(key: string) {
+  router.push(`/course/LearningCourses/CourseDetails/${route.params.id}${key}`)
+}
 </script>
 
 <template>
   <div class="courseContainer">
     <div class="courseSider">
-      <a-menu v-model:selectedKeys="selectedKeys" style="width: 100%;" mode="vertical" @click="handleClick">
-        <div class="logo">
-          <img src="" alt="">
-          <span></span>
-        </div>
-        <a-menu-item key="/AITeachingAssistantLearning" style="height: 50px; line-height: 50px;">
-          <StarTwoTone />
-          <span>AI助教</span>
-        </a-menu-item>
-        <a-menu-item key="/ChapterStudyLearning" style="height: 50px; line-height: 50px;">
-          <FileTextOutlined />
-          <span>章节学习</span>
-        </a-menu-item>
-        <a-menu-item key="/CourseWorkLearning" style="height: 50px; line-height: 50px;">
-          <FileDoneOutlined />
-          <span>课程作业</span>
-        </a-menu-item>
-        <a-menu-item key="/CourseExamsLearning" style="height: 50px; line-height: 50px;">
-          <FundProjectionScreenOutlined />
-          <span>课程考试</span>
-        </a-menu-item>
-        <a-menu-item key="/CourseMaterialsLearning" style="height: 50px; line-height: 50px;">
-          <FolderOpenOutlined />
-          <span>课程资料</span>
-        </a-menu-item>
-        <a-menu-item key="/CurriculumMapLearning" style="height: 50px; line-height: 50px;">
-          <ClusterOutlined />
-          <span>课程图谱</span>
-        </a-menu-item>
-        <a-menu-item key="/ErrorSetLearning" style="height: 50px; line-height: 50px;">
-          <FileExcelOutlined />
-          <span>错题集</span>
-        </a-menu-item>
-      </a-menu>
+      <el-menu :default-active="activeIndex" @select="handleSelect">
+        <el-menu-item v-for="item in menuItems" :key="item.key" :index="item.key">
+          <el-icon><component :is="item.icon" /></el-icon>
+          <span>{{ item.label }}</span>
+        </el-menu-item>
+      </el-menu>
     </div>
 
     <div class="courseContent">
@@ -102,13 +82,5 @@ const handleClick = menuInfo => {
 .courseContent {
   flex: 5;
   margin: 10px;
-}
-.ant-menu {
-  height: 100%;
-
-  .ant-menu-item{
-    height: 50px !important;
-  }
-
 }
 </style>

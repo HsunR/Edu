@@ -6,7 +6,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCourseStore } from '@/stores/course'
 import { createCourse, updateCourse, deleteCourse, publishCourse, archiveCourse } from '@/api/course/course'
 import type { CourseVO, CourseCreateRequest, CourseUpdateRequest } from '@/api/course/types'
-import { CourseStatus } from '@/types/enums'
+import { CourseStatus, YesNo } from '@/types/enums'
 import type { FormInstance, FormRules, UploadProps } from 'element-plus'
 import axios from 'axios'
 import { presignImage, confirmUpload } from '@/api/resource/resource'
@@ -23,7 +23,7 @@ const isEdit = ref(false)
 const courseFormRef = ref<FormInstance>()
 const editingCourseId = ref<number | null>(null)
 
-const CourseForm = reactive<CourseCreateRequest & { isPublic: 0 | 1 | null }>({
+const CourseForm = reactive<CourseCreateRequest & { isPublic: YesNo | null }>({
   courseName: '',
   description: '',
   coverUrl: '',
@@ -373,8 +373,8 @@ onMounted(async () => {
         </el-form-item>
         <el-form-item label="是否公开" prop="isPublic">
           <el-radio-group v-model="CourseForm.isPublic">
-            <el-radio :value="0">私有</el-radio>
-            <el-radio :value="1">公开</el-radio>
+            <el-radio :value="YesNo.No">私有</el-radio>
+            <el-radio :value="YesNo.Yes">公开</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>

@@ -29,6 +29,7 @@ import type {
 } from '@/api/course/types'
 import type { ResourceVO } from '@/api/resource/types'
 import type { FormInstance } from 'element-plus'
+import { ResourceType, SectionResourceType, YesNo } from '@/types/enums'
 
 const route = useRoute()
 const courseStore = useCourseStore()
@@ -45,17 +46,17 @@ const currentChapterIdForSection = ref<number | null>(null)
 const resourceSelectorVisible = ref(false)
 const currentSectionIdForResource = ref<number | null>(null)
 
-const resourceTypeMap: Record<number, 'VIDEO' | 'DOCUMENT' | 'IMAGE'> = {
-  1: 'VIDEO',
-  2: 'DOCUMENT',
-  3: 'IMAGE'
+const resourceTypeMap: Record<ResourceType, SectionResourceType> = {
+  [ResourceType.Video]: SectionResourceType.Video,
+  [ResourceType.Document]: SectionResourceType.Document,
+  [ResourceType.Image]: SectionResourceType.Image
 }
 
 const chapterFormRef = ref<FormInstance>()
 const sectionFormRef = ref<FormInstance>()
 
 const chapterForm = ref<ChapterCreateRequest>({ title: '' })
-const sectionForm = ref<SectionCreateRequest & { isFree: 0 | 1 }>({ title: '', isFree: 0 })
+const sectionForm = ref<SectionCreateRequest & { isFree: YesNo }>({ title: '', isFree: YesNo.No })
 
 const course = computed(() => courseStore.currentCourse)
 const chapters = computed(() => course.value?.chapters || [])
@@ -123,7 +124,7 @@ function openAddSection(chapterId: number) {
   isEditSection.value = false
   editingSectionId.value = null
   currentChapterIdForSection.value = chapterId
-  sectionForm.value = { title: '', isFree: 0 }
+  sectionForm.value = { title: '', isFree: YesNo.No }
   sectionDialogVisible.value = true
 }
 
@@ -185,7 +186,7 @@ async function handleResourceSelect(selectedResources: ResourceVO[]) {
     for (const resource of selectedResources) {
       const data: SectionResourceAddRequest = {
         resourceId: resource.resourceId,
-        resourceType: resourceTypeMap[resource.resourceType] || 'VIDEO'
+        resourceType: resourceTypeMap[resource.resourceType] || SectionResourceType.Video
       }
       await addSectionResource(currentSectionIdForResource.value, data)
     }
@@ -284,7 +285,7 @@ onMounted(loadCourse)
               class="section-item"
             >
               <div class="section-info">
-                <el-tag v-if="section.isFree === 1" size="small" type="warning" style="margin-right: 8px">免费</el-tag>
+                <el-tag v-if="section.isFree === YesNo.Yes" size="small" type="warning" style="margin-right: 8px">免费</el-tag>
                 <span class="section-title">{{ section.title }}</span>
                 <span class="section-resource-count">
                   {{ section.resources?.length || 0 }} 个资源
@@ -345,8 +346,8 @@ onMounted(loadCourse)
         <el-form-item label="免费预览">
           <el-switch
             v-model="sectionForm.isFree"
-            :active-value="1"
-            :inactive-value="0"
+            :active-value="YesNo.Yes"
+            :inactive-value="YesNo.No"
             active-text="是"
             inactive-text="否"
           />

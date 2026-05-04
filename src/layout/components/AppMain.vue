@@ -15,7 +15,7 @@
 <script setup>
 import copyright from "./Copyright/index"
 import iframeToggle from "./IframeToggle/index"
-import useTagsViewStore from '@/store/modules/tagsView'
+import { useTagsViewStore } from '@/stores/tagsView'
 
 const route = useRoute()
 const tagsViewStore = useTagsViewStore()

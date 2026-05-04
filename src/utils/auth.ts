@@ -9,6 +9,11 @@ export function setToken(token: string): void {
   localStorage.setItem(ACCESS_TOKEN_KEY, token)
 }
 
+export function removeToken(): void {
+  localStorage.removeItem(ACCESS_TOKEN_KEY)
+  localStorage.removeItem(REFRESH_TOKEN_KEY)
+}
+
 export function getRefreshToken(): string | null {
   return localStorage.getItem(REFRESH_TOKEN_KEY)
 }
@@ -17,7 +22,11 @@ export function setRefreshToken(token: string): void {
   localStorage.setItem(REFRESH_TOKEN_KEY, token)
 }
 
-export function removeToken(): void {
-  localStorage.removeItem(ACCESS_TOKEN_KEY)
+export function removeRefreshToken(): void {
   localStorage.removeItem(REFRESH_TOKEN_KEY)
+}
+
+export function clearAuth(): void {
+  removeToken()
+  localStorage.removeItem('userId')
 }

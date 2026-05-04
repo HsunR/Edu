@@ -1,3 +1,14 @@
+import type {
+  Difficulty,
+  ExamStatus,
+  ExamType,
+  GradingStatus,
+  PaperStatus,
+  QuestionType,
+  SheetStatus
+} from '@/types/enums'
+import type { PageRequest } from '@/types/api'
+
 export interface QuestionBankVO {
   bankId: number
   bankName: string
@@ -20,11 +31,7 @@ export interface QuestionBankUpdateRequest {
   description?: string
 }
 
-export interface QuestionBankQueryRequest {
-  current?: number
-  pageSize?: number
-  sortField?: string
-  sortOrder?: string
+export interface QuestionBankQueryRequest extends PageRequest {
   courseId?: number
   keyword?: string
 }
@@ -47,24 +54,24 @@ export interface QuestionOptionDTO {
 export interface QuestionVO {
   questionId: number
   bankId: number
-  questionType: 0 | 1 | 2 | 3 | 4
+  questionType: QuestionType
   stem: string
   analysis: string
   answer: string
   score: number
-  difficulty: 1 | 2 | 3 | 4 | 5
+  difficulty: Difficulty
   options: QuestionOptionVO[]
   createdAt: string
   updatedAt: string
 }
 
 export interface QuestionCreateRequest {
-  questionType: 0 | 1 | 2 | 3 | 4
+  questionType: QuestionType
   stem: string
   analysis?: string
   answer?: string
   score: number
-  difficulty?: 1 | 2 | 3 | 4 | 5
+  difficulty?: Difficulty
   options?: QuestionOptionDTO[]
 }
 
@@ -73,19 +80,20 @@ export interface QuestionUpdateRequest {
   analysis?: string
   answer?: string
   score?: number
-  difficulty?: 1 | 2 | 3 | 4 | 5
+  difficulty?: Difficulty
   options?: QuestionOptionDTO[]
 }
 
-export interface QuestionQueryRequest {
-  current?: number
-  pageSize?: number
-  sortField?: string
-  sortOrder?: string
+export interface QuestionQueryRequest extends PageRequest {
   bankId?: number
-  questionType?: 0 | 1 | 2 | 3 | 4
-  difficulty?: 1 | 2 | 3 | 4 | 5
+  questionType?: QuestionType
+  difficulty?: Difficulty
   keyword?: string
+}
+
+export interface PaperSection {
+  index: number
+  title: string
 }
 
 export interface PaperVO {
@@ -94,11 +102,21 @@ export interface PaperVO {
   courseId: number
   teacherId: number
   totalScore: number
-  sections: any[]
-  status: 0 | 1
+  sections: PaperSection[]
+  status: PaperStatus
   questionCount: number
   createdAt: string
   updatedAt: string
+}
+
+export interface QuestionSnapshot {
+  questionId: number
+  questionType: QuestionType
+  stem: string
+  answer: string
+  score: number
+  difficulty: Difficulty
+  options: QuestionOptionVO[]
 }
 
 export interface PaperDetailVO extends PaperVO {
@@ -113,27 +131,23 @@ export interface PaperQuestionVO {
   score: number
   sectionIndex: number
   question: QuestionVO
-  questionSnapshot: any
+  questionSnapshot: QuestionSnapshot
 }
 
 export interface PaperCreateRequest {
   paperName: string
   courseId: number
-  sections?: Array<{ index: number; title: string }>
+  sections?: PaperSection[]
 }
 
 export interface PaperUpdateRequest {
   paperName?: string
-  sections?: any[]
+  sections?: PaperSection[]
 }
 
-export interface PaperQueryRequest {
-  current?: number
-  pageSize?: number
-  sortField?: string
-  sortOrder?: string
+export interface PaperQueryRequest extends PageRequest {
   courseId?: number
-  status?: 0 | 1
+  status?: PaperStatus
   keyword?: string
 }
 
@@ -165,12 +179,12 @@ export interface ExamVO {
   classId: number
   courseId: number
   teacherId: number
-  examType: 0 | 1 | 2
+  examType: ExamType
   startTime: string
   endTime: string
   durationMinutes: number
   allowLateSubmit: boolean
-  status: 0 | 1 | 2 | 3
+  status: ExamStatus
   createdAt: string
 }
 
@@ -178,7 +192,7 @@ export interface ExamCreateRequest {
   examName: string
   paperId: number
   classId: number
-  examType: 0 | 1 | 2
+  examType: ExamType
   startTime: string
   endTime: string
   durationMinutes?: number
@@ -193,15 +207,11 @@ export interface ExamUpdateRequest {
   allowLateSubmit?: boolean
 }
 
-export interface ExamQueryRequest {
-  current?: number
-  pageSize?: number
-  sortField?: string
-  sortOrder?: string
+export interface ExamQueryRequest extends PageRequest {
   classId?: number
   courseId?: number
-  examType?: 0 | 1 | 2
-  status?: 0 | 1 | 2 | 3
+  examType?: ExamType
+  status?: ExamStatus
   keyword?: string
 }
 
@@ -220,7 +230,7 @@ export interface AnswerSheetVO {
   examId: number
   studentId: number
   studentName: string
-  status: 0 | 1 | 2 | 3
+  status: SheetStatus
   totalScore: number
   objectiveScore: number
   subjectiveScore: number
@@ -236,10 +246,10 @@ export interface AnswerRecordVO {
   answerContent: string
   score: number
   isCorrect: boolean
-  gradingStatus: 0 | 1 | 2
+  gradingStatus: GradingStatus
   graderId: number
   comment: string
-  questionType: 0 | 1 | 2 | 3 | 4
+  questionType: QuestionType
   stem: string
   questionScore: number
   correctAnswer: string
@@ -250,7 +260,7 @@ export interface AnswerSheetDetailVO {
   examId: number
   examName: string
   studentId: number
-  status: 0 | 1 | 2 | 3
+  status: SheetStatus
   totalScore: number
   objectiveScore: number
   subjectiveScore: number

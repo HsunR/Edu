@@ -62,6 +62,7 @@
 
 <script setup name="SelectUser">
 import { authUserSelectAll, unallocatedUserList } from "@/api/system/role"
+import { resetForm } from "@/utils"
 
 const props = defineProps({
   roleId: {
@@ -118,7 +119,7 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef")
+  resetForm("queryRef")
   handleQuery()
 }
 

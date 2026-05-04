@@ -5,11 +5,12 @@ import { Search } from '@element-plus/icons-vue'
 import { getResourceList } from '@/api/resource/resource'
 import ResourceUpload from '@/components/ResourceUpload/index.vue'
 import type { ResourceVO, ResourceQueryRequest } from '@/api/resource/types'
+import { ResourceType, ResourceTypeLabels, UploadStatus } from '@/types/enums'
 
 const props = withDefaults(defineProps<{
   modelValue: boolean
   multiple?: boolean
-  resourceType?: 1 | 2 | 3
+  resourceType?: ResourceType
   excludeIds?: number[]
 }>(), {
   multiple: false,
@@ -33,20 +34,14 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const keyword = ref('')
-const filterType = ref<1 | 2 | 3 | undefined>(props.resourceType)
+const filterType = ref<ResourceType | undefined>(props.resourceType)
 const selectedResources = ref<ResourceVO[]>([])
 const uploadVisible = ref(false)
 
-const resourceTypeLabel: Record<number, string> = {
-  1: '视频',
-  2: '文档',
-  3: '图片'
-}
-
-const uploadStatusTag: Record<number, { type: 'info' | 'success' | 'danger'; label: string }> = {
-  0: { type: 'info', label: '待确认' },
-  1: { type: 'success', label: '成功' },
-  2: { type: 'danger', label: '失败' }
+const uploadStatusTag: Record<UploadStatus, { type: 'info' | 'success' | 'danger'; label: string }> = {
+  [UploadStatus.Pending]: { type: 'info', label: '待确认' },
+  [UploadStatus.Success]: { type: 'success', label: '成功' },
+  [UploadStatus.Failed]: { type: 'danger', label: '失败' }
 }
 
 function formatFileSize(bytes: number): string {
@@ -170,9 +165,9 @@ watch(visible, (val) => {
             style="width: 120px"
             @change="handleSearch"
           >
-            <el-option label="视频" :value="1" />
-            <el-option label="文档" :value="2" />
-            <el-option label="图片" :value="3" />
+            <el-option label="视频" :value="ResourceType.Video" />
+            <el-option label="文档" :value="ResourceType.Document" />
+            <el-option label="图片" :value="ResourceType.Image" />
           </el-select>
         </div>
         <el-button type="primary" @click="uploadVisible = true">上传新资源</el-button>
@@ -194,7 +189,7 @@ watch(visible, (val) => {
         <el-table-column prop="resourceName" label="文件名" min-width="200" show-overflow-tooltip />
         <el-table-column prop="resourceType" label="类型" width="80" align="center">
           <template #default="{ row }">
-            <el-tag size="small">{{ resourceTypeLabel[row.resourceType] }}</el-tag>
+            <el-tag size="small">{{ ResourceTypeLabels[row.resourceType as ResourceType] }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="fileFormat" label="格式" width="80" align="center" />
@@ -253,9 +248,9 @@ watch(visible, (val) => {
     <el-form label-width="80px">
       <el-form-item label="资源类型">
         <el-radio-group v-model="uploadResourceType">
-          <el-radio :value="1">视频</el-radio>
-          <el-radio :value="2">文档</el-radio>
-          <el-radio :value="3">图片</el-radio>
+          <el-radio :value="ResourceType.Video">视频</el-radio>
+          <el-radio :value="ResourceType.Document">文档</el-radio>
+          <el-radio :value="ResourceType.Image">图片</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -270,7 +265,7 @@ watch(visible, (val) => {
 export default {
   data() {
     return {
-      uploadResourceType: 2 as 1 | 2 | 3
+      uploadResourceType: ResourceType.Document as ResourceType
     }
   }
 }

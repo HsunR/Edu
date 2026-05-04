@@ -5,6 +5,7 @@ import { Search } from '@element-plus/icons-vue'
 import { useCourseStore } from '@/stores/course'
 import type { CourseQueryRequest } from '@/api/course/types'
 import type { CategoryVO } from '@/api/course/types'
+import { CourseStatus } from '@/types/enums'
 
 const router = useRouter()
 const courseStore = useCourseStore()
@@ -20,7 +21,7 @@ const queryParams = reactive<CourseQueryRequest>({
   pageSize: 12,
   courseName: '',
   categoryId: undefined,
-  status: 1
+  status: CourseStatus.Published
 })
 
 async function loadCourses() {

@@ -15,9 +15,9 @@
 <script setup>
 import { useWindowSize } from '@vueuse/core'
 import Sidebar from './components/Sidebar/index.vue'
-import { AppMain, Navbar, TagsView } from './components'
-import useAppStore from '@/store/modules/app'
-import useSettingsStore from '@/store/modules/settings'
+import { AppMain, Navbar } from './components'
+import { useAppStore } from '@/stores/app'
+import { useSettingsStore } from '@/stores/settings'
 
 const settingsStore = useSettingsStore()
 const theme = computed(() => settingsStore.theme)
@@ -34,7 +34,7 @@ const classObj = computed(() => ({
   mobile: device.value === 'mobile'
 }))
 
-const { width, height } = useWindowSize()
+const { width } = useWindowSize()
 const WIDTH = 992 // refer to Bootstrap's responsive design
 
 watch(() => device.value, () => {
@@ -57,7 +57,7 @@ function handleClickOutside() {
 }
 
 function setLayout() {
-  settingRef.value.openSetting()
+  console.warn('setLayout: Settings panel not yet implemented')
 }
 </script>
 

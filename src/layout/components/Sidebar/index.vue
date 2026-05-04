@@ -29,9 +29,9 @@
 import Logo from './Logo'
 import SidebarItem from './SidebarItem'
 import variables from '@/assets/styles/variables.module.scss'
-import useAppStore from '@/store/modules/app'
-import useSettingsStore from '@/store/modules/settings'
-import usePermissionStore from '@/store/modules/permission'
+import { useAppStore } from '@/stores/app'
+import { useSettingsStore } from '@/stores/settings'
+import { usePermissionStore } from '@/stores/permission'
 
 
 const route = useRoute()
@@ -47,7 +47,7 @@ const isCollapse = computed(() => !appStore.sidebar.opened)
 
 // 获取菜单背景色
 const getMenuBackground = computed(() => {
-  if (settingsStore.isDark) {
+  if (settingsStore.isDarkMode) {
     return 'var(--sidebar-bg)'
   }
   return sideTheme.value === 'theme-dark' ? variables.menuBg : variables.menuLightBg
@@ -55,7 +55,7 @@ const getMenuBackground = computed(() => {
 
 // 获取菜单文字颜色
 const getMenuTextColor = computed(() => {
-  if (settingsStore.isDark) {
+  if (settingsStore.isDarkMode) {
     return 'var(--sidebar-text)'
   }
   return sideTheme.value === 'theme-dark' ? variables.menuText : variables.menuLightText

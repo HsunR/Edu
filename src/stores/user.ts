@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { login as loginApi, logout as logoutApi } from '@/api/user/auth'
 import { getUserInfo, updateUserInfo as updateUserInfoApi, updateAvatar as updateAvatarApi } from '@/api/user/user'
-import { getToken, setToken, removeToken, getRefreshToken, setRefreshToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, getRefreshToken, setRefreshToken, removeRefreshToken } from '@/utils/auth'
 import type { LoginRequest, UserDetailVO, UserUpdateRequest } from '@/api/user/types'
 import { UserType } from '@/types/enums'
 
@@ -23,6 +23,7 @@ export const useUserStore = defineStore('user', () => {
     refreshToken.value = res.refreshToken
     setToken(res.accessToken)
     setRefreshToken(res.refreshToken)
+    await fetchUserInfo()
   }
 
   async function fetchUserInfo() {
@@ -47,7 +48,14 @@ export const useUserStore = defineStore('user', () => {
       refreshToken.value = ''
       userInfo.value = null
       removeToken()
+      removeRefreshToken()
     }
+  }
+
+  function resetState() {
+    token.value = ''
+    refreshToken.value = ''
+    userInfo.value = null
   }
 
   return {
@@ -63,6 +71,7 @@ export const useUserStore = defineStore('user', () => {
     fetchUserInfo,
     updateUserInfo,
     updateAvatar,
-    logout
+    logout,
+    resetState
   }
 })

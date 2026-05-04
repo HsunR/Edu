@@ -292,6 +292,7 @@
 import { addMenu, delMenu, getMenu, listMenu, updateMenu } from "@/api/system/menu"
 import SvgIcon from "@/components/SvgIcon"
 import IconSelect from "@/components/IconSelect"
+import { handleTree, resetForm } from "@/utils"
 
 const { proxy } = getCurrentInstance()
 const { sys_show_hide, sys_normal_disable } = proxy.useDict("sys_show_hide", "sys_normal_disable")
@@ -325,7 +326,7 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listMenu(queryParams.value).then(response => {
-    menuList.value = proxy.handleTree(response.data, "menuId")
+    menuList.value = handleTree(response.data, "menuId")
     loading.value = false
   })
 }
@@ -335,7 +336,7 @@ function getTreeselect() {
   menuOptions.value = []
   listMenu().then(response => {
     const menu = { menuId: 0, menuName: "主类目", children: [] }
-    menu.children = proxy.handleTree(response.data, "menuId")
+    menu.children = handleTree(response.data, "menuId")
     menuOptions.value.push(menu)
   })
 }
@@ -360,7 +361,7 @@ function reset() {
     visible: "0",
     status: "0"
   }
-  proxy.resetForm("menuRef")
+  resetForm("menuRef")
 }
 
 /** 展示下拉图标 */
@@ -380,7 +381,7 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef")
+  resetForm("queryRef")
   handleQuery()
 }
 

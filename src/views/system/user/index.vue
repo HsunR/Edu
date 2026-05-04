@@ -215,7 +215,9 @@
 
 <script setup name="User">
 import { getToken } from "@/utils/auth"
-import useAppStore from '@/store/modules/app'
+import { download } from "@/api/request"
+import { addDateRange, resetForm } from "@/utils"
+import { useAppStore } from '@/stores/app'
 import { changeUserStatus, listUser, resetUserPwd, delUser, getUser, updateUser, addUser, deptTreeSelect } from "@/api/system/user"
 import { Splitpanes, Pane } from "splitpanes"
 import "splitpanes/dist/splitpanes.css"
@@ -302,7 +304,7 @@ watch(deptName, val => {
 /** 查询用户列表 */
 function getList() {
   loading.value = true
-  listUser(proxy.addDateRange(queryParams.value, dateRange.value)).then(res => {
+  listUser(addDateRange(queryParams.value, dateRange.value)).then(res => {
     loading.value = false
     userList.value = res.rows
     total.value = res.total
@@ -345,7 +347,7 @@ function handleQuery() {
 /** 重置按钮操作 */
 function resetQuery() {
   dateRange.value = []
-  proxy.resetForm("queryRef")
+  resetForm("queryRef")
   queryParams.value.deptId = undefined
   proxy.$refs.deptTreeRef.setCurrentKey(null)
   handleQuery()
@@ -364,7 +366,7 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download("system/user/export", {
+  download("system/user/export", {
     ...queryParams.value,
   },`user_${new Date().getTime()}.xlsx`)
 }
@@ -436,7 +438,7 @@ function handleImport() {
 
 /** 下载模板操作 */
 function importTemplate() {
-  proxy.download("system/user/importTemplate", {
+  download("system/user/importTemplate", {
   }, `user_template_${new Date().getTime()}.xlsx`)
 }
 
@@ -475,7 +477,7 @@ function reset() {
     postIds: [],
     roleIds: []
   }
-  proxy.resetForm("userRef")
+  resetForm("userRef")
 }
 
 /** 取消按钮 */

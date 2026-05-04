@@ -7,6 +7,7 @@ import { getResourceList, getResourceDetail, deleteResource } from '@/api/resour
 import ResourceUpload from '@/components/ResourceUpload/index.vue'
 import VideoPlayer from '@/components/VideoPlayer/index.vue'
 import type { ResourceVO, ResourceDetailVO, ResourceQueryRequest } from '@/api/resource/types'
+import { ResourceType, ResourceTypeLabels, UploadStatus, UploadStatusLabels } from '@/types/enums'
 
 const route = useRoute()
 const courseId = route.params.id
@@ -17,24 +18,18 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const keyword = ref('')
-const filterType = ref<1 | 2 | 3 | undefined>(undefined)
+const filterType = ref<ResourceType | undefined>(undefined)
 
 const uploadDialogVisible = ref(false)
-const uploadResourceType = ref<1 | 2 | 3>(2)
+const uploadResourceType = ref<ResourceType>(ResourceType.Document)
 const previewVisible = ref(false)
 const previewResource = ref<ResourceDetailVO | null>(null)
 const previewLoading = ref(false)
 
-const resourceTypeLabel: Record<number, string> = {
-  1: '视频',
-  2: '文档',
-  3: '图片'
-}
-
-const uploadStatusTag: Record<number, { type: 'info' | 'success' | 'danger'; label: string }> = {
-  0: { type: 'info', label: '待确认' },
-  1: { type: 'success', label: '成功' },
-  2: { type: 'danger', label: '失败' }
+const uploadStatusTag: Record<UploadStatus, { type: 'info' | 'success' | 'danger'; label: string }> = {
+  [UploadStatus.Pending]: { type: 'info', label: '待确认' },
+  [UploadStatus.Success]: { type: 'success', label: '成功' },
+  [UploadStatus.Failed]: { type: 'danger', label: '失败' }
 }
 
 function formatFileSize(bytes: number): string {
@@ -148,9 +143,9 @@ onMounted(loadResources)
           @clear="handleSearch"
         />
         <el-select v-model="filterType" placeholder="资源类型" clearable style="width: 120px" @change="handleSearch">
-          <el-option label="视频" :value="1" />
-          <el-option label="文档" :value="2" />
-          <el-option label="图片" :value="3" />
+          <el-option label="视频" :value="ResourceType.Video" />
+          <el-option label="文档" :value="ResourceType.Document" />
+          <el-option label="图片" :value="ResourceType.Image" />
         </el-select>
       </div>
 
@@ -158,7 +153,7 @@ onMounted(loadResources)
         <el-table-column prop="resourceName" label="文件名" min-width="200" show-overflow-tooltip />
         <el-table-column prop="resourceType" label="类型" width="80" align="center">
           <template #default="{ row }">
-            <el-tag size="small">{{ resourceTypeLabel[row.resourceType] }}</el-tag>
+            <el-tag size="small">{{ ResourceTypeLabels[row.resourceType as ResourceType] }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="fileFormat" label="格式" width="80" align="center" />
@@ -212,9 +207,9 @@ onMounted(loadResources)
       <el-form label-width="80px">
         <el-form-item label="资源类型">
           <el-radio-group v-model="uploadResourceType">
-            <el-radio :value="1">视频</el-radio>
-            <el-radio :value="2">文档</el-radio>
-            <el-radio :value="3">图片</el-radio>
+            <el-radio :value="ResourceType.Video">视频</el-radio>
+            <el-radio :value="ResourceType.Document">文档</el-radio>
+            <el-radio :value="ResourceType.Image">图片</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -227,10 +222,10 @@ onMounted(loadResources)
     <el-dialog v-model="previewVisible" title="资源预览" width="700px" destroy-on-close>
       <div v-loading="previewLoading" class="preview-content">
         <template v-if="previewResource">
-          <div v-if="previewResource.resourceType === 1" class="preview-video">
+          <div v-if="previewResource.resourceType === ResourceType.Video" class="preview-video">
             <VideoPlayer :src="previewResource.accessUrl" :meta="previewResource.videoMeta || null" />
           </div>
-          <div v-else-if="previewResource.resourceType === 3" class="preview-image">
+          <div v-else-if="previewResource.resourceType === ResourceType.Image" class="preview-image">
             <img :src="previewResource.accessUrl" :alt="previewResource.resourceName" style="max-width: 100%" />
           </div>
           <div v-else class="preview-document">
@@ -239,7 +234,7 @@ onMounted(loadResources)
           </div>
           <el-descriptions :column="2" border style="margin-top: 16px">
             <el-descriptions-item label="文件名">{{ previewResource.resourceName }}</el-descriptions-item>
-            <el-descriptions-item label="类型">{{ resourceTypeLabel[previewResource.resourceType] }}</el-descriptions-item>
+            <el-descriptions-item label="类型">{{ ResourceTypeLabels[previewResource.resourceType as ResourceType] }}</el-descriptions-item>
             <el-descriptions-item label="格式">{{ previewResource.fileFormat }}</el-descriptions-item>
             <el-descriptions-item label="大小">{{ formatFileSize(previewResource.fileSize) }}</el-descriptions-item>
             <el-descriptions-item label="上传时间">{{ previewResource.createdAt }}</el-descriptions-item>

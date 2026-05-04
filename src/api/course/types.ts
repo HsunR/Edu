@@ -1,3 +1,6 @@
+import type { ClassStatus, CourseStatus, SectionResourceType, YesNo } from '@/types/enums'
+import type { PageRequest } from '@/types/api'
+
 export interface CategoryVO {
   categoryId: number
   name: string
@@ -16,8 +19,8 @@ export interface CourseVO {
   teacherAvatar: string
   categoryId: number
   categoryName: string
-  status: 0 | 1 | 2
-  isPublic: 0 | 1
+  status: CourseStatus
+  isPublic: YesNo
   createdAt: string
 }
 
@@ -30,7 +33,7 @@ export interface CourseCreateRequest {
   description?: string
   coverUrl?: string
   categoryId?: number
-  isPublic?: 0 | 1
+  isPublic?: YesNo
 }
 
 export interface CourseUpdateRequest {
@@ -38,17 +41,13 @@ export interface CourseUpdateRequest {
   description?: string
   coverUrl?: string
   categoryId?: number
-  isPublic?: 0 | 1
+  isPublic?: YesNo
 }
 
-export interface CourseQueryRequest {
-  current?: number
-  pageSize?: number
-  sortField?: string
-  sortOrder?: string
+export interface CourseQueryRequest extends PageRequest {
   categoryId?: number
   courseName?: string
-  status?: 0 | 1 | 2
+  status?: CourseStatus
 }
 
 export interface ChapterVO {
@@ -72,7 +71,7 @@ export interface SectionVO {
   chapterId: number
   title: string
   orderIndex: number
-  isFree: 0 | 1
+  isFree: YesNo
   resources: SectionResourceVO[]
 }
 
@@ -82,16 +81,22 @@ export interface SectionDetailVO extends SectionVO {
 
 export interface SectionCreateRequest {
   title: string
-  isFree?: 0 | 1
+  isFree?: YesNo
 }
 
 export interface SectionUpdateRequest {
   title?: string
-  isFree?: 0 | 1
+  isFree?: YesNo
 }
 
 export interface SectionResourceVO {
-  [key: string]: any
+  id: number
+  sectionId: number
+  resourceId: number
+  resourceType: SectionResourceType
+  orderIndex: number
+  resourceName: string
+  accessUrl: string
 }
 
 export interface ResourceSimpleDTO {
@@ -105,7 +110,7 @@ export interface ResourceSimpleDTO {
 
 export interface SectionResourceAddRequest {
   resourceId: number
-  resourceType: 'VIDEO' | 'DOCUMENT' | 'IMAGE'
+  resourceType: SectionResourceType
 }
 
 export interface ClassVO {
@@ -120,7 +125,7 @@ export interface ClassVO {
   currentStudents: number
   startDate: string
   endDate: string
-  status: 0 | 1 | 2
+  status: ClassStatus
   createdAt: string
 }
 
@@ -137,7 +142,7 @@ export interface ClassUpdateRequest {
   maxStudents?: number
   startDate?: string
   endDate?: string
-  status?: 0 | 1 | 2
+  status?: ClassStatus
 }
 
 export interface JoinClassRequest {

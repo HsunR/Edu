@@ -142,6 +142,7 @@
 
 <script setup name="Dept">
 import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from "@/api/system/dept"
+import { handleTree, resetForm } from "@/utils"
 
 const { proxy } = getCurrentInstance()
 const { sys_normal_disable } = proxy.useDict("sys_normal_disable")
@@ -175,8 +176,8 @@ const { queryParams, form, rules } = toRefs(data)
 /** 查询部门列表 */
 function getList() {
   loading.value = true
-  listDept(queryParams.value).then(response => {
-    deptList.value = proxy.handleTree(response.data, "deptId")
+  listDept(queryParams.value).then(data => {
+    deptList.value = handleTree(data, "deptId")
     loading.value = false
   })
 }
@@ -199,7 +200,7 @@ function reset() {
     email: undefined,
     status: "0"
   }
-  proxy.resetForm("deptRef")
+  resetForm("deptRef")
 }
 
 /** 搜索按钮操作 */
@@ -209,15 +210,15 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef")
+  resetForm("queryRef")
   handleQuery()
 }
 
 /** 新增按钮操作 */
 function handleAdd(row) {
   reset()
-  listDept().then(response => {
-    deptOptions.value = proxy.handleTree(response.data, "deptId")
+  listDept().then(data => {
+    deptOptions.value = handleTree(data, "deptId")
   })
   if (row != undefined) {
     form.value.parentId = row.deptId
@@ -238,11 +239,11 @@ function toggleExpandAll() {
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset()
-  listDeptExcludeChild(row.deptId).then(response => {
-    deptOptions.value = proxy.handleTree(response.data, "deptId")
+  listDeptExcludeChild(row.deptId).then(data => {
+    deptOptions.value = handleTree(data, "deptId")
   })
-  getDept(row.deptId).then(response => {
-    form.value = response.data
+  getDept(row.deptId).then(data => {
+    form.value = data
     open.value = true
     title.value = "修改部门"
   })

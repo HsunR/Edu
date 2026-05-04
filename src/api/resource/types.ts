@@ -1,11 +1,14 @@
+import type { ResourceType, UploadStatus } from '@/types/enums'
+import type { PageRequest } from '@/types/api'
+
 export interface ResourceVO {
   resourceId: number
   resourceName: string
-  resourceType: 1 | 2 | 3
+  resourceType: ResourceType
   fileFormat: string
   fileSize: number
   accessUrl: string
-  uploadStatus: 0 | 1 | 2
+  uploadStatus: UploadStatus
   createdAt: string
 }
 
@@ -21,15 +24,11 @@ export interface VideoMetaVO {
   transcodeStatus: number
 }
 
-export interface ResourceQueryRequest {
-  current?: number
-  pageSize?: number
-  sortField?: string
-  sortOrder?: string
+export interface ResourceQueryRequest extends PageRequest {
   resourceName?: string
-  resourceType?: 1 | 2 | 3
+  resourceType?: ResourceType
   fileFormat?: string
-  uploadStatus?: '1' | '2' | '3'
+  uploadStatus?: UploadStatus
   createdFrom?: string
   createdTo?: string
 }

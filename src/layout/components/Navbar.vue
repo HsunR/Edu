@@ -7,7 +7,6 @@
 
     <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
-        <!-- 邀请码 -->
         <div class="invite right-menu-item">
           <span @click="inviteFormVisible = true">输入邀请码</span>
         </div>
@@ -16,16 +15,15 @@
 
         <el-tooltip content="主题模式" effect="dark" placement="bottom">
           <div class="right-menu-item hover-effect theme-switch-wrapper" @click="toggleTheme">
-            <svg-icon v-if="settingsStore.isDark" icon-class="sunny" />
-            <svg-icon v-if="!settingsStore.isDark" icon-class="moon" />
+            <svg-icon v-if="settingsStore.isDarkMode" icon-class="sunny" />
+            <svg-icon v-if="!settingsStore.isDarkMode" icon-class="moon" />
           </div>
         </el-tooltip>
       </template>
 
       <el-dropdown @command="handleCommand" class="avatar-container right-menu-item hover-effect" trigger="hover">
         <div class="avatar-wrapper">
-          <el-avatar v-if="userStore.username" class="user-avatar"> {{ userStore.username }} </el-avatar>
-
+          <el-avatar v-if="userStore.userInfo?.nickname" class="user-avatar"> {{ userStore.userInfo?.nickname }} </el-avatar>
           <el-avatar v-else class="user-avatar" :icon="UserFilled"/>
         </div>
         <template #dropdown>
@@ -58,26 +56,20 @@
 </template>
 
 <script setup>
-import {ElMessage, ElMessageBox} from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import Breadcrumb from '@/components/Breadcrumb'
 import TopNav from '@/components/TopNav'
 import Hamburger from '@/components/Hamburger'
 import HeaderSearch from '@/components/HeaderSearch'
-import useAppStore from '@/store/modules/app'
-import useUserStore from '@/store/modules/user'
-import useSettingsStore from '@/store/modules/settings'
-
+import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
+import { useSettingsStore } from '@/stores/settings'
+import { joinClass } from '@/api/course/class'
+import { UserFilled } from '@element-plus/icons-vue'
 
 const appStore = useAppStore()
 const userStore = useUserStore()
 const settingsStore = useSettingsStore()
-
-const headPortrait = ref("")
-
-import api from '@/api/index.ts';
-const { ClassController } = api;
-
-import { UserFilled } from '@element-plus/icons-vue'
 
 function toggleSideBar() {
   appStore.toggleSideBar()
@@ -102,7 +94,7 @@ function logout() {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    userStore.logOut().then(() => {
+    userStore.logout().then(() => {
       location.href = '/login'
     })
   }).catch(() => { })
@@ -117,24 +109,27 @@ function toggleTheme() {
   settingsStore.toggleTheme()
 }
 
-// 输入邀请码加入班级
 const inviteFormVisible = ref(false)
 const inviteForm = ref({
   inviteCode: ""
 })
-const submitForm = () => {
-  const res = ClassController.joinClassByInvite(inviteForm.value)
-  if(res.data.data){
-    ElMessage.success('加入成功')
-    dialogFormVisible.value = false
-    inviteForm.value = {inviteCode: ""}
-  }else {
+
+async function submitForm() {
+  try {
+    const res = await joinClass({ inviteCode: inviteForm.value.inviteCode })
+    if (res) {
+      ElMessage.success('加入成功')
+      inviteFormVisible.value = false
+      inviteForm.value = { inviteCode: "" }
+    }
+  } catch {
     ElMessage.error('加入失败')
   }
 }
-const handleCancel =()=>{
+
+function handleCancel() {
   inviteFormVisible.value = false
-  inviteForm.value = {inviteCode: ""}
+  inviteForm.value = { inviteCode: "" }
 }
 </script>
 

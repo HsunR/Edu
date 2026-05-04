@@ -13,7 +13,7 @@ import { getPaperList } from '@/api/exam/index'
 import { getCourseClasses } from '@/api/course/course'
 import type { ExamVO, ExamCreateRequest, ExamUpdateRequest, PaperVO } from '@/api/exam/types'
 import type { ClassVO } from '@/api/course/types'
-import { ExamType, ExamStatus } from '@/types/enums'
+import { ExamType, ExamStatus, PaperStatus } from '@/types/enums'
 import type { FormInstance, FormRules } from 'element-plus'
 
 const route = useRoute()
@@ -25,8 +25,8 @@ const exams = ref<ExamVO[]>([])
 const examTotal = ref(0)
 const examPage = ref(1)
 const examPageSize = ref(10)
-const examTypeFilter = ref<0 | 1 | 2 | undefined>(undefined)
-const examStatusFilter = ref<0 | 1 | 2 | 3 | undefined>(undefined)
+const examTypeFilter = ref<ExamType | undefined>(undefined)
+const examStatusFilter = ref<ExamStatus | undefined>(undefined)
 const examKeyword = ref('')
 
 const createDialogVisible = ref(false)
@@ -35,7 +35,7 @@ const createForm = reactive<ExamCreateRequest>({
   examName: '',
   paperId: 0,
   classId: 0,
-  examType: 0,
+  examType: ExamType.Exam,
   startTime: '',
   endTime: '',
   durationMinutes: undefined,
@@ -85,7 +85,7 @@ async function loadExams() {
 async function loadFormData() {
   try {
     const [paperResult, classResult] = await Promise.all([
-      getPaperList({ current: 1, pageSize: 100, courseId, status: 1 }),
+      getPaperList({ current: 1, pageSize: 100, courseId, status: PaperStatus.Published }),
       getCourseClasses(courseId)
     ])
     publishedPapers.value = paperResult.records
@@ -99,7 +99,7 @@ function openCreateDialog() {
   createForm.examName = ''
   createForm.paperId = 0
   createForm.classId = 0
-  createForm.examType = 0
+  createForm.examType = ExamType.Exam
   createForm.startTime = ''
   createForm.endTime = ''
   createForm.durationMinutes = undefined

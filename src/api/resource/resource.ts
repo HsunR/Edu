@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/api/request'
 import type { PageResult } from '@/types/api'
 import type { ResourceVO, ResourceDetailVO, ResourceQueryRequest, PresignRequest, PresignedUrlVO, VodPresignedUrlVO, UploadConfirmRequest, VideoConfirmRequest } from './types'
 

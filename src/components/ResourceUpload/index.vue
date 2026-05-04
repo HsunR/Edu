@@ -4,11 +4,12 @@ import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { presignDocument, presignImage, presignVideo, confirmUpload, confirmVideoUpload } from '@/api/resource/resource'
 import type { ResourceVO, PresignedUrlVO, VodPresignedUrlVO } from '@/api/resource/types'
+import { ResourceType } from '@/types/enums'
 import axios from 'axios'
 
 const props = withDefaults(defineProps<{
   accept?: string
-  resourceType: 1 | 2 | 3
+  resourceType: ResourceType
   maxFileSize?: number
   autoUpload?: boolean
 }>(), {
@@ -28,14 +29,14 @@ const fileName = ref('')
 
 const acceptComputed = computed(() => {
   if (props.accept) return props.accept
-  if (props.resourceType === 1) return 'video/*'
-  if (props.resourceType === 2) return '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt'
+  if (props.resourceType === ResourceType.Video) return 'video/*'
+  if (props.resourceType === ResourceType.Document) return '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt'
   return 'image/*'
 })
 
 const typeLabel = computed(() => {
-  if (props.resourceType === 1) return '视频'
-  if (props.resourceType === 2) return '文档'
+  if (props.resourceType === ResourceType.Video) return '视频'
+  if (props.resourceType === ResourceType.Document) return '文档'
   return '图片'
 })
 
@@ -54,9 +55,9 @@ async function handleUpload(file: File) {
   try {
     let presignResult: PresignedUrlVO | VodPresignedUrlVO
 
-    if (props.resourceType === 1) {
+    if (props.resourceType === ResourceType.Video) {
       presignResult = await presignVideo({ fileName: file.name, fileSize: file.size })
-    } else if (props.resourceType === 2) {
+    } else if (props.resourceType === ResourceType.Document) {
       presignResult = await presignDocument({ fileName: file.name, fileSize: file.size })
     } else {
       presignResult = await presignImage({ fileName: file.name, fileSize: file.size })
@@ -64,7 +65,7 @@ async function handleUpload(file: File) {
 
     progress.value = 40
 
-    if (props.resourceType === 1) {
+    if (props.resourceType === ResourceType.Video) {
       const vodResult = presignResult as VodPresignedUrlVO
       if (vodResult.mediaUploadUrls?.length > 0) {
         await axios.put(vodResult.mediaUploadUrls[0], file, {

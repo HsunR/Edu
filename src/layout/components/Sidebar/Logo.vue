@@ -15,7 +15,7 @@
 
 <script setup>
 import logo from '@/assets/logo/logo.png'
-import useSettingsStore from '@/store/modules/settings'
+import { useSettingsStore } from '@/stores/settings'
 import variables from '@/assets/styles/variables.module.scss'
 
 defineProps({
@@ -31,7 +31,7 @@ const sideTheme = computed(() => settingsStore.sideTheme)
 
 // 获取Logo背景色
 const getLogoBackground = computed(() => {
-  if (settingsStore.isDark) {
+  if (settingsStore.isDarkMode) {
     return 'var(--sidebar-bg)'
   }
   return sideTheme.value === 'theme-dark' ? variables.menuBg : variables.menuLightBg
@@ -39,7 +39,7 @@ const getLogoBackground = computed(() => {
 
 // 获取Logo文字颜色
 const getLogoTextColor = computed(() => {
-  if (settingsStore.isDark) {
+  if (settingsStore.isDarkMode) {
     return 'var(--sidebar-text)'
   }
   return sideTheme.value === 'theme-dark' ? '#fff' : variables.menuLightText

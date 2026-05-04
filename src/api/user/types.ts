@@ -1,5 +1,8 @@
+import type { LoginType, RegisterType, Sex, UserStatus, UserType } from '@/types/enums'
+import type { PageRequest } from '@/types/api'
+
 export interface LoginRequest {
-  loginType: '1' | '2' | '3' | '4'
+  loginType: LoginType
   username?: string
   password?: string
   mobile?: string
@@ -10,13 +13,13 @@ export interface LoginRequest {
 
 export interface LoginResult {
   userId: number
-  userType: 'Student' | 'Teacher' | 'Admin'
+  userType: UserType
   accessToken: string
   refreshToken: string
 }
 
 export interface SendLoginCodeRequest {
-  loginType: number
+  loginType: LoginType
   mobile?: string
   email?: string
 }
@@ -24,7 +27,7 @@ export interface SendLoginCodeRequest {
 export interface RegisterRequest {
   name: string
   password: string
-  registerType: '手机验证码注册' | '邮箱验证码注册' | '微信OpenID注册'
+  registerType: RegisterType
   mobile?: string
   email?: string
   code?: string
@@ -36,7 +39,7 @@ export interface RegisterRequest {
 }
 
 export interface SendRegisterCodeRequest {
-  registerType: '手机验证码注册' | '邮箱验证码注册' | '微信OpenID注册'
+  registerType: RegisterType
   mobile?: string
   email?: string
 }
@@ -44,8 +47,8 @@ export interface SendRegisterCodeRequest {
 export interface UserVO {
   userId: number
   name: string
-  type: 'Student' | 'Teacher' | 'Admin'
-  sex: '未知' | '男' | '女'
+  type: UserType
+  sex: Sex
   avatarUrl: string
   personalSignature: string
   school: string
@@ -54,14 +57,14 @@ export interface UserVO {
 export interface UserDetailVO {
   userId: number
   name: string
-  type: 'Student' | 'Teacher' | 'Admin'
-  sex: '未知' | '男' | '女'
+  type: UserType
+  sex: Sex
   avatarUrl: string
   personalSignature: string
   school: string
   email: string
   mobile: string
-  status: '正常' | '禁止'
+  status: UserStatus
   studentProfile?: StudentProfileVO
   teacherProfile?: TeacherProfileVO
 }
@@ -82,7 +85,7 @@ export interface TeacherProfileVO {
 
 export interface UserUpdateRequest {
   name?: string
-  sex?: '未知' | '男' | '女'
+  sex?: Sex
   school?: string
   personalSignature?: string
 }
@@ -111,17 +114,13 @@ export interface AssignTeacherRequest {
   bio?: string
 }
 
-export interface UserQueryRequest {
-  current?: number
-  pageSize?: number
-  sortField?: string
-  sortOrder?: string
+export interface UserQueryRequest extends PageRequest {
   userId?: number
   name?: string
-  userType?: string
-  sex?: number
+  userType?: UserType
+  sex?: Sex
   email?: string
   mobile?: string
   school?: string
-  status?: number
+  status?: UserStatus
 }

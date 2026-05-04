@@ -3,19 +3,19 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 import {
-  AppstoreOutlined,
-  FileTextOutlined,
-  FileDoneOutlined,
-  FundProjectionScreenOutlined,
-  FolderOpenOutlined,
-  BookOutlined,
-  RadarChartOutlined,
-  SettingOutlined,
-  CopyOutlined
-} from '@ant-design/icons-vue';
+  Grid,
+  Document,
+  DocumentChecked,
+  Monitor,
+  FolderOpened,
+  Reading,
+  SetUp,
+  Setting,
+  CopyDocument
+} from '@element-plus/icons-vue'
 
 onMounted(() => {
   console.log(route.params.id)
@@ -28,56 +28,33 @@ watch(
   }
 )
 
+const activeIndex = ref('1')
+const menuItems = [
+  { key: '/ClassManagementTeaching', label: '班级管理', icon: Grid },
+  { key: '/ChapterStudyTeaching', label: '章节学习', icon: Document },
+  { key: '/CourseWorkTeaching', label: '课程作业', icon: DocumentChecked },
+  { key: '/CourseExamsTeaching', label: '课程考试', icon: Monitor },
+  { key: '/CourseMaterialsTeaching', label: '课程资料', icon: FolderOpened },
+  { key: '/QuestionBankManagementTeaching', label: '题库管理', icon: Reading },
+  { key: '/PaperManagementTeaching', label: '试卷管理', icon: CopyDocument },
+  { key: '/KnowledgePointsTeaching', label: '知识点', icon: SetUp },
+  { key: '/SettingManagementTeaching', label: '管理', icon: Setting },
+]
 
-const selectedKeys = ref(['1']);
-const handleClick = menuInfo => {
-  console.log('click ', menuInfo);
-  router.push(`/course/TeachingCourses/CourseDetails/${route.params.id}` + menuInfo.key )
-};
+function handleSelect(key: string) {
+  router.push(`/course/TeachingCourses/CourseDetails/${route.params.id}${key}`)
+}
 </script>
 
 <template>
   <div class="courseContainer">
     <div class="courseSider">
-      <div class="logo" />
-      <a-menu v-model:selectedKeys="selectedKeys" style="width: 100%" mode="vertical" @click="handleClick">
-        <a-menu-item key="/ClassManagementTeaching" style="height: 50px; line-height: 50px;">
-          <AppstoreOutlined />
-          <span>班级管理</span>
-        </a-menu-item>
-        <a-menu-item key="/ChapterStudyTeaching" style="height: 50px; line-height: 50px;">
-          <FileTextOutlined />
-          <span>章节学习</span>
-        </a-menu-item>
-        <a-menu-item key="/CourseWorkTeaching" style="height: 50px; line-height: 50px;">
-          <FileDoneOutlined />
-          <span>课程作业</span>
-        </a-menu-item>
-        <a-menu-item key="/CourseExamsTeaching" style="height: 50px; line-height: 50px;">
-          <FundProjectionScreenOutlined />
-          <span>课程考试</span>
-        </a-menu-item>
-        <a-menu-item key="/CourseMaterialsTeaching" style="height: 50px; line-height: 50px;">
-          <FolderOpenOutlined />
-          <span>课程资料</span>
-        </a-menu-item>
-        <a-menu-item key="/QuestionBankManagementTeaching" style="height: 50px; line-height: 50px;">
-          <BookOutlined />
-          <span>题库管理</span>
-        </a-menu-item>
-        <a-menu-item key="/PaperManagementTeaching" style="height: 50px; line-height: 50px;">
-          <CopyOutlined />
-          <span>试卷管理</span>
-        </a-menu-item>
-        <a-menu-item key="/KnowledgePointsTeaching" style="height: 50px; line-height: 50px;">
-          <RadarChartOutlined />
-          <span>知识点</span>
-        </a-menu-item>
-        <a-menu-item key="/SettingManagementTeaching" style="height: 50px; line-height: 50px;">
-          <SettingOutlined />
-          <span>管理</span>
-        </a-menu-item>
-      </a-menu>
+      <el-menu :default-active="activeIndex" @select="handleSelect">
+        <el-menu-item v-for="item in menuItems" :key="item.key" :index="item.key">
+          <el-icon><component :is="item.icon" /></el-icon>
+          <span>{{ item.label }}</span>
+        </el-menu-item>
+      </el-menu>
     </div>
 
     <div class="courseContent">
@@ -108,9 +85,5 @@ const handleClick = menuInfo => {
 .courseContent {
   flex: 5;
   margin: 10px;
-}
-
-.ant-menu{
-  height: 100%;
 }
 </style>

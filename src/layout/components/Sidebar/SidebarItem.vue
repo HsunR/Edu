@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!item.hidden">
+  <div v-if="!item.meta?.hidden">
     <template v-if="hasOneShowingChild(item.children, item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren) && !item.alwaysShow">
       <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path, onlyOneChild.query)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
@@ -30,7 +30,7 @@
 <script setup>
 import { isExternal } from '@/utils/validate'
 import AppLink from './Link'
-import { getNormalPath } from '@/utils/ruoyi'
+import { getNormalPath } from '@/utils'
 
 const props = defineProps({
   // route object
@@ -55,7 +55,7 @@ function hasOneShowingChild(children = [], parent) {
     children = []
   }
   const showingChildren = children.filter(item => {
-    if (item.hidden) {
+    if (item.meta?.hidden) {
       return false
     }
     onlyOneChild.value = item

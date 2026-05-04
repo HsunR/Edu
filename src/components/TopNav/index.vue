@@ -35,9 +35,9 @@
 <script setup>
 import { constantRoutes } from "@/router"
 import { isHttp } from '@/utils/validate'
-import useAppStore from '@/store/modules/app'
-import useSettingsStore from '@/store/modules/settings'
-import usePermissionStore from '@/store/modules/permission'
+import { useAppStore } from '@/stores/app'
+import { useSettingsStore } from '@/stores/settings'
+import { usePermissionStore } from '@/stores/permission'
 
 // 顶部栏初始数
 const visibleNumber = ref(null)
@@ -61,7 +61,7 @@ const routers = computed(() => permissionStore.topbarRouters)
 const topMenus = computed(() => {
   let topMenus = []
   routers.value.map((menu) => {
-    if (menu.hidden !== true) {
+    if (menu.meta?.hidden !== true) {
       // 兼容顶部栏一级菜单内部跳转
       if (menu.path === '/' && menu.children) {
           topMenus.push(menu.children[0])
@@ -150,7 +150,7 @@ function activeRoutes(key) {
     })
   }
   if(routes.length > 0) {
-    permissionStore.setSidebarRouters(routes)
+    permissionStore.sidebarRouters = routes
   } else {
     appStore.toggleSideBarHide(true)
   }

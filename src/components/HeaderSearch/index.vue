@@ -43,10 +43,10 @@
 
 <script setup>
 import Fuse from 'fuse.js'
-import { getNormalPath } from '@/utils/ruoyi'
+import { getNormalPath } from '@/utils'
 import { isHttp } from '@/utils/validate'
-import useSettingsStore from '@/store/modules/settings'
-import usePermissionStore from '@/store/modules/permission'
+import { useSettingsStore } from '@/stores/settings'
+import { usePermissionStore } from '@/stores/permission'
 
 const search = ref('')
 const options = ref([])
@@ -121,7 +121,7 @@ function generateRoutes(routes, basePath = '', prefixTitle = []) {
 
   for (const r of routes) {
     // skip hidden router
-    if (r.hidden) { continue }
+    if (r.meta?.hidden) { continue }
     const p = r.path.length > 0 && r.path[0] === '/' ? r.path : '/' + r.path
     const data = {
       path: !isHttp(r.path) ? getNormalPath(basePath + p) : r.path,

@@ -5,24 +5,18 @@
 </template>
 
 <script setup name="Index">
-import { onMounted } from 'vue'
-import useUserStore from '@/store/modules/user.js'
-// 1. 引入 storeToRefs
+import { onMounted, ref } from 'vue'
+import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
+import { getUserList } from '@/api/user/user'
 
 const userStore = useUserStore()
-// 2. 使用 storeToRefs 解构
-const { loginUserInfo, userInfo } = storeToRefs(userStore)
-
-import api from '@/api/index.ts';
-const { userController } = api;
+const { userInfo } = storeToRefs(userStore)
 
 onMounted(async () => {
-  await userStore.getInfo()
-  await userStore.getLoginUser()
+  await userStore.fetchUserInfo()
 
   console.log(userInfo.value)
-  console.log(loginUserInfo.value)
 
   await getUsersList()
 })
@@ -38,13 +32,11 @@ const queryParam = ref({
   "school": ""
 })
 
-const getUsersList = async ()=>{
-  const res = await userController.listUsers(queryParam.value)
-  // console.log(res)
+const getUsersList = async () => {
+  const res = await getUserList(queryParam.value)
 }
 </script>
 
 <style scoped lang="scss">
 
 </style>
-

@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/api/request'
 import type { PageResult } from '@/types/api'
 import type { QuestionBankVO, QuestionBankCreateRequest, QuestionBankUpdateRequest, QuestionBankQueryRequest, QuestionVO, QuestionCreateRequest, QuestionUpdateRequest, QuestionQueryRequest, PaperVO, PaperDetailVO, PaperCreateRequest, PaperUpdateRequest, PaperQueryRequest, PaperQuestionAddRequest, PaperQuestionOrderRequest, ExamVO, ExamCreateRequest, ExamUpdateRequest, ExamQueryRequest, ExamStatsVO, AnswerSheetVO, AnswerSheetDetailVO, AnswerSaveRequest, GradeRequest } from './types'
 

@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import useSettingsStore from '@/store/modules/settings'
+import { useSettingsStore } from '@/stores/settings'
 
 const settingsStore = useSettingsStore()
 

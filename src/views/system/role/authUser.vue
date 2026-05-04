@@ -94,6 +94,7 @@
 <script setup name="AuthUser">
 import selectUser from "./selectUser"
 import { allocatedUserList, authUserCancel, authUserCancelAll } from "@/api/system/role"
+import { resetForm } from "@/utils"
 
 const route = useRoute()
 const { proxy } = getCurrentInstance()
@@ -138,7 +139,7 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef")
+  resetForm("queryRef")
   handleQuery()
 }
 

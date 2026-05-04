@@ -11,9 +11,9 @@
     </el-form-item>
     <el-form-item label="性别">
       <el-radio-group v-model="form.sex">
-        <el-radio value="男">男</el-radio>
-        <el-radio value="女">女</el-radio>
-        <el-radio value="未知">未知</el-radio>
+        <el-radio :value="Sex.Male">男</el-radio>
+        <el-radio :value="Sex.Female">女</el-radio>
+        <el-radio :value="Sex.Unknown">未知</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item>
@@ -27,6 +27,7 @@ import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import type { UserUpdateRequest } from '@/api/user/types'
+import { Sex } from '@/types/enums'
 
 const userStore = useUserStore()
 const userRef = ref()
@@ -35,7 +36,7 @@ const form = ref<UserUpdateRequest>({
   name: '',
   personalSignature: '',
   school: '',
-  sex: '未知'
+  sex: Sex.Unknown
 })
 
 const rules = ref({

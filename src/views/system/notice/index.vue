@@ -160,6 +160,7 @@
 
 <script setup name="Notice">
 import { listNotice, getNotice, delNotice, addNotice, updateNotice } from "@/api/system/notice"
+import { resetForm } from "@/utils"
 
 const { proxy } = getCurrentInstance()
 const { sys_notice_status, sys_notice_type } = proxy.useDict("sys_notice_status", "sys_notice_type")
@@ -216,7 +217,7 @@ function reset() {
     noticeContent: undefined,
     status: "0"
   }
-  proxy.resetForm("noticeRef")
+  resetForm("noticeRef")
 }
 
 /** 搜索按钮操作 */
@@ -227,7 +228,7 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  proxy.resetForm("queryRef")
+  resetForm("queryRef")
   handleQuery()
 }
 
@@ -249,8 +250,8 @@ function handleAdd() {
 function handleUpdate(row) {
   reset()
   const noticeId = row.noticeId || ids.value
-  getNotice(noticeId).then(response => {
-    form.value = response.data
+  getNotice(noticeId).then(data => {
+    form.value = data
     open.value = true
     title.value = "修改公告"
   })

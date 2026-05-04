@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCourseStore } from '@/stores/course'
 import { getSectionDetail } from '@/api/course/section'
 import type { SectionDetailVO, ChapterVO, SectionVO } from '@/api/course/types'
+import { YesNo, ResourceType } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -71,7 +72,7 @@ onMounted(loadCourse)
                 :class="{ active: currentSectionDetail?.sectionId === section.sectionId }"
                 @click="handleSectionClick(section)"
               >
-                <el-tag v-if="section.isFree === 1" size="small" type="warning" style="margin-right: 6px">免费</el-tag>
+                <el-tag v-if="section.isFree === YesNo.Yes" size="small" type="warning" style="margin-right: 6px">免费</el-tag>
                 <span>{{ section.title }}</span>
               </div>
               <el-empty
@@ -96,17 +97,17 @@ onMounted(loadCourse)
               >
                 <div class="resource-info">
                   <el-tag
-                    :type="res.resourceType === 1 ? 'danger' : res.resourceType === 2 ? '' : 'success'"
+                    :type="res.resourceType === ResourceType.Video ? 'danger' : res.resourceType === ResourceType.Document ? '' : 'success'"
                     size="small"
                   >
-                    {{ res.resourceType === 1 ? '视频' : res.resourceType === 2 ? '文档' : '图片' }}
+                    {{ res.resourceType === ResourceType.Video ? '视频' : res.resourceType === ResourceType.Document ? '文档' : '图片' }}
                   </el-tag>
                   <span class="resource-name">{{ res.resourceName }}</span>
                   <span class="resource-format">({{ res.fileFormat }})</span>
                 </div>
                 <div class="resource-actions">
                   <el-button
-                    v-if="res.resourceType === 1"
+                    v-if="res.resourceType === ResourceType.Video"
                     size="small"
                     type="primary"
                     @click="router.push(`/course/learning/${courseId}/section/${currentSectionDetail!.sectionId}/video/${res.resourceId}`)"

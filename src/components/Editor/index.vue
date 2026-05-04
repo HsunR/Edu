@@ -9,7 +9,7 @@
       :show-file-list="false"
       :headers="headers"
       class="editor-img-uploader"
-      v-if="type == 'url'"
+      v-if="type === 'url'"
     >
       <i ref="uploadRef" class="editor-img-uploader"></i>
     </el-upload>
@@ -19,76 +19,62 @@
       ref="quillEditorRef"
       v-model:content="content"
       contentType="html"
-      @textChange="(e) => $emit('update:modelValue', content)"
+      @textChange="() => emit('update:modelValue', content)"
       :options="options"
       :style="styles"
     />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import axios from 'axios'
 import { QuillEditor } from "@vueup/vue-quill"
 import "@vueup/vue-quill/dist/vue-quill.snow.css"
 import { getToken } from "@/utils/auth"
-
-const { proxy } = getCurrentInstance()
+import type { UploadRawFile } from 'element-plus'
 
 const quillEditorRef = ref()
-const uploadUrl = ref(import.meta.env.VITE_APP_BASE_API + "/common/upload") // 上传的图片服务器地址
+const uploadRef = ref()
+const uploadUrl = ref(import.meta.env.VITE_APP_BASE_API + "/common/upload")
 const headers = ref({
   Authorization: "Bearer " + getToken()
 })
 
-const props = defineProps({
-  /* 编辑器的内容 */
-  modelValue: {
-    type: String,
-  },
-  /* 高度 */
-  height: {
-    type: Number,
-    default: null,
-  },
-  /* 最小高度 */
-  minHeight: {
-    type: Number,
-    default: null,
-  },
-  /* 只读 */
-  readOnly: {
-    type: Boolean,
-    default: false,
-  },
-  /* 上传文件大小限制(MB) */
-  fileSize: {
-    type: Number,
-    default: 5,
-  },
-  /* 类型（base64格式、url格式） */
-  type: {
-    type: String,
-    default: "url",
-  }
+const props = withDefaults(defineProps<{
+  modelValue?: string
+  height?: number | null
+  minHeight?: number | null
+  readOnly?: boolean
+  fileSize?: number
+  type?: string
+}>(), {
+  height: null,
+  minHeight: null,
+  readOnly: false,
+  fileSize: 5,
+  type: 'url',
 })
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+}>()
 
 const options = ref({
   theme: "snow",
   bounds: document.body,
   debug: "warn",
   modules: {
-    // 工具栏配置
     toolbar: [
-      ["bold", "italic", "underline", "strike"],      // 加粗 斜体 下划线 删除线
-      ["blockquote", "code-block"],                   // 引用  代码块
-      [{ list: "ordered" }, { list: "bullet" }],      // 有序、无序列表
-      [{ indent: "-1" }, { indent: "+1" }],           // 缩进
-      [{ size: ["small", false, "large", "huge"] }],  // 字体大小
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],        // 标题
-      [{ color: [] }, { background: [] }],            // 字体颜色、字体背景颜色
-      [{ align: [] }],                                // 对齐方式
-      ["clean"],                                      // 清除文本格式
-      ["link", "image", "video"]                      // 链接、图片、视频
+      ["bold", "italic", "underline", "strike"],
+      ["blockquote", "code-block"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ size: ["small", false, "large", "huge"] }],
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ color: [] }, { background: [] }],
+      [{ align: [] }],
+      ["clean"],
+      ["link", "image", "video"]
     ],
   },
   placeholder: "请输入内容",
@@ -96,7 +82,7 @@ const options = ref({
 })
 
 const styles = computed(() => {
-  let style = {}
+  const style: Record<string, string> = {}
   if (props.minHeight) {
     style.minHeight = `${props.minHeight}px`
   }
@@ -109,18 +95,17 @@ const styles = computed(() => {
 const content = ref("")
 watch(() => props.modelValue, (v) => {
   if (v !== content.value) {
-    content.value = v == undefined ? "<p></p>" : v
+    content.value = v === undefined ? "<p></p>" : v
   }
 }, { immediate: true })
 
-// 如果设置了上传地址则自定义图片上传事件
 onMounted(() => {
-  if (props.type == 'url') {
-    let quill = quillEditorRef.value.getQuill()
-    let toolbar = quill.getModule("toolbar")
-    toolbar.addHandler("image", (value) => {
+  if (props.type === 'url') {
+    const quill = quillEditorRef.value.getQuill()
+    const toolbar = quill.getModule("toolbar")
+    toolbar.addHandler("image", (value: boolean) => {
       if (value) {
-        proxy.$refs.uploadRef.click()
+        uploadRef.value?.click()
       } else {
         quill.format("image", false)
       }
@@ -129,67 +114,58 @@ onMounted(() => {
   }
 })
 
-// 上传前校检格式和大小
-function handleBeforeUpload(file) {
+function handleBeforeUpload(file: UploadRawFile) {
   const type = ["image/jpeg", "image/jpg", "image/png", "image/svg"]
   const isJPG = type.includes(file.type)
-  //检验文件格式
   if (!isJPG) {
-    proxy.$modal.msgError(`图片格式错误!`)
+    ElMessage.error('图片格式错误!')
     return false
   }
-  // 校检文件大小
   if (props.fileSize) {
     const isLt = file.size / 1024 / 1024 < props.fileSize
     if (!isLt) {
-      proxy.$modal.msgError(`上传文件大小不能超过 ${props.fileSize} MB!`)
+      ElMessage.error(`上传文件大小不能超过 ${props.fileSize} MB!`)
       return false
     }
   }
   return true
 }
 
-// 上传成功处理
-function handleUploadSuccess(res, file) {
-  // 如果上传成功
-  if (res.code == 200) {
-    // 获取富文本实例
-    let quill = toRaw(quillEditorRef.value).getQuill()
-    // 获取光标位置
-    let length = quill.selection.savedRange.index
-    // 插入图片，res.url为服务器返回的图片链接地址
+function handleUploadSuccess(res: { code: number; fileName: string }) {
+  if (res.code === 200) {
+    const quill = toRaw(quillEditorRef.value).getQuill()
+    const length = quill.selection.savedRange.index
     quill.insertEmbed(length, "image", import.meta.env.VITE_APP_BASE_API + res.fileName)
-    // 调整光标到最后
     quill.setSelection(length + 1)
   } else {
-    proxy.$modal.msgError("图片插入失败")
+    ElMessage.error("图片插入失败")
   }
 }
 
-// 上传失败处理
 function handleUploadError() {
-  proxy.$modal.msgError("图片插入失败")
+  ElMessage.error("图片插入失败")
 }
 
-// 复制粘贴图片处理
-function handlePasteCapture(e) {
-  const clipboard = e.clipboardData || window.clipboardData
+function handlePasteCapture(e: ClipboardEvent) {
+  const clipboard = e.clipboardData
   if (clipboard && clipboard.items) {
     for (let i = 0; i < clipboard.items.length; i++) {
       const item = clipboard.items[i]
       if (item.type.indexOf('image') !== -1) {
         e.preventDefault()
         const file = item.getAsFile()
-        insertImage(file)
+        if (file) insertImage(file)
       }
     }
   }
 }
 
-function insertImage(file) {
+function insertImage(file: File) {
   const formData = new FormData()
   formData.append("file", file)
-  axios.post(uploadUrl.value, formData, { headers: { "Content-Type": "multipart/form-data", Authorization: headers.value.Authorization } }).then(res => {
+  axios.post(uploadUrl.value, formData, {
+    headers: { "Content-Type": "multipart/form-data", Authorization: headers.value.Authorization }
+  }).then(res => {
     handleUploadSuccess(res.data)
   })
 }

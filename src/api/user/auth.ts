@@ -1,8 +1,8 @@
-import request from '@/utils/request'
+import request from '@/api/request'
 import type { LoginRequest, LoginResult, SendLoginCodeRequest, RegisterRequest, SendRegisterCodeRequest } from './types'
 
 export function login(data: LoginRequest) {
-  return request.post<any, LoginResult>('/api/user/auth/login', data)
+  return request.post<LoginResult>('/api/user/auth/login', data)
 }
 
 export function sendLoginCode(data: SendLoginCodeRequest) {
@@ -14,7 +14,7 @@ export function logout() {
 }
 
 export function refreshTokenApi(refreshToken: string) {
-  return request.post<any, LoginResult>('/api/user/auth/refresh-token', null, {
+  return request.post<LoginResult>('/api/user/auth/refresh-token', null, {
     params: { refreshToken }
   })
 }

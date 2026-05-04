@@ -1,17 +1,17 @@
-import request from '@/utils/request'
+import request from '@/api/request'
 import type { PageResult } from '@/types/api'
 import type { UserVO, UserDetailVO, UserUpdateRequest, PasswordUpdateRequest, ProfileUpdateRequest, AssignTeacherRequest, UserQueryRequest } from './types'
 
 export function getUserList(params: UserQueryRequest) {
-  return request.get<any, PageResult<UserVO>>('/api/user/users', { params })
+  return request.get<PageResult<UserVO>>('/api/user/users', { params })
 }
 
 export function getUserInfo() {
-  return request.get<any, UserDetailVO>('/api/user/users/me')
+  return request.get<UserDetailVO>('/api/user/users/me')
 }
 
 export function getUserById(userId: number) {
-  return request.get<any, UserVO>(`/api/user/users/${userId}`)
+  return request.get<UserVO>(`/api/user/users/${userId}`)
 }
 
 export function updateUserInfo(data: UserUpdateRequest) {
