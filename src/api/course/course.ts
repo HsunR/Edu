@@ -1,87 +1,39 @@
-// @ts-ignore
-/* eslint-disable */
-import request from "../../utils/request";
+import request from '@/utils/request'
+import type { PageResult } from '@/types/api'
+import type { CourseVO, CourseDetailVO, CourseCreateRequest, CourseUpdateRequest, CourseQueryRequest, ClassVO } from './types'
 
-/** 创建课程  */
-export async function createCourse(data) {
-    return request({
-        url: `/course/courses`,
-        method: "POST",
-        data
-    });
+export function getCourseList(params: CourseQueryRequest) {
+  return request.get<any, PageResult<CourseVO>>('/api/course/courses', { params })
 }
 
-/** 更新课程基本信息  */
-export async function updateCourse(courseId, data) {
-    return request({
-        url: `/course/courses/${courseId}`,
-        method: "PUT",
-        data
-    });
+export function getCourseDetail(courseId: number) {
+  return request.get<any, CourseDetailVO>(`/api/course/courses/${courseId}`)
 }
 
-/** 发布课程  */
-export async function publishCourse(courseId) {
-    return request({
-        url: `/course/courses/${courseId}/publish`,
-        method: "PUT"
-    });
+export function createCourse(data: CourseCreateRequest) {
+  return request.post<any, CourseVO>('/api/course/courses', data)
 }
 
-/** 发布课程  */
-export async function archiveCourse(courseId) {
-    return request({
-        url: `/course/courses/${courseId}/archive`,
-        method: "PUT"
-    });
+export function updateCourse(courseId: number, data: CourseUpdateRequest) {
+  return request.put<any, CourseVO>(`/api/course/courses/${courseId}`, data)
 }
 
-/** 删除课程  */
-export async function deleteCourse(courseId) {
-    return request({
-        url: `/course/courses/${courseId}`,
-        method: "DELETE"
-    });
+export function deleteCourse(courseId: number) {
+  return request.delete(`/api/course/courses/${courseId}`)
 }
 
-/** 我教的课程列表  */
-export async function teachingCourse() {
-    return request({
-        url: `/course/courses/teaching`,
-        method: "GET"
-    });
+export function publishCourse(courseId: number) {
+  return request.put(`/api/course/courses/${courseId}/publish`)
 }
 
-/** 查看课程下的所有班级  */
-export async function courseClasses(courseId) {
-    return request({
-        url: `/course/courses/${courseId}/classes`,
-        method: "GET"
-    });
+export function archiveCourse(courseId: number) {
+  return request.put(`/api/course/courses/${courseId}/archive`)
 }
 
-/** 浏览公开课程  */
-export async function openingCourse(data) {
-    return request({
-        url: `/course/courses`,
-        method: "GET",
-        data
-    });
+export function getTeachingCourses(params: CourseQueryRequest) {
+  return request.get<any, PageResult<CourseVO>>('/api/course/courses/teaching', { params })
 }
 
-/** 课程详情  */
-export async function courseDetail(courseId) {
-    return request({
-        url: `/course/courses/${courseId}`,
-        method: "GET"
-    });
-}
-
-
-/** 获取分类树  */
-export async function categories() {
-    return request({
-        url: `/course/categories`,
-        method: "GET"
-    });
+export function getCourseClasses(courseId: number) {
+  return request.get<any, ClassVO[]>(`/api/course/courses/${courseId}/classes`)
 }

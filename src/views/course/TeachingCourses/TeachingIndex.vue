@@ -13,7 +13,8 @@ import {
   FolderOpenOutlined,
   BookOutlined,
   RadarChartOutlined,
-  SettingOutlined
+  SettingOutlined,
+  CopyOutlined
 } from '@ant-design/icons-vue';
 
 onMounted(() => {
@@ -63,6 +64,10 @@ const handleClick = menuInfo => {
         <a-menu-item key="/QuestionBankManagementTeaching" style="height: 50px; line-height: 50px;">
           <BookOutlined />
           <span>题库管理</span>
+        </a-menu-item>
+        <a-menu-item key="/PaperManagementTeaching" style="height: 50px; line-height: 50px;">
+          <CopyOutlined />
+          <span>试卷管理</span>
         </a-menu-item>
         <a-menu-item key="/KnowledgePointsTeaching" style="height: 50px; line-height: 50px;">
           <RadarChartOutlined />

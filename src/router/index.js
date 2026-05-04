@@ -43,6 +43,11 @@ export const constantRoutes = [
     hidden: true,
   },
   {
+    path: "/register",
+    component: () => import("@/views/login/loginNew.vue"),
+    hidden: true,
+  },
+  {
     path: "/:pathMatch(.*)*",
     component: () => import("@/views/error/404"),
     hidden: true,
@@ -59,9 +64,9 @@ export const constantRoutes = [
     children: [
       {
         path: "/index",
-        component: () => import("@/views/home/index.vue"),
+        component: () => import("@/views/course/Browse/index.vue"),
         name: "Index",
-        meta: { title: "首页", icon: "dashboard", affix: true },
+        meta: { title: "课程浏览", icon: "dashboard", affix: true },
       },
     ],
   },
@@ -77,18 +82,6 @@ export const constantRoutes = [
       },
     ],
   },
-  // {
-  //   path: "/message",
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: "",
-  //       component: () => import("@/views/message/index"),
-  //       name: "Message",
-  //       meta: { title: "消息", icon: "message" },
-  //     },
-  //   ],
-  // },
   {
     path: "/",
     component: Layout,
@@ -101,7 +94,6 @@ export const constantRoutes = [
         name: "LearningCourse",
         meta: { title: "我学的课", icon: "education" },
       },
-      // 我学的课
       {
         path: "/course/LearningCourses/CourseDetails/:id",
         component: () => import("@/views/course/LearningCourses/LearingIndex"),
@@ -186,6 +178,14 @@ export const constantRoutes = [
             hidden: true,
             meta: { title: "错题集" },
           },
+          {
+            path: "ExamAnswer/:examId",
+            component: () =>
+              import("@/views/course/LearningCourses/ExamAnswer/index.vue"),
+            name: "ExamAnswerLearning",
+            hidden: true,
+            meta: { title: "答题" },
+          },
         ],
       },
 
@@ -195,7 +195,6 @@ export const constantRoutes = [
         name: "TeachingCourse",
         meta: { title: "我教的课", icon: "education" },
       },
-      // 我教的课
       {
         path: "/course/TeachingCourses/CourseDetails/:id",
         component: () => import("@/views/course/TeachingCourses/TeachingIndex"),
@@ -211,7 +210,7 @@ export const constantRoutes = [
               ),
             name: "ClassManagementTeaching",
             hidden: true,
-            meta: { title: "课程管理" },
+            meta: { title: "班级管理" },
           },
           {
             path: "ChapterStudyTeaching",
@@ -221,7 +220,7 @@ export const constantRoutes = [
               ),
             name: "ChapterStudyTeaching",
             hidden: true,
-            meta: { title: "章节学习" },
+            meta: { title: "章节管理" },
           },
           {
             path: "CourseWorkTeaching",
@@ -274,6 +273,26 @@ export const constantRoutes = [
             meta: { title: "题库管理" },
           },
           {
+            path: "PaperManagementTeaching",
+            component: () =>
+              import(
+                "@/views/course/TeachingCourses/PaperManagement/index.vue"
+              ),
+            name: "PaperManagementTeaching",
+            hidden: true,
+            meta: { title: "试卷管理" },
+          },
+          {
+            path: "ExamStats/:examId",
+            component: () =>
+              import(
+                "@/views/course/TeachingCourses/ExamStats/index.vue"
+              ),
+            name: "ExamStatsTeaching",
+            hidden: true,
+            meta: { title: "考试统计" },
+          },
+          {
             path: "SettingManagementTeaching",
             component: () =>
                 import(
@@ -281,11 +300,17 @@ export const constantRoutes = [
                     ),
             name: "SettingManagementTeaching",
             hidden: true,
-            meta: { title: "管理" },
+            meta: { title: "课程设置" },
           },
         ],
       },
-      // 创建题目
+      {
+        path: "/course/detail/:courseId",
+        component: () => import("@/views/course/Detail/index.vue"),
+        name: "CourseDetail",
+        hidden: true,
+        meta: { title: "课程详情" },
+      },
       {
         path: "/course/createQuestion",
         component: () =>
@@ -296,7 +321,6 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: "创建题目" },
       },
-      // 新建作业（1）/考试（2）
       {
         path: "/course/createExam/:id",
         component: () =>
@@ -305,7 +329,6 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: "新建作业/考试" },
       },
-      // 作业库
       {
         path: "/course/jobLibrary",
         component: () =>
@@ -314,7 +337,6 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: "作业库" },
       },
-      // 进入作业 / 考试详情页 
       {
         path: "/course/homeworkWorkDetail/:type/:id",
         component: () =>
@@ -328,6 +350,19 @@ export const constantRoutes = [
     ],
   },
 
+  {
+    path: "/resource",
+    component: Layout,
+    meta: { title: "资源管理", icon: "education" },
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/resource/index.vue"),
+        name: "ResourceManagement",
+        meta: { title: "我的资源", icon: "education" },
+      },
+    ],
+  },
   {
     path: "/setting",
     component: Layout,

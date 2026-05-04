@@ -1,97 +1,51 @@
 <script setup lang="ts">
-import { Open } from '@element-plus/icons-vue';
-import { ref, watch } from 'vue'
-import {ElButton, FilterNodeMethodFunction, TreeInstance} from 'element-plus'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useCourseStore } from '@/stores/course'
+import { getSectionDetail } from '@/api/course/section'
+import type { SectionDetailVO, ChapterVO, SectionVO } from '@/api/course/types'
 
-// 完成任务点
-const CompletedPoints = ref(0)
-const TotalPoints = ref(0)
-const percentage = ref(0)
+const route = useRoute()
+const router = useRouter()
+const courseStore = useCourseStore()
+const courseId = Number(route.params.id)
 
-// 
-interface Tree {
-  [key: string]: any
-}
+const loading = ref(false)
+const currentSectionDetail = ref<SectionDetailVO | null>(null)
+const sectionLoading = ref(false)
 
-const defaultProps = {
-  children: 'children',
-  label: 'label',
-}
+const course = computed(() => courseStore.currentCourse)
+const chapters = computed(() => course.value?.chapters || [])
 
-
-const dataSource: Tree[] = [
-  {
-    id: 1,
-    label: 'Level one 1',
-    children: [
-      {
-        id: 4,
-        label: 'Level two 1-1',
-        children: [
-          {
-            id: 9,
-            label: 'Level three 1-1-1',
-          },
-          {
-            id: 10,
-            label: 'Level three 1-1-2',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    label: 'Level one 2',
-    children: [
-      {
-        id: 5,
-        label: 'Level two 2-1',
-      },
-      {
-        id: 6,
-        label: 'Level two 2-2',
-      },
-    ],
-  },
-  {
-    id: 3,
-    label: 'Level one 3',
-    children: [
-      {
-        id: 7,
-        label: 'Level two 3-1',
-      },
-      {
-        id: 8,
-        label: 'Level two 3-2',
-      },
-    ],
-  },
-]
-
-const filterText = ref('')
-const treeRef = ref<TreeInstance>()
-
-watch(filterText, (val) => {
-  treeRef.value!.filter(val)
-})
-
-const filterNode = (value: string, data: Tree) => {
-  if (!value) return true
-  return data.label.includes(value)
-}
-
-const handleNodeClick = (data: Tree) => {
-  console.log(data)
-  if (data.children && data.children.length) {
-    return
+async function loadCourse() {
+  loading.value = true
+  try {
+    await courseStore.fetchCourseDetail(courseId)
+  } finally {
+    loading.value = false
   }
 }
+
+async function handleSectionClick(section: SectionVO) {
+  sectionLoading.value = true
+  try {
+    currentSectionDetail.value = await getSectionDetail(section.sectionId)
+  } catch {
+    currentSectionDetail.value = null
+  } finally {
+    sectionLoading.value = false
+  }
+}
+
+function goBack() {
+  router.push('/course/LearningCourses')
+}
+
+onMounted(loadCourse)
 </script>
 
 <template>
-  <div>
+  <div v-loading="loading" class="chapter-study">
     <el-card>
       <template #header>
         <div class="card-header">
@@ -99,123 +53,198 @@ const handleNodeClick = (data: Tree) => {
             <el-breadcrumb-item :to="{ path: '/course/LearningCourses' }">我学的课</el-breadcrumb-item>
             <el-breadcrumb-item>章节学习</el-breadcrumb-item>
           </el-breadcrumb>
-
-          <div class="top">
-
-            <div class="finish">
-              <span>已完成任务点：{{ CompletedPoints }} / {{ TotalPoints }}</span>
-              <span><el-progress :text-inside="true" :stroke-width="20" :percentage="percentage" /></span>
-            </div>
-
-            <div class="empty"></div>
-
-            <el-input v-model="filterText" placeholder="搜索" class="input">
-              <template #prefix>
-                <el-icon class="el-input__icon">
-                  <search />
-                </el-icon>
-              </template>
-            </el-input>
-          </div>
         </div>
       </template>
 
-      <div class="chapter">
-        <el-tree ref="treeRef" style="border-right: 1px solid #eee; padding: 20px;" :data="dataSource" node-key="id"
-                 default-expand-all :expand-on-click-node="false" :filter-node-method="filterNode" >
-          <template #default="{ node, data }">
-            <div class="custom-tree-node"><span class="custom-node">
-              <i v-if="data.children && data.children.length" class="icon-parent"></i>
-              <i class="icon-cicle" v-else>{{ node.id }}</i>
-              <span>{{ node.label }}</span>
-            </span>
-            </div>
-          </template>
-        </el-tree>
-      </div>
+      <div class="study-content">
+        <div class="chapter-sidebar">
+          <h3 class="sidebar-title">{{ course?.courseName || '课程目录' }}</h3>
+          <el-scrollbar height="70vh">
+            <el-empty v-if="chapters.length === 0" description="暂无章节" :image-size="60" />
 
+            <div v-for="chapter in chapters" :key="chapter.chapterId" class="chapter-group">
+              <div class="chapter-label">{{ chapter.title }}</div>
+              <div
+                v-for="section in chapter.sections"
+                :key="section.sectionId"
+                class="section-link"
+                :class="{ active: currentSectionDetail?.sectionId === section.sectionId }"
+                @click="handleSectionClick(section)"
+              >
+                <el-tag v-if="section.isFree === 1" size="small" type="warning" style="margin-right: 6px">免费</el-tag>
+                <span>{{ section.title }}</span>
+              </div>
+              <el-empty
+                v-if="!chapter.sections?.length"
+                description="暂无小节"
+                :image-size="40"
+              />
+            </div>
+          </el-scrollbar>
+        </div>
+
+        <div class="section-detail" v-loading="sectionLoading">
+          <template v-if="currentSectionDetail">
+            <h2 class="section-title">{{ currentSectionDetail.title }}</h2>
+
+            <div v-if="currentSectionDetail.resourceDetails?.length" class="resources-list">
+              <h4>资源列表</h4>
+              <div
+                v-for="res in currentSectionDetail.resourceDetails"
+                :key="res.resourceId"
+                class="resource-item"
+              >
+                <div class="resource-info">
+                  <el-tag
+                    :type="res.resourceType === 1 ? 'danger' : res.resourceType === 2 ? '' : 'success'"
+                    size="small"
+                  >
+                    {{ res.resourceType === 1 ? '视频' : res.resourceType === 2 ? '文档' : '图片' }}
+                  </el-tag>
+                  <span class="resource-name">{{ res.resourceName }}</span>
+                  <span class="resource-format">({{ res.fileFormat }})</span>
+                </div>
+                <div class="resource-actions">
+                  <el-button
+                    v-if="res.resourceType === 1"
+                    size="small"
+                    type="primary"
+                    @click="router.push(`/course/learning/${courseId}/section/${currentSectionDetail!.sectionId}/video/${res.resourceId}`)"
+                  >
+                    播放
+                  </el-button>
+                  <el-button
+                    v-else
+                    size="small"
+                    @click="window.open(res.accessUrl, '_blank')"
+                  >
+                    查看
+                  </el-button>
+                </div>
+              </div>
+            </div>
+
+            <el-empty v-else description="该小节暂无资源" />
+          </template>
+
+          <el-empty v-else description="请从左侧目录选择小节学习" />
+        </div>
+      </div>
     </el-card>
   </div>
 </template>
 
 <style scoped lang="scss">
-.card-header {
-  height: 10vh;
+.chapter-study {
+  padding: 0;
 }
 
-.finish {
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  span {
-    float: left;
-    margin: 30px 10px 10px 10px;
+.study-content {
+  display: flex;
+  gap: 20px;
+}
+
+.chapter-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid #ebeef5;
+  padding-right: 16px;
+
+  .sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ebeef5;
   }
 }
 
-.custom-tree-node {
-  flex: 1;
+.chapter-group {
+  margin-bottom: 16px;
+
+  .chapter-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #303133;
+    padding: 6px 0;
+  }
+}
+
+.section-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
-  padding-right: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 13px;
+  color: #606266;
 
-  .custom-node{
-    width: 200px;
+  &:hover {
+    background: #f5f7fa;
   }
 
-  .icon-parent {
-    padding: 5px 8px;
-    margin: 20px 10px;
-  }
-
-  .icon-cicle {
-    background-color: orange;
-    display: inline-block;
-    width: 25px;
-    height: 25px;
-    padding: 7px;
-    margin: 0 10px;
-    border-radius: 60%;
-    font-size: 10px;
-    color: #f0f7ff;
+  &.active {
+    background: #ecf5ff;
+    color: #409eff;
   }
 }
 
-.el-progress {
-  width: 100px;
+.section-detail {
+  flex: 1;
+  min-width: 0;
 }
 
-
-.el-tree {
-  --el-tree-node-hover-bg-color: #f5f7fa;
-  --el-tree-node-content-height: 60px;
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 16px;
 }
 
-.el-tree-node {
-  padding: 5px 0;
+.resources-list {
+  h4 {
+    font-size: 15px;
+    font-weight: 500;
+    color: #303133;
+    margin: 0 0 12px;
+  }
 }
 
-.el-tree-node__content {
-  height: 60px;
-  line-height: 60px;
-}
-
-.top{
+.resource-item {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+  margin-bottom: 8px;
 
-  .gradient-btn{
-    flex: 1;
+  &:hover {
+    background: #f5f7fa;
   }
 
-  .empty{
-    flex: 4;
-  }
+  .resource-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-  .input{
-    flex: 2;
-    margin-top: 20px;
-    height: 40px;
-  }
+    .resource-name {
+      font-size: 14px;
+      color: #303133;
+    }
 
+    .resource-format {
+      font-size: 12px;
+      color: #909399;
+    }
+  }
 }
 </style>

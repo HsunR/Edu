@@ -1,85 +1,39 @@
-// @ts-ignore
-/* eslint-disable */
-import request from "../../utils/request";
+import request from '@/utils/request'
+import type { PageResult } from '@/types/api'
+import type { UserVO, UserDetailVO, UserUpdateRequest, PasswordUpdateRequest, ProfileUpdateRequest, AssignTeacherRequest, UserQueryRequest } from './types'
 
-/**
- *  获取用户信息 (查看他人信息)
- * **/
-export function getUserInfo(userId) {
-  return request({
-    url: `/user/users/${userId}`,
-    method: 'get'
-  })
+export function getUserList(params: UserQueryRequest) {
+  return request.get<any, PageResult<UserVO>>('/api/user/users', { params })
 }
 
-/**
- *  多条件查询
- * **/
-export function listUsers(data) {
-  return request({
-    url: `/user/users`,
-    method: 'get',
-    data: data,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+export function getUserInfo() {
+  return request.get<any, UserDetailVO>('/api/user/users/me')
 }
 
-
-/** 更新用户信息  */
-export function updateUserInfo(data) {
-  return request({
-    url: `/user/users/me`,
-    method: 'put',
-    data: data
-  })
+export function getUserById(userId: number) {
+  return request.get<any, UserVO>(`/api/user/users/${userId}`)
 }
 
-/**
- * 删除
- * **/
-export function deleteUser(userId) {
-  return request({
-    url: `/user/users/${userId}`,
-    method: 'delete'
-  })
+export function updateUserInfo(data: UserUpdateRequest) {
+  return request.put('/api/user/users/me', data)
 }
 
-
-/** 更新用户头像  */
-export function updateUserAvator(avatarUrl) {
-  return request({
-    url: `/user/users/me/avatar`,
-    method: 'put',
-    data: avatarUrl
-  })
+export function updateAvatar(avatarUrl: string) {
+  return request.put('/api/user/users/me/avatar', null, { params: { avatarUrl } })
 }
 
-/**
- *  获取当前登录用户信息
- * **/
-export function getUserMe() {
-  return request({
-    url: `/user/users/me`,
-    method: 'get'
-  })
+export function updatePassword(data: PasswordUpdateRequest) {
+  return request.put('/api/user/users/me/password', data)
 }
 
-/** 更新当前用户档案信息  */
-export function updateUserProfile(data) {
-  return request({
-    url: `/user/users/me/profile`,
-    method: 'put',
-    data: data
-  })
+export function updateProfile(data: ProfileUpdateRequest) {
+  return request.put('/api/user/users/me/profile', data)
 }
 
-/** 修改密码  */
-export function updateUserPassword(data) {
-  return request({
-    url: `/user/users/me/password`,
-    method: 'put',
-    data: data
-  })
+export function deleteUser(userId: number) {
+  return request.delete(`/api/user/users/${userId}`)
+}
+
+export function assignTeacher(userId: number, data: AssignTeacherRequest) {
+  return request.put(`/api/user/users/${userId}/assign-teacher`, data)
 }

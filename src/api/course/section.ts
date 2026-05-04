@@ -1,75 +1,34 @@
-// @ts-ignore
-/* eslint-disable */
-import request from "../../utils/request";
+import request from '@/utils/request'
+import type { SectionVO, SectionDetailVO, SectionCreateRequest, SectionUpdateRequest, SectionResourceAddRequest, OrderItem } from './types'
 
-/** 添加节  */
-export async function addSections(chapterId, data) {
-    return request({
-        url: `/course/chapters/${chapterId}/sections`,
-        method: "POST",
-        data
-    });
+export function addSection(chapterId: number, data: SectionCreateRequest) {
+  return request.post<any, SectionVO>(`/api/course/chapters/${chapterId}/sections`, data)
 }
 
-/** 更新节  */
-export async function updateSections(sectionId, data) {
-    return request({
-        url: `/course/sections/${sectionId}`,
-        method: "PUT",
-        data
-    });
+export function updateSection(sectionId: number, data: SectionUpdateRequest) {
+  return request.put<any, SectionVO>(`/api/course/sections/${sectionId}`, data)
 }
 
-/** 批量调整节排序  */
-export async function orderSections(chapterId, data) {
-    return request({
-        url: `/course/chapters/${chapterId}/sections/order`,
-        method: "PUT",
-        data
-    });
+export function deleteSection(sectionId: number) {
+  return request.delete(`/api/course/sections/${sectionId}`)
 }
 
-
-/** 删除节  */
-export async function deleteSections(sectionId) {
-    return request({
-        url: `/course/sections/${sectionId}`,
-        method: "DELETE"
-    });
+export function getSectionDetail(sectionId: number) {
+  return request.get<any, SectionDetailVO>(`/api/course/sections/${sectionId}/detail`)
 }
 
-
-/** 添加资源到节  */
-export async function addResourcesToSections(sectionId, data) {
-    return request({
-        url: `/course/sections/${sectionId}/resources`,
-        method: "POST",
-        data
-    });
+export function reorderSections(chapterId: number, items: OrderItem[]) {
+  return request.put(`/api/course/chapters/${chapterId}/sections/order`, items)
 }
 
-/** 移除节内资源  */
-export async function deleteSectionsResources(sectionId) {
-    return request({
-        url: `/course/sections/${sectionId}/resources/{id}`,
-        method: "DELETE"
-    });
+export function addSectionResource(sectionId: number, data: SectionResourceAddRequest) {
+  return request.post(`/api/course/sections/${sectionId}/resources`, data)
 }
 
-
-/** 调整节内资源顺序  */
-export async function orderSectionsResources(sectionId, data) {
-    return request({
-        url: `/course/sections/${sectionId}/resources/order`,
-        method: "PUT",
-        data
-    });
+export function removeSectionResource(sectionId: number, id: number) {
+  return request.delete(`/api/course/sections/${sectionId}/resources/${id}`)
 }
 
-/** 获取节详情  */
-export async function getSectionsDetail(sectionId) {
-    return request({
-        url: `/course/sections/${sectionId}/detail`,
-        method: "GET"
-    });
+export function reorderSectionResources(sectionId: number, items: OrderItem[]) {
+  return request.put(`/api/course/sections/${sectionId}/resources/order`, items)
 }

@@ -1,207 +1,301 @@
-<script setup>
-import { ElLoading, ElMessage } from 'element-plus'
-import { ref, computed, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Search, UploadFilled } from '@element-plus/icons-vue'
-import moment from 'moment'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Delete, View } from '@element-plus/icons-vue'
+import {
+  getExamList,
+  createExam,
+  updateExam,
+  deleteExam
+} from '@/api/exam/index'
+import { getPaperList } from '@/api/exam/index'
+import { getCourseClasses } from '@/api/course/course'
+import type { ExamVO, ExamCreateRequest, ExamUpdateRequest, PaperVO } from '@/api/exam/types'
+import type { ClassVO } from '@/api/course/types'
+import { ExamType, ExamStatus } from '@/types/enums'
+import type { FormInstance, FormRules } from 'element-plus'
+
 const route = useRoute()
 const router = useRouter()
+const courseId = Number(route.params.id)
 
-// 查询
-const queryParams = ref({
-  current: 1,
-  pagesize: 10,
-  questionType: [],
-  name:''
+const loading = ref(false)
+const exams = ref<ExamVO[]>([])
+const examTotal = ref(0)
+const examPage = ref(1)
+const examPageSize = ref(10)
+const examTypeFilter = ref<0 | 1 | 2 | undefined>(undefined)
+const examStatusFilter = ref<0 | 1 | 2 | 3 | undefined>(undefined)
+const examKeyword = ref('')
+
+const createDialogVisible = ref(false)
+const createFormRef = ref<FormInstance>()
+const createForm = reactive<ExamCreateRequest>({
+  examName: '',
+  paperId: 0,
+  classId: 0,
+  examType: 0,
+  startTime: '',
+  endTime: '',
+  durationMinutes: undefined,
+  allowLateSubmit: false
 })
-const total = ref(0)
-const pagesize = ref(0)
-const formLabelWidth = ref("50px")
-// 存储列表数据
-const list = ref([])
-// 选中项
-const multipleSelection = ref([])
-const formData = ref({
-  name: ''
+const createRules = reactive<FormRules>({
+  examName: [{ required: true, message: '请输入考试名称', trigger: 'blur' }],
+  paperId: [{ required: true, message: '请选择试卷', trigger: 'change' }],
+  classId: [{ required: true, message: '请选择班级', trigger: 'change' }],
+  examType: [{ required: true, message: '请选择考试类型', trigger: 'change' }]
 })
 
-onMounted(() => {
-  // getList()
-})
-// 获取列表
-const getList = async () => {
-  const { data } = await getList(queryParams.value)
-  console.log('获取项目列表')
-  console.log(data.data)
-  list.value = data.data?.records
-  total.value = Number(data.data?.total)
-  pagesize.value = Number(data.data?.size)
-}
-// 切换页码
-const changePage = (newPage) => {
-  queryParams.value.current = newPage
-  getList()
+const publishedPapers = ref<PaperVO[]>([])
+const classes = ref<ClassVO[]>([])
+
+const examTypeMap: Record<number, { label: string; type: string }> = {
+  [ExamType.Exam]: { label: '考试', type: 'danger' },
+  [ExamType.Practice]: { label: '练习', type: 'primary' },
+  [ExamType.Homework]: { label: '作业', type: 'success' }
 }
 
-const submitQuery = () => {
-  formData.value?.validate(( valid) => {
-    if (!valid) return
-    // 提交表单 调用查询接口
-    getList()
-  })
-}
-const resetQueryForm = () => {
-  formData.value?.resetFields()
-  getList()
-}
-// 删除
-const confirmDel = async (id) => {
-  console.log('删除')
-  // await delAchievementTransformation(id)
-  // if (list.value.length === 1 && queryParams.value.page > 1) queryParams.value.page--
-  getList()
-  ElMessage.success('删除成功')
+const examStatusMap: Record<number, { label: string; type: string }> = {
+  [ExamStatus.NotStarted]: { label: '未开始', type: 'info' },
+  [ExamStatus.InProgress]: { label: '进行中', type: 'success' },
+  [ExamStatus.Ended]: { label: '已结束', type: 'warning' },
+  [ExamStatus.Graded]: { label: '已批阅', type: '' }
 }
 
-const handleSelectionChange = (val) => {
-  multipleSelection.value = val.map(item => item.id)
-}
-
-// 下载
-const downloadacademicPaper = async (supportiveMaterial) => {
+async function loadExams() {
+  loading.value = true
   try {
-    const response = await downloadAcademicPaper(supportiveMaterial)
-
-    const currentDate = moment().format('YYYYMMDD')
-    const originalFileName = supportiveMaterial
-    const newFileName = `${currentDate}_${originalFileName}`
-
-    const url = window.URL.createObjectURL(new Blob([response.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', newFileName)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
-  } catch (err) {
-    console.error('下载失败:', err)
-  }
-}
-// 导入
-const handleChange = (file) => {
-  const fileType = file.name.substring(file.name.lastIndexOf('.') + 1)
-
-  if (fileType === 'xlsx' || fileType === 'xls') {
-    importFile(file.raw)
-  } else {
-    ElMessage.warning('请上传xlsx或者xls格式的文件！')
-  }
-}
-const importFile = async (file) => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: '正在导入...',
-    background: 'rgba(0, 0, 0, 0.7)'
-  })
-  try {
-    const data = new FormData()
-    data.append('file', file)
-    // const res = await uploadExcel(data)
-    // console.log(res)
-    ElMessage.success('导入成功！')
-    window.location.reload()
-  } catch (error) {
-    ElMessage.error('导入失败！')
-    console.error('导入失败:', error)
+    const result = await getExamList({
+      current: examPage.value,
+      pageSize: examPageSize.value,
+      courseId,
+      examType: examTypeFilter.value,
+      status: examStatusFilter.value,
+      keyword: examKeyword.value || undefined
+    })
+    exams.value = result.records
+    examTotal.value = result.total
   } finally {
-    loading.close()
+    loading.value = false
   }
 }
 
-// 导出
-const exportToWord = () => {
-  
+async function loadFormData() {
+  try {
+    const [paperResult, classResult] = await Promise.all([
+      getPaperList({ current: 1, pageSize: 100, courseId, status: 1 }),
+      getCourseClasses(courseId)
+    ])
+    publishedPapers.value = paperResult.records
+    classes.value = classResult
+  } catch {
+    // ignore
+  }
 }
 
-const handlePublish = (id) => {
-  
+function openCreateDialog() {
+  createForm.examName = ''
+  createForm.paperId = 0
+  createForm.classId = 0
+  createForm.examType = 0
+  createForm.startTime = ''
+  createForm.endTime = ''
+  createForm.durationMinutes = undefined
+  createForm.allowLateSubmit = false
+  createDialogVisible.value = true
+  loadFormData()
 }
-const handleEdit = (id) => {
-  
+
+async function handleCreate() {
+  if (!createFormRef.value) return
+  await createFormRef.value.validate(async (valid) => {
+    if (!valid) return
+    try {
+      await createExam(createForm)
+      ElMessage.success('创建考试成功')
+      createDialogVisible.value = false
+      await loadExams()
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '创建失败'
+      ElMessage.error(msg)
+    }
+  })
 }
+
+async function handleDelete(exam: ExamVO) {
+  if (exam.status !== ExamStatus.NotStarted) {
+    ElMessage.warning('仅未开始的考试可删除')
+    return
+  }
+  try {
+    await ElMessageBox.confirm('确认删除该考试吗？', '删除确认', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await deleteExam(exam.examId)
+    ElMessage.success('删除成功')
+    await loadExams()
+  } catch {
+    // cancelled
+  }
+}
+
+function goToStats(examId: number) {
+  router.push(`/course/TeachingCourses/CourseDetails/${courseId}/ExamStats/${examId}`)
+}
+
+function handlePageChange(page: number) {
+  examPage.value = page
+  loadExams()
+}
+
+function handleFilterSearch() {
+  examPage.value = 1
+  loadExams()
+}
+
+onMounted(loadExams)
 </script>
 
 <template>
-  <div>
+  <div class="exam-management">
     <el-card>
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/course/TeachingCourses' }">我教的课</el-breadcrumb-item>
-            <el-breadcrumb-item>课程考试</el-breadcrumb-item>
+            <el-breadcrumb-item>考试管理</el-breadcrumb-item>
           </el-breadcrumb>
-
-          <div class="header-buttons">
-            <el-button class="gradient-btn" style="color: #fff; margin-top: 0px;"
-              @click="router.push(`/course/createExam/${2}`)">新建考试</el-button>
-            <el-upload class="upload-demo" action="#" :on-change="handleChange" :show-file-list="false"
-              :auto-upload="false">
-              <el-button :icon="UploadFilled" type="warning" plain>导入</el-button>
-            </el-upload>
-            <el-button @click="exportToWord">word导出</el-button>
-
-            <!-- 查询 -->
-            <div class="form" style="margin-left: 480px;">
-              <el-form ref="formData" :model="queryParams" size="large" label-width="80px">
-                <el-form-item prop="name" label-width="80px">
-                  <el-input v-model="queryParams.name" style="max-width: 100vh;" placeholder="搜索">
-                    <template #append>
-                      <el-button :icon="Search" @click="submitQuery" />
-                    </template>
-                  </el-input>
-                </el-form-item>
-              </el-form>
-            </div>
-          </div>
-
         </div>
       </template>
 
-      <!-- 表格 -->
-      <el-table ref="exportContent" :data="list" height="500" border style="width: 100%"
-        @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="achievementName" label="文件名" width="220" align="center" />
-        <el-table-column prop="achievementType" label="题量" width="100" align="center" />
-        <el-table-column prop="achievementType" label="总分" width="100" align="center" />
-        <el-table-column prop="achievementType" label="难度" width="100" align="center" />
-        <el-table-column prop="note" label="创建者" width="150" align="center" />
-        <el-table-column prop="time" label="创建日期" width="180" align="center">
-          <template #default="scope">{{ scope.row.date }}</template>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <el-select v-model="examTypeFilter" placeholder="考试类型" clearable size="small" style="width: 120px" @change="handleFilterSearch">
+            <el-option label="考试" :value="0" />
+            <el-option label="练习" :value="1" />
+            <el-option label="作业" :value="2" />
+          </el-select>
+          <el-select v-model="examStatusFilter" placeholder="状态" clearable size="small" style="width: 120px" @change="handleFilterSearch">
+            <el-option label="未开始" :value="0" />
+            <el-option label="进行中" :value="1" />
+            <el-option label="已结束" :value="2" />
+            <el-option label="已批阅" :value="3" />
+          </el-select>
+          <el-input v-model="examKeyword" placeholder="搜索考试名称" clearable size="small" style="width: 200px" @keyup.enter="handleFilterSearch" @clear="handleFilterSearch" />
+        </div>
+        <el-button type="primary" :icon="Plus" @click="openCreateDialog">创建考试</el-button>
+      </div>
+
+      <el-table v-loading="loading" :data="exams" stripe>
+        <el-table-column prop="examName" label="考试名称" min-width="180" show-overflow-tooltip />
+        <el-table-column label="类型" width="80">
+          <template #default="{ row }">
+            <el-tag :type="examTypeMap[row.examType]?.type" size="small">
+              {{ examTypeMap[row.examType]?.label }}
+            </el-tag>
+          </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="150px" align="center" fixed="right">
-          <template v-slot="{ row }">
-            <el-button size="mini" type="text" @click="handlePublish(row.id)">发布</el-button>
-            <el-button size="mini" type="text" @click="handleEdit(row.id)">编辑</el-button>
-            <el-popconfirm title="确认删除该行数据吗？" @confirm="confirmDel(row.id)">
-              <template #reference>
-                <el-button style="margin-left: 10px;color: #F56C6C" size="mini" type="text">
-                  删除
-                </el-button>
-              </template>
-            </el-popconfirm>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="examStatusMap[row.status]?.type" size="small">
+              {{ examStatusMap[row.status]?.label }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="paperName" label="试卷" min-width="150" show-overflow-tooltip />
+        <el-table-column label="时间" width="180">
+          <template #default="{ row }">
+            {{ row.startTime?.split(' ')[0] }} ~ {{ row.endTime?.split(' ')[0] }}
+          </template>
+        </el-table-column>
+        <el-table-column label="时长" width="80">
+          <template #default="{ row }">
+            {{ row.durationMinutes ? row.durationMinutes + '分钟' : '不限' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200">
+          <template #default="{ row }">
+            <el-button size="small" link :icon="View" @click="goToStats(row.examId)">统计</el-button>
+            <el-button v-if="row.status === ExamStatus.NotStarted" size="small" link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!-- 分页 -->
-      <el-row style="height: 60px" align="middle" type="flex" justify="end">
-        <el-pagination layout="total,prev, pager, next" :total="total" :current-page="queryParams.page"
-          :page-size="queryParams.pagesize" @current-change="changePage" />
-      </el-row>
+      <el-pagination
+        v-if="examTotal > examPageSize"
+        v-model:current-page="examPage"
+        :total="examTotal"
+        :page-size="examPageSize"
+        layout="prev, pager, next"
+        style="margin-top: 12px"
+        @current-change="handlePageChange"
+      />
     </el-card>
+
+    <el-dialog v-model="createDialogVisible" title="创建考试" width="550px">
+      <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="100px">
+        <el-form-item label="考试名称" prop="examName">
+          <el-input v-model="createForm.examName" placeholder="请输入考试名称" />
+        </el-form-item>
+        <el-form-item label="考试类型" prop="examType">
+          <el-radio-group v-model="createForm.examType">
+            <el-radio :value="0">考试</el-radio>
+            <el-radio :value="1">练习</el-radio>
+            <el-radio :value="2">作业</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="选择试卷" prop="paperId">
+          <el-select v-model="createForm.paperId" placeholder="请选择已发布试卷" style="width: 100%">
+            <el-option
+              v-for="p in publishedPapers"
+              :key="p.paperId"
+              :label="`${p.paperName} (${p.questionCount}题/${p.totalScore}分)`"
+              :value="p.paperId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="选择班级" prop="classId">
+          <el-select v-model="createForm.classId" placeholder="请选择班级" style="width: 100%">
+            <el-option v-for="c in classes" :key="c.classId" :label="c.className" :value="c.classId" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="开始时间" required>
+          <el-date-picker v-model="createForm.startTime" type="datetime" placeholder="选择开始时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="结束时间" required>
+          <el-date-picker v-model="createForm.endTime" type="datetime" placeholder="选择结束时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="答题时长">
+          <el-input-number v-model="createForm.durationMinutes" :min="1" placeholder="分钟，留空不限时" />
+          <span style="margin-left: 8px; color: #909399">分钟，留空不限时</span>
+        </el-form-item>
+        <el-form-item label="允许迟交">
+          <el-switch v-model="createForm.allowLateSubmit" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleCreate">确认创建</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped lang="scss">
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+</style>

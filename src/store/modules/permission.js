@@ -15,6 +15,7 @@ const usePermissionStore = defineStore("permission", {
     defaultRoutes: [],
     topbarRouters: [],
     sidebarRouters: [],
+    isRoutesGenerated: false,
   }),
   actions: {
     setRoutes(routes) {
@@ -52,11 +53,12 @@ const usePermissionStore = defineStore("permission", {
     // }
     generateRoutes() {
       return new Promise((resolve) => {
-        this.addRoutes = dynamicRoutes; // 直接赋值所有动态路由
-        this.routes = [...constantRoutes, ...dynamicRoutes]; // 合并静态和动态路由
+        this.addRoutes = dynamicRoutes;
+        this.routes = [...constantRoutes, ...dynamicRoutes];
         this.setSidebarRouters(this.routes);
         this.setDefaultRoutes(this.routes);
         this.setTopbarRoutes(this.routes);
+        this.isRoutesGenerated = true;
         resolve(dynamicRoutes);
       });
     },

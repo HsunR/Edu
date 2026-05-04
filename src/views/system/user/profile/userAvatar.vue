@@ -1,6 +1,6 @@
 <template>
   <div class="user-info-head" @click="editCropper()">
-    <img :src="options.img" title="点击更改头像" class="img-circle img-lg" />
+    <img :src="avatarUrl" title="点击更改头像" class="img-circle img-lg" />
     <el-dialog :title="title" v-model="open" width="800px" append-to-body @opened="modalOpened" @close="closeDialog">
       <el-row>
         <el-col :xs="24" :md="12" :style="{ height: '350px' }">
@@ -58,125 +58,106 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import "vue-cropper/dist/index.css"
 import { VueCropper } from "vue-cropper"
-import useUserStore from "@/store/modules/user"
-
-import api from '@/api/index.js';
-// import api from '@/services/user/user/index.js';
-const { userController,coResourceController } = api;
-
-// import api2 from '@/services/resource/resource/index.js'
-// const {coResourceController} = api2;
-
+import { useUserStore } from '@/stores/user'
+import { presignImage, confirmUpload } from '@/api/resource/resource'
+import { updateAvatar } from '@/api/user/user'
 import { ElMessage } from "element-plus"
-import { onMounted, onUpdated } from "vue"
+import { ref, reactive, computed } from "vue"
+import axios from 'axios'
 
 const userStore = useUserStore()
-const { proxy } = getCurrentInstance()
 
 const open = ref(false)
 const visible = ref(false)
 const title = ref("修改头像")
+const cropper = ref()
 
+const avatarUrl = computed(() => userStore.userInfo?.avatarUrl || '')
 
-onMounted(() => {
-  userStore.getInfo().then(res => {
-    options.img = localStorage.getItem("headPortrait")
-  })
-})
-
-//图片裁剪数据
 const options = reactive({
-  img: localStorage.getItem("headPortrait"),     // 裁剪图片的地址
-  autoCrop: true,            // 是否默认生成截图框
-  autoCropWidth: 200,        // 默认生成截图框宽度
-  autoCropHeight: 200,       // 默认生成截图框高度
-  fixedBox: true,            // 固定截图框大小 不允许改变
-  outputType: "png",         // 默认生成截图为PNG格式
-  filename: 'avatar',        // 文件名称
-  previews: {}               //预览数据
+  img: '',
+  autoCrop: true,
+  autoCropWidth: 200,
+  autoCropHeight: 200,
+  fixedBox: true,
+  outputType: "png",
+  filename: 'avatar',
+  previews: {} as any
 })
 
-/** 编辑头像 */
 function editCropper() {
+  options.img = avatarUrl.value
   open.value = true
 }
 
-/** 打开弹出层结束时的回调 */
 function modalOpened() {
   visible.value = true
 }
 
-/** 覆盖默认上传行为 */
 function requestUpload() {}
 
-/** 向左旋转 */
 function rotateLeft() {
-  proxy.$refs.cropper.rotateLeft()
+  cropper.value?.rotateLeft()
 }
 
-/** 向右旋转 */
 function rotateRight() {
-  proxy.$refs.cropper.rotateRight()
+  cropper.value?.rotateRight()
 }
 
-/** 图片缩放 */
-function changeScale(num) {
+function changeScale(num: number) {
   num = num || 1
-  proxy.$refs.cropper.changeScale(num)
+  cropper.value?.changeScale(num)
 }
 
-/** 上传预处理 */
-function beforeUpload(file) {
-  if (file.type.indexOf("image/") == -1) {
-    proxy.$modal.msgError("文件格式错误，请上传图片类型,如：JPG，PNG后缀的文件。")
+function beforeUpload(file: File) {
+  if (file.type.indexOf("image/") === -1) {
+    ElMessage.error("文件格式错误，请上传图片类型,如：JPG，PNG后缀的文件。")
   } else {
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onload = () => {
-      options.img = reader.result
+      options.img = reader.result as string
       options.filename = file.name
     }
   }
 }
 
-/** 上传图片 */
-function uploadImg() {
-  proxy.$refs.cropper.getCropBlob(data => {
-    let formData = new FormData()
-    formData.append("file", data, options.filename)
-    coResourceController.uploadPicture(formData).then(async response => {
+async function uploadImg() {
+  cropper.value?.getCropBlob(async (data: Blob) => {
+    try {
+      const presignResult = await presignImage({
+        fileName: options.filename,
+        fileSize: data.size
+      })
 
-      console.log("上传图片")
-      console.log(response)
-      const form = {
-        userId: localStorage.getItem("userId"),
-        headPortrait: response.data.data.thumbnailUrl
-      }
-      const res = await userController.updateUserInfo(form)
-      console.log(res)
-      if (res.data.data) {
-        open.value = false
-        ElMessage.success("上传成功")
-        userStore.headPortrait.value = res.data.data.headPortrait
-        localStorage.setItem("headPortrait", res.data.data.headPortrait);
-        visible.value = false
-      }
-    })
+      await axios.put(presignResult.uploadUrl, data, {
+        headers: { 'Content-Type': 'image/png' }
+      })
+
+      await confirmUpload({ resourceId: presignResult.resourceId })
+
+      await updateAvatar(presignResult.accessUrl)
+      await userStore.fetchUserInfo()
+
+      open.value = false
+      visible.value = false
+      ElMessage.success("头像上传成功")
+    } catch (error: any) {
+      ElMessage.error(error?.message || "头像上传失败")
+    }
   })
 }
 
-/** 实时预览 */
-function realTime(data) {
+function realTime(data: any) {
   options.previews = data
 }
 
-/** 关闭窗口 */
 function closeDialog() {
-  options.img = userStore.headPortrait.value
-  options.visible = false
+  options.img = avatarUrl.value
+  visible.value = false
 }
 </script>
 

@@ -1,272 +1,178 @@
 <script setup lang="ts">
-import { onMounted, ref, reactive } from 'vue'
-import { Edit, Delete } from '@element-plus/icons-vue';
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { Reading } from '@element-plus/icons-vue'
+import { getMyClasses, joinClass } from '@/api/course/class'
+import type { ClassVO } from '@/api/course/types'
+
 const router = useRouter()
 
-import { ElMessage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
-import type { UploadProps } from 'element-plus'
+const loading = ref(false)
+const myClasses = ref<ClassVO[]>([])
+const joinDialogVisible = ref(false)
+const inviteCode = ref('')
 
-interface ListItem {
-  id: string
-  imgUrl: string
-  name: string
-}
-
-const loading = ref(true)
-const lists = ref<ListItem[]>([])
-onMounted(() => {
-  loading.value = false
-  lists.value = [
-    {
-      id: "1001",
-      imgUrl: '/src/assets/images/test.png',
-      name: '离散数学',
-    },
-    {
-      id: "1002",
-      imgUrl: '/src/assets/images/test.png',
-      name: '数据库',
-    },
-    {
-      id: "1003",
-      imgUrl: '/src/assets/images/test.png',
-      name: '概率论',
-    },
-    {
-      id: "1004",
-      imgUrl: '/src/assets/images/test.png',
-      name: '高等数学',
-    },
-    {
-      id: "1005",
-      imgUrl: '/src/assets/images/test.png',
-      name: '操作系统',
-    },
-  ]
-})
-
-const dialogFormVisible = ref(false)
-const isEdit = ref(false)
-const formLabelWidth = '120px'
-const courseFormRef = ref();
-
-const CourseForm = reactive({
-  courseName: '',
-  courseDescribe: '',
-  courseCover:'',
-})
-const addCourse = () =>{
-  isEdit.value = false
-  dialogFormVisible.value = true
-}
-const editCourse = (id) =>{
-  console.log("编辑：", id);
-  isEdit.value = true
-  dialogFormVisible.value = true
-}
-
-// 上传图片
-const imageUrl = ref('')
-// 上传成功返回url地址  response.url
-const handleUploadSuccess: UploadProps['onSuccess'] = (
-    response,
-    uploadFile
-) => {
-  imageUrl.value = URL.createObjectURL(uploadFile.raw!)
-}
-
-const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
-  if (rawFile.size / 1024 / 1024 > 2) {
-    ElMessage.error('图片大小不能超过2MB!')
-    return false
+async function loadMyClasses() {
+  loading.value = true
+  try {
+    myClasses.value = await getMyClasses()
+  } catch {
+    myClasses.value = []
+  } finally {
+    loading.value = false
   }
-  return true
 }
 
-const handleRemove = () => {
-  imageUrl.value = "";
-  CourseForm.courseCover = '';
+async function handleJoinClass() {
+  if (!inviteCode.value.trim()) {
+    ElMessage.warning('请输入邀请码')
+    return
+  }
+  try {
+    await joinClass({ inviteCode: inviteCode.value.trim() })
+    ElMessage.success('加入班级成功')
+    joinDialogVisible.value = false
+    inviteCode.value = ''
+    await loadMyClasses()
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : '加入失败'
+    ElMessage.error(msg)
+  }
 }
 
-// 跳转课程详情页
-const toCourse = (id) => {
-  router.push(`/course/LearningCourses/CourseDetails/${id}/AITeachingAssistantLearning`)
+function goToCourse(courseId: number) {
+  router.push(`/course/LearningCourses/CourseDetails/${courseId}/ChapterStudyLearning`)
 }
 
-// 遮罩层
-const activeOverlayIndex = ref(-1);
-const toggleOverlay = (index, isShow)=>{
-  activeOverlayIndex.value = isShow ? index : -1;
+function goToCourseDetail(courseId: number) {
+  router.push(`/course/detail/${courseId}`)
 }
 
-// 删除操作
-const handleDelete = (id) => {
-  console.log("删除：", id);
-};
-
-const handleCancle = () => {
-  dialogFormVisible.value = false
-  resetForm()
-}
-
-const handleSubmit = () => {
-  courseFormRef.value.validate(async (valid) => {
-    if (valid) {
-      // const res = isEdit.value ? await editCourse() : await addCourse()
-      // console.log(res)
-      // if(res.data.data){
-      //   ElMessage.success(isEdit.value ? '修改成功' : '新增成功')
-      //   dialogFormVisible.value = false
-      //   resetForm()
-      // }else {
-      //   ElMessage.error(isEdit.value ? '修改失败' : '新增失败')
-      // }
-
-    } else {
-      ElMessage.error('请填写完整')
-      return false
-    }
-  })
-}
-// 清空表单
-const resetForm = () => {
-  courseFormRef.value?.resetFields();
-  imageUrl.value = '';
-};
+onMounted(loadMyClasses)
 </script>
 
 <template>
-  <div>
-    <el-space style="width: 100%" fill>
-      <div>
-        <el-button @click="addCourse" class="gradient-btn" style="margin: 20px;">添加课程</el-button>
-      </div>
-      <el-skeleton style="display: flex; gap: 8px" :loading="loading" animated :count="3">
-        <template #template>
-          <div style="flex: 1">
-            <el-skeleton-item variant="image" style="height: 240px" />
-            <div style="padding: 14px">
-              <el-skeleton-item variant="h3" style="width: 50%" />
-              <div style="
-                display: flex;
-                align-items: center;
-                /*justify-items: space-between;*/
-                margin-top: 16px;
-                height: 16px;
-              ">
-                <el-skeleton-item variant="text" style="margin-right: 16px" />
-                <el-skeleton-item variant="text" style="width: 30%" />
-              </div>
-            </div>
+  <div class="learning-courses">
+    <div class="page-header">
+      <h2 class="page-title">我学的课</h2>
+      <el-button type="primary" @click="joinDialogVisible = true">加入班级</el-button>
+    </div>
+
+    <div v-loading="loading" class="courses-grid">
+      <el-empty v-if="!loading && myClasses.length === 0" description="暂无课程，点击上方按钮加入班级" />
+
+      <el-card
+        v-for="cls in myClasses"
+        :key="cls.classId"
+        class="course-card"
+        shadow="hover"
+        @click="goToCourse(cls.courseId)"
+      >
+        <div class="card-body">
+          <h3 class="card-title" :title="cls.courseName">{{ cls.courseName }}</h3>
+          <p class="card-class">班级：{{ cls.className }}</p>
+          <div class="card-meta">
+            <span class="card-teacher">教师：{{ cls.teacherName }}</span>
+            <span class="card-students">{{ cls.currentStudents }} 名同学</span>
           </div>
-        </template>
-        <!-- 课程列表 -->
-        <template #default>
-          <div class="courses-container">
-            <el-card v-for="item in lists" :key="item.name" :body-style="{ padding: '20px', margin: '0px' }"
-              class="courseCard" @mouseenter="toggleOverlay(item.id, true)" @mouseleave="toggleOverlay(item.id, false)">
-              <img :src="item.imgUrl" class="image multi-content" style="max-width: 100%" />
-              <div style="padding: 14px">
-                <span>{{ item.name }}</span>
-                <div class="bottom card-header">
-                  <el-button class="button gradient-btn" @click="toCourse(item.id)">进入课程</el-button>
-                </div>
-              </div>
-
-              <!-- 遮罩层 -->
-              <div class="card-overlay" v-show="activeOverlayIndex === item.id" @click.stop>
-                <el-button type="primary" plain round @click="editCourse(item.id)" style="width: 6vh;">
-                  <el-icon>
-                    <Edit />
-                  </el-icon>编辑
-                </el-button>
-                <el-button type="danger" round @click="handleDelete(item.id)" style="width: 6vh;">
-                  <el-icon>
-                    <Delete />
-                  </el-icon>删除
-                </el-button>
-              </div>
-            </el-card>
+          <div class="card-actions">
+            <el-button type="primary" size="small" @click.stop="goToCourse(cls.courseId)">
+              进入学习
+            </el-button>
+            <el-button size="small" @click.stop="goToCourseDetail(cls.courseId)">
+              课程详情
+            </el-button>
           </div>
-
-        </template>
-      </el-skeleton>
-    </el-space>
-
-    <!-- 新增课程对话框   -->
-    <el-dialog v-model="dialogFormVisible" :title="isEdit ? '编辑课程' : '新增课程' " width="700"
-      style="padding: 20px 60px 20px 10px;">
-      <el-form ref="courseFormRef" :model="CourseForm">
-        <el-form-item label="课程名字" prop="courseName" :label-width="formLabelWidth">
-          <el-input v-model="CourseForm.courseName" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="课程封面" prop="courseCover" :label-width="formLabelWidth">
-          <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-            :show-file-list="false" :on-success="handleUploadSuccess" :before-upload="beforeUpload">
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
-              <Plus />
-            </el-icon>
-            <el-button v-if="imageUrl" @click.stop="handleRemove">删除图片</el-button>
-          </el-upload>
-        </el-form-item>
-
-        <el-form-item label="课程详细描述" prop="courseDescribe" :label-width="formLabelWidth">
-          <el-input v-model="CourseForm.courseDescribe " autocomplete="off" type="textarea" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="handleCancle">取 消</el-button>
-          <el-button type="primary" @click="handleSubmit">
-            确 认
-          </el-button>
         </div>
+      </el-card>
+    </div>
+
+    <el-dialog v-model="joinDialogVisible" title="加入班级" width="400px">
+      <el-input
+        v-model="inviteCode"
+        placeholder="请输入班级邀请码"
+        clearable
+        @keyup.enter="handleJoinClass"
+      />
+      <template #footer>
+        <el-button @click="joinDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleJoinClass">确认加入</el-button>
       </template>
     </el-dialog>
-
-    <router-view v-slot="{ Component }">
-      <keep-alive>
-        <component :is="Component" />
-      </keep-alive>
-    </router-view>
   </div>
 </template>
 
-<style scoped>
-.courses-container {
+<style scoped lang="scss">
+.learning-courses {
+  padding: 20px;
+}
+
+.page-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.courseCard {
-  flex: 0 0 calc(20% - 10px);
-  box-sizing: border-box;
-  margin-left: 50px;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
-  position: relative;
-  padding-bottom: 30px;
-}
-.courseCard:hover{
-  box-shadow: 0 4px 15px rgba(39, 116, 232, 0.6);
 }
 
-.card-overlay{
-  position: absolute;
-  top: 20px;
-  right: 10px;
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
 }
 
-.avatar-uploader .avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  min-height: 200px;
 }
 
-.gradient-btn {
-  color: #fff;
+.course-card {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.card-body {
+  padding: 4px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-class {
+  font-size: 13px;
+  color: #606266;
+  margin: 0 0 8px;
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  span {
+    font-size: 12px;
+    color: #909399;
+  }
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
 }
 </style>

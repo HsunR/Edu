@@ -15,23 +15,27 @@
                   <ul class="list-group list-group-striped">
                      <li class="list-group-item">
                         <svg-icon icon-class="user" style="margin-right: 10px;" />用户名称
-                        <div class="pull-right">{{ user?.value?.name }}</div>
+                        <div class="pull-right">{{ userStore.userInfo?.name }}</div>
                      </li>
                      <li class="list-group-item">
                         <svg-icon icon-class="phone" style="margin-right: 10px;" />手机号码
-                        <div class="pull-right">{{ user?.value?.mobile }}</div>
+                        <div class="pull-right">{{ userStore.userInfo?.mobile }}</div>
                      </li>
                      <li class="list-group-item">
                         <svg-icon icon-class="email" style="margin-right: 10px;" />用户邮箱
-                        <div class="pull-right">{{ user?.value?.email }}</div>
+                        <div class="pull-right">{{ userStore.userInfo?.email }}</div>
                      </li>
                      <li class="list-group-item">
                         <svg-icon icon-class="peoples" style="margin-right: 10px;" />用户ID
-                        <div class="pull-right">{{ user?.value?.userId }}</div>
+                        <div class="pull-right">{{ userStore.userInfo?.userId }}</div>
                      </li>
                      <li class="list-group-item">
                         <svg-icon icon-class="tree" style="margin-right: 10px;" />学校
-                        <div class="pull-right">{{ user?.value?.school }}</div>
+                        <div class="pull-right">{{ userStore.userInfo?.school }}</div>
+                     </li>
+                     <li class="list-group-item">
+                        <svg-icon icon-class="peoples" style="margin-right: 10px;" />角色
+                        <div class="pull-right">{{ userStore.userInfo?.type }}</div>
                      </li>
                   </ul>
                </div>
@@ -46,10 +50,16 @@
                </template>
                <el-tabs v-model="selectedTab">
                   <el-tab-pane label="基本资料" name="userinfo">
-                     <userInfo :user="user.value" />
+                     <userInfo />
                   </el-tab-pane>
                   <el-tab-pane label="修改密码" name="resetPwd">
                      <resetPwd />
+                  </el-tab-pane>
+                  <el-tab-pane v-if="userStore.isStudent" label="学生档案" name="studentProfile">
+                     <studentProfile />
+                  </el-tab-pane>
+                  <el-tab-pane v-if="userStore.isTeacher" label="教师档案" name="teacherProfile">
+                     <teacherProfile />
                   </el-tab-pane>
                </el-tabs>
             </el-card>
@@ -58,33 +68,14 @@
    </div>
 </template>
 
-<script setup name="Profile">
+<script setup lang="ts">
 import userAvatar from "./userAvatar"
 import userInfo from "./userInfo"
 import resetPwd from "./resetPwd"
-
-import useUserStore from '@/store/modules/user'
-import { onMounted } from 'vue'
+import studentProfile from "./studentProfile"
+import teacherProfile from "./teacherProfile"
+import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
-
 const selectedTab = ref("userinfo")
-const user = reactive({
-   userId: "",
-   name: "",
-   avatar: "",
-   email: "",
-   mobile: "",
-   school: "",
-   sex: "",
-})
-
-onMounted(async () => {
-   console.log("个人中心")
-   const { data } = await userStore.getInfo()
-   user.value = data.data
-   console.log(user.value)
-})
-
-
 </script>

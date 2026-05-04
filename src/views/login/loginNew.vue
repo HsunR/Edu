@@ -7,33 +7,33 @@
           <h2 class="form_title title">登录</h2>
 
           <!-- 手机号码登录 -->
-          <el-form-item v-if="loginForm.loginType === 1" prop="mobile">
+          <el-form-item v-if="loginForm.loginType === '1'" prop="mobile">
             <el-input v-model="loginForm.mobile" class="form_input" placeholder="手机号码" :prefix-icon="Iphone" />
           </el-form-item>
 
           <!-- 邮箱登录 -->
-          <el-form-item v-else-if="loginForm.loginType === 2" prop="email">
+          <el-form-item v-else-if="loginForm.loginType === '2'" prop="email">
             <el-input v-model="loginForm.email" class="form_input" placeholder="邮箱" :prefix-icon="Message" />
           </el-form-item>
 
           <!-- 微信登录 -->
-          <el-form-item v-else-if="loginForm.loginType === 3" prop="openId">
+          <el-form-item v-else-if="loginForm.loginType === '3'" prop="openId">
             <el-input v-model="loginForm.openId" class="form_input" placeholder="微信" :prefix-icon="Message" />
           </el-form-item>
 
           <!-- 用户名登录 -->
-          <el-form-item v-else-if="loginForm.loginType === 4" prop="username">
+          <el-form-item v-else-if="loginForm.loginType === '4'" prop="username">
             <el-input v-model="loginForm.username" class="form_input" placeholder="用户名" :prefix-icon="User" />
           </el-form-item>
 
           <!-- 密码 -->
-          <el-form-item v-if="loginForm.loginType === 4"  prop="password">
+          <el-form-item v-if="loginForm.loginType === '4'"  prop="password">
             <el-input v-model="loginForm.password" class="form_input" type="password" placeholder="密码"
               :prefix-icon="Lock" show-password />
           </el-form-item>
 
           <!-- 验证码 -->
-          <el-form-item v-if="loginForm.loginType === 1 || loginForm.loginType === 2" prop="code">
+          <el-form-item v-if="loginForm.loginType === '1' || loginForm.loginType === '2'" prop="code">
             <el-input v-model="loginForm.code" class="form_input" placeholder="请输入验证码" style="width: 230px;" />
             <el-button type="primary" style="margin-left: 10px; width: 160px;" @click="LoginCode"
               :disabled="codeButtonDisabled">
@@ -86,17 +86,17 @@
           </el-form-item>
 
           <!-- 手机号码注册 v-if="registerForm.registerType === 1"-->
-          <el-form-item prop="mobile" v-if="registerForm.registerType === 1">
+          <el-form-item prop="mobile" v-if="registerForm.registerType === '手机验证码注册'">
             <el-input v-model="registerForm.mobile" class="form_input" placeholder="手机号码" :prefix-icon="Iphone" />
           </el-form-item>
 
-          <!-- 邮箱注册  v-else-if="registerForm.registerType === 2"-->
-          <el-form-item prop="email" v-else-if="registerForm.registerType === 2">
+          <!-- 邮箱注册 -->
+          <el-form-item prop="email" v-else-if="registerForm.registerType === '邮箱验证码注册'">
             <el-input v-model="registerForm.email" class="form_input" placeholder="邮箱" :prefix-icon="Message" />
           </el-form-item>
 
           <!-- 验证码 -->
-          <el-form-item prop="code" v-if="registerForm.registerType === 1 || registerForm.registerType === 2">
+          <el-form-item prop="code" v-if="registerForm.registerType === '手机验证码注册' || registerForm.registerType === '邮箱验证码注册'">
             <el-input v-model="registerForm.code" class="form_input" placeholder="请输入验证码" style="width: 230px;" />
             <el-button type="primary" style="margin-left: 10px;  width: 160px;" @click="RegisterCode"
               :disabled="codeButtonDisabledRegister">
@@ -155,24 +155,11 @@
 
 </template>
 
-<script setup>
-// import api from '@/services/user/user/index.js';
-import api from '@/api/index.ts';
-const { userController,authController } = api;
-
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import useUserStore from '@/store/modules/user.js'
-import { onMounted } from 'vue'
-
-const router = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
-
-onMounted(() => {
-  userStore.getInfo()
-})
-
+import { useUserStore } from '@/stores/user'
+import { login as loginApi, sendLoginCode, sendRegisterCode, register as registerApi } from '@/api/user/auth'
 import {
   User,
   Message,
@@ -180,309 +167,236 @@ import {
   Lock,
   Tickets
 } from '@element-plus/icons-vue'
-import {ElMessage} from "element-plus";
+import { ElMessage } from 'element-plus'
 
-// 显示登录页面
+const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
+
 const isLoginVisible = ref(true)
 
 const loginFormRef = ref(null)
 const registerFormRef = ref(null)
 
 const loginForm = reactive({
-  "loginType": 1,
-  "username": "",
-  "password": "",
-  "mobile": "",
-  "email": "",
-  "code": ""
+  loginType: '4',
+  username: '',
+  password: '',
+  mobile: '',
+  email: '',
+  code: '',
+  openId: ''
 })
 
 const registerForm = reactive({
-  "name": "",
-  "studentNo": "",
-  "password": "",
-  "registerType": 1,
-  "mobile": "",
-  "email": "",
-  "code": "",
-  "grade": "",
-  "major": "",
-  "enrollmentYear": "",
-  "school": ""
+  name: '',
+  studentNo: '',
+  password: '',
+  registerType: '手机验证码注册',
+  mobile: '',
+  email: '',
+  code: '',
+  grade: '',
+  major: '',
+  enrollmentYear: '',
+  school: ''
 })
 
-// 加载状态
 const loading = ref(false)
 
-// 验证码按钮状态
 const codeButtonDisabled = ref(false)
 const codeButtonText = ref('获取验证码')
 const countdown = ref(60)
 
-// 验证码按钮状态
 const codeButtonDisabledRegister = ref(false)
 const codeButtonTextRegister = ref('获取验证码')
 const countdownRegister = ref(60)
 
 const loginByPhone = () => {
-  loginForm.loginType = 1
+  loginForm.loginType = '1'
   ElMessage.info('已切换为手机号登录')
 }
 
 const loginByEmail = () => {
-  loginForm.loginType = 2
+  loginForm.loginType = '2'
   ElMessage.info('已切换为邮箱登录')
 }
 
 const loginByWeChat = () => {
-  loginForm.loginType = 3
+  loginForm.loginType = '3'
   ElMessage.info('微信登录功能尚未开发')
 }
 
 const loginByUser = () => {
-  loginForm.loginType = 4
+  loginForm.loginType = '4'
   ElMessage.info('已切换为用户名密码登录')
 }
 
 const registerByPhone = () => {
-  registerForm.registerType = 1
+  registerForm.registerType = '手机验证码注册'
   ElMessage.info('已切换为手机号注册')
 }
 
 const registerByEmail = () => {
-  registerForm.registerType = 2
+  registerForm.registerType = '邮箱验证码注册'
   ElMessage.info('已切换为邮箱注册')
 }
 
 const registerByWechat = () => {
-  registerForm.registerType = 3
+  registerForm.registerType = '微信OpenID注册'
   ElMessage.info('微信注册功能尚未开发')
 }
 
-// 确保切换函数正确切换状态
 const toggleForm = () => {
   isLoginVisible.value = !isLoginVisible.value
 }
 
-// 登录表单校验
 const loginRules = reactive({
   mobile: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
-    {
-      pattern: /^1[3-9]\d{9}$/,
-      message: '请输入正确的手机号码格式',
-      trigger: 'blur'
-    }
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码格式', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    {
-      type: 'email',
-      message: '请输入正确的邮箱格式',
-      trigger: 'blur'
-    }
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
   ],
   openId: [
     { required: true, message: '请输入微信OpenID', trigger: 'blur' }
   ],
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    {
-      min: 2,
-      max: 20,
-      message: '用户名长度在2到20个字符之间',
-      trigger: 'blur'
-    }
+    { min: 2, max: 20, message: '用户名长度在2到20个字符之间', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    {
-      min: 6,
-      max: 20,
-      message: '密码必须包含字母、数字和特殊字符且长度在6到20之间',
-      trigger: 'blur'
-    }
+    { min: 6, max: 20, message: '密码长度在6到20之间', trigger: 'blur' }
   ],
   code: [
     { required: true, message: '请输入验证码', trigger: 'blur' }
   ]
 })
 
-// 注册表单校验
 const registerRules = reactive({
   name: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    {
-      min: 2,
-      max: 20,
-      message: '用户名长度在2到20个字符之间',
-      trigger: 'blur'
-    }
+    { required: true, message: '请输入姓名', trigger: 'blur' },
+    { min: 2, max: 20, message: '姓名长度在2到20个字符之间', trigger: 'blur' }
   ],
   studentNo: [
     { required: true, message: '请输入学号', trigger: 'blur' }
   ],
   mobile: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
-    {
-      pattern: /^1[3-9]\d{9}$/,
-      message: '请输入正确的手机号码格式',
-      trigger: 'blur'
-    }
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码格式', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    {
-      type: 'email',
-      message: '请输入正确的邮箱格式',
-      trigger: 'blur'
-    }
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    {
-      min: 6,
-      max: 20,
-      message: '密码必须包含字母、数字和特殊字符且长度在6到20之间',
-      trigger: 'blur'
-    }
+    { min: 6, max: 20, message: '密码长度在6到20之间', trigger: 'blur' }
   ],
   code: [
     { required: true, message: '请输入验证码', trigger: 'blur' }
   ]
 })
 
-// 发送登录验证码
+function startCountdown(type: 'login' | 'register') {
+  const isLogin = type === 'login'
+  const disabled = isLogin ? codeButtonDisabled : codeButtonDisabledRegister
+  const text = isLogin ? codeButtonText : codeButtonTextRegister
+  const cd = isLogin ? countdown : countdownRegister
+
+  disabled.value = true
+  text.value = `${cd.value}秒后重新获取`
+
+  const timer = setInterval(() => {
+    cd.value--
+    text.value = `${cd.value}秒后重新获取`
+    if (cd.value <= 0) {
+      clearInterval(timer)
+      disabled.value = false
+      text.value = '获取验证码'
+      cd.value = 60
+    }
+  }, 1000)
+}
+
 const LoginCode = async () => {
-  // if (loginForm.loginType === 1) {
-  //   ElMessage.info('通过手机号获取验证码还未实现')
-  // }
-  // 获取验证码(邮箱)
-  if (loginForm.loginType === 1 || loginForm.loginType === 2) {
-    const data = {
-      "loginType": loginForm.loginType,
-      "mobile": loginForm.mobile,
-      "email": loginForm.email
+  const loginTypeNum = Number(loginForm.loginType)
+  if (loginTypeNum === 1 || loginTypeNum === 2) {
+    try {
+      await sendLoginCode({
+        loginType: loginTypeNum,
+        mobile: loginForm.mobile,
+        email: loginForm.email
+      })
+      ElMessage.success('验证码已发送')
+      startCountdown('login')
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '发送验证码失败'
+      ElMessage.error(msg)
     }
-    const res = await authController.sendLoginCode(data)
-    console.log(res)
-    if (!res.data.data || res.data.data === "" || res.data.message === 'ok') {
-      // 倒计时
-      codeButtonDisabled.value = true
-      codeButtonText.value = `${countdown.value}秒后重新获取`
-
-      const timer = setInterval(() => {
-        countdown.value--
-        codeButtonText.value = `${countdown.value}秒后重新获取`
-        if (countdown.value <= 0) {
-          clearInterval(timer)
-          codeButtonDisabled.value = false
-          codeButtonText.value = '获取验证码'
-          countdown.value = 60
-        }
-      }, 1000)
-    } else {
-      ElMessage.error(res.data.message)
-    }
-
-    
   }
-
 }
 
-// 发送注册验证码
 const RegisterCode = async () => {
-  // if (registerForm.registerType === 1) {
-  //   ElMessage.info('通过手机号获取验证码还未实现')
-  // }
-  // 获取验证码
-  if (registerForm.registerType === 1 || registerForm.registerType === 2) {
-    const data = {
-      "registerType": registerForm.registerType,
-      "mobile": registerForm.mobile,
-      "email": registerForm.email
-    }
-    const res = await authController.sendRegisterCode(data)
-    console.log(res)
-
-    if (!res.data.data || res.data.data === "" || res.data.message === 'ok') {
-      // 倒计时
-      codeButtonDisabledRegister.value = true
-      codeButtonTextRegister.value = `${countdownRegister.value}秒后重新获取`
-
-      const timer = setInterval(() => {
-        countdownRegister.value--
-        codeButtonTextRegister.value = `${countdownRegister.value}秒后重新获取`
-        if (countdownRegister.value <= 0) {
-          clearInterval(timer)
-          codeButtonDisabledRegister.value = false
-          codeButtonTextRegister.value = '获取验证码'
-          countdownRegister.value = 60
-        }
-      }, 1000)
-    } else {
-      ElMessage.error(res.data.message)
+  if (registerForm.registerType === '手机验证码注册' || registerForm.registerType === '邮箱验证码注册') {
+    try {
+      await sendRegisterCode({
+        registerType: registerForm.registerType,
+        mobile: registerForm.mobile,
+        email: registerForm.email
+      })
+      ElMessage.success('验证码已发送')
+      startCountdown('register')
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '发送验证码失败'
+      ElMessage.error(msg)
     }
   }
-  
 }
 
-// 登录
 const handleLogin = () => {
   loginFormRef.value.validate(async (valid) => {
-    if (valid) {
-      loading.value = true
-      try {
-        console.log("登录表单提交：", loginForm)
-        userStore.login(loginForm).then(() => {
-          resetForm();
-          router.push("/");
-        })
-      } catch (error) {
-        ElMessage.error(error.message || '登录失败')
-      } finally {
-        loading.value = false
-      }
-
-    } else {
-      console.log('表单验证失败')
+    if (!valid) {
       ElMessage.error('请填写完整')
-      return false
+      return
+    }
+    loading.value = true
+    try {
+      await userStore.login(loginForm)
+      const redirect = route.query.redirect || '/'
+      router.push(redirect)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '登录失败'
+      ElMessage.error(msg)
+    } finally {
+      loading.value = false
     }
   })
 }
 
-// 注册
 const handleRegister = () => {
-  // 这里添加注册逻辑
   registerFormRef.value.validate(async (valid) => {
-    if (valid) {
-      loading.value = true
-      try {
-        const res = await authController.register(registerForm)
-        console.log('注册结果:', res)
-        if (res.data.message === 'ok') {
-          ElMessage.success('注册成功')
-          // 注册成功后，跳转到登录页
-          isLoginVisible.value = true
-          resetForm()
-        } else {
-          ElMessage.error(res.data.message)
-        }
-        
-      } catch (error) {
-        ElMessage.error(error.message || '注册失败')
-      } finally {
-        loading.value = false
-      }
-    } else {
-      console.log('表单验证失败')
-      return false
+    if (!valid) {
+      return
+    }
+    loading.value = true
+    try {
+      await registerApi(registerForm)
+      ElMessage.success('注册成功，请登录')
+      isLoginVisible.value = true
+      resetForm()
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '注册失败'
+      ElMessage.error(msg)
+    } finally {
+      loading.value = false
     }
   })
 }
 
-// 重置表单
 const resetForm = () => {
   loginFormRef.value?.resetFields()
   registerFormRef.value?.resetFields()
