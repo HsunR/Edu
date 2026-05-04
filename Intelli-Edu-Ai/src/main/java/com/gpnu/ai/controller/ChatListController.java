@@ -7,8 +7,6 @@ import com.gpnu.ai.model.dto.chatList.ChatListUpdateRequest;
 import com.gpnu.ai.model.vo.ChatListVO;
 import com.gpnu.ai.service.ChatListService;
 
-import com.gpnu.common.common.BaseResponse;
-import com.gpnu.common.common.ResultUtils;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,20 +53,18 @@ public class ChatListController {
 
     @PostMapping("/updateChatList")
     @Operation(summary = "更新聊天会话")
-    public BaseResponse<ChatListVO> updateChatList(@RequestBody ChatListUpdateRequest updateRequest ) {
+    public ChatListVO updateChatList(@RequestBody ChatListUpdateRequest updateRequest ) {
         ThrowUtils.throwIf(updateRequest == null, ErrorCode.PARAMS_ERROR,"请求体不能为空");
         ThrowUtils.throwIf(updateRequest.getConversationId() == null || updateRequest.getConversationId().isEmpty(), ErrorCode.PARAMS_ERROR,"会话ID不能为空");
 
-        ChatListVO result = chatListService.updateChatList(updateRequest);
-        return ResultUtils.success(result);
+        return chatListService.updateChatList(updateRequest);
     }
 
     @PostMapping("/deleteChatList")
     @Operation(summary = "删除聊天会话")
-    public BaseResponse<Boolean> deleteChatList(@RequestBody ChatListDeleteRequest chatListDeleteRequest) {
+    public Boolean deleteChatList(@RequestBody ChatListDeleteRequest chatListDeleteRequest) {
         ThrowUtils.throwIf(chatListDeleteRequest == null , ErrorCode.PARAMS_ERROR,"会话ID不能为空");
-        boolean result = chatListService.deleteChatList(chatListDeleteRequest);
-        return ResultUtils.success(result);
+        return chatListService.deleteChatList(chatListDeleteRequest);
     }
 
 }
