@@ -19,7 +19,7 @@ export const useCourseStore = defineStore('course', () => {
     return currentCourse.value?.teacherId === userStore.userInfo?.userId
   })
 
-  async function fetchCourseDetail(courseId: number) {
+  async function fetchCourseDetail(courseId: string) {
     currentCourse.value = await getCourseDetail(courseId)
   }
 

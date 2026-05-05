@@ -29,7 +29,7 @@ import type { ClassVO } from '@/api/course/types'
 
 const route = useRoute()
 const router = useRouter()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const papers = ref<PaperVO[]>([])
@@ -200,7 +200,7 @@ function toggleQuestionSelect(q: QuestionVO) {
   }
 }
 
-function isQuestionSelected(qId: number) {
+function isQuestionSelected(qId: string) {
   return selectedQuestions.value.some(sq => sq.questionId === qId)
 }
 

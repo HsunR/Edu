@@ -26,7 +26,7 @@ import { QuestionType, Difficulty } from '@/types/enums'
 import type { FormInstance, FormRules } from 'element-plus'
 
 const route = useRoute()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const questionLoading = ref(false)
@@ -45,9 +45,9 @@ const questionKeyword = ref('')
 
 const bankDialogVisible = ref(false)
 const isEditBank = ref(false)
-const editingBankId = ref<number | null>(null)
+const editingBankId = ref<string | null>(null)
 const bankFormRef = ref<FormInstance>()
-const bankForm = reactive<QuestionBankCreateRequest & { bankName: string; courseId: number; description: string }>({
+const bankForm = reactive<QuestionBankCreateRequest & { bankName: string; courseId: string; description: string }>({
   bankName: '',
   courseId,
   description: ''
@@ -58,7 +58,7 @@ const bankRules = reactive<FormRules>({
 
 const questionDialogVisible = ref(false)
 const isEditQuestion = ref(false)
-const editingQuestionId = ref<number | null>(null)
+const editingQuestionId = ref<string | null>(null)
 const questionFormRef = ref<FormInstance>()
 const questionForm = reactive<QuestionCreateRequest & { questionType: QuestionType; stem: string; score: number }>({
   questionType: QuestionType.SingleChoice,
@@ -78,7 +78,7 @@ const questionTypeMap: Record<number, string> = {
   [QuestionType.ShortAnswer]: '简答题'
 }
 
-const questionTypeTagType: Record<number, string> = {
+const questionTypeTagType: Record<number, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
   [QuestionType.SingleChoice]: 'primary',
   [QuestionType.MultipleChoice]: 'success',
   [QuestionType.TrueFalse]: 'warning',

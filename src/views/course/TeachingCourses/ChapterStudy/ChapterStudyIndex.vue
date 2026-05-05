@@ -33,18 +33,18 @@ import { ResourceType, SectionResourceType, YesNo } from '@/types/enums'
 
 const route = useRoute()
 const courseStore = useCourseStore()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const chapterDialogVisible = ref(false)
 const sectionDialogVisible = ref(false)
 const isEditChapter = ref(false)
 const isEditSection = ref(false)
-const editingChapterId = ref<number | null>(null)
-const editingSectionId = ref<number | null>(null)
-const currentChapterIdForSection = ref<number | null>(null)
+const editingChapterId = ref<string | null>(null)
+const editingSectionId = ref<string | null>(null)
+const currentChapterIdForSection = ref<string | null>(null)
 const resourceSelectorVisible = ref(false)
-const currentSectionIdForResource = ref<number | null>(null)
+const currentSectionIdForResource = ref<string | null>(null)
 
 const resourceTypeMap: Record<ResourceType, SectionResourceType> = {
   [ResourceType.Video]: SectionResourceType.Video,
@@ -120,7 +120,7 @@ async function handleDeleteChapter(chapter: ChapterVO) {
   }
 }
 
-function openAddSection(chapterId: number) {
+function openAddSection(chapterId: string) {
   isEditSection.value = false
   editingSectionId.value = null
   currentChapterIdForSection.value = chapterId
@@ -128,7 +128,7 @@ function openAddSection(chapterId: number) {
   sectionDialogVisible.value = true
 }
 
-function openEditSection(section: SectionVO, chapterId: number) {
+function openEditSection(section: SectionVO, chapterId: string) {
   isEditSection.value = true
   editingSectionId.value = section.sectionId
   currentChapterIdForSection.value = chapterId
@@ -175,7 +175,7 @@ async function handleDeleteSection(section: SectionVO) {
   }
 }
 
-function openAddResource(sectionId: number) {
+function openAddResource(sectionId: string) {
   currentSectionIdForResource.value = sectionId
   resourceSelectorVisible.value = true
 }
@@ -199,7 +199,7 @@ async function handleResourceSelect(selectedResources: ResourceVO[]) {
   }
 }
 
-async function handleRemoveResource(sectionId: number, resourceId: number) {
+async function handleRemoveResource(sectionId: string, resourceId: string) {
   try {
     await ElMessageBox.confirm('确认移除该资源吗？', '移除确认', {
       confirmButtonText: '确认',
@@ -226,7 +226,7 @@ async function handleChapterDragEnd() {
   }
 }
 
-async function handleSectionDragEnd(chapterId: number, sections: SectionVO[]) {
+async function handleSectionDragEnd(chapterId: string, sections: SectionVO[]) {
   const items: OrderItem[] = sections.map((sec, idx) => ({
     id: sec.sectionId,
     orderIndex: idx

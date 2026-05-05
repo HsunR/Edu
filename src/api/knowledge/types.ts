@@ -1,8 +1,8 @@
 export interface KnowledgePointVO {
-  pointId: number
+  pointId: string
   pointName: string
-  courseId: number
-  parentId: number
+  courseId: string
+  parentId: string
   description: string
   orderIndex: number
   createdAt: string
@@ -10,10 +10,10 @@ export interface KnowledgePointVO {
 }
 
 export interface KnowledgeTreeVO {
-  pointId: number
+  pointId: string
   pointName: string
-  courseId: number
-  parentId: number
+  courseId: string
+  parentId: string
   description: string
   orderIndex: number
   children: KnowledgeTreeVO[]
@@ -21,8 +21,8 @@ export interface KnowledgeTreeVO {
 
 export interface PointCreateRequest {
   pointName: string
-  courseId: number
-  parentId?: number
+  courseId: string
+  parentId?: string
   description?: string
   orderIndex?: number
 }
@@ -34,9 +34,9 @@ export interface PointUpdateRequest {
 }
 
 export interface QuestionBindRequest {
-  questionIds: number[]
+  questionIds: string[]
 }
 
 export interface SectionBindRequest {
-  sectionIds: number[]
+  sectionIds: string[]
 }

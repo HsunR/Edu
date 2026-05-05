@@ -11,11 +11,11 @@ const props = withDefaults(defineProps<{
   modelValue: boolean
   multiple?: boolean
   resourceType?: ResourceType
-  excludeIds?: number[]
+  excludeIds?: string[]
 }>(), {
   multiple: false,
   resourceType: undefined,
-  excludeIds: () => []
+  excludeIds: () => [] as string[]
 })
 
 const emit = defineEmits<{
@@ -37,6 +37,7 @@ const keyword = ref('')
 const filterType = ref<ResourceType | undefined>(props.resourceType)
 const selectedResources = ref<ResourceVO[]>([])
 const uploadVisible = ref(false)
+const uploadResourceType = ref<ResourceType>(ResourceType.Document)
 
 const uploadStatusTag: Record<UploadStatus, { type: 'info' | 'success' | 'danger'; label: string }> = {
   [UploadStatus.Pending]: { type: 'info', label: '待确认' },
@@ -260,16 +261,6 @@ watch(visible, (val) => {
     />
   </el-dialog>
 </template>
-
-<script lang="ts">
-export default {
-  data() {
-    return {
-      uploadResourceType: ResourceType.Document as ResourceType
-    }
-  }
-}
-</script>
 
 <style scoped lang="scss">
 .resource-selector {

@@ -10,7 +10,7 @@ export function getUserInfo() {
   return request.get<UserDetailVO>('/api/user/users/me')
 }
 
-export function getUserById(userId: number) {
+export function getUserById(userId: string) {
   return request.get<UserVO>(`/api/user/users/${userId}`)
 }
 
@@ -30,10 +30,10 @@ export function updateProfile(data: ProfileUpdateRequest) {
   return request.put('/api/user/users/me/profile', data)
 }
 
-export function deleteUser(userId: number) {
+export function deleteUser(userId: string) {
   return request.delete(`/api/user/users/${userId}`)
 }
 
-export function assignTeacher(userId: number, data: AssignTeacherRequest) {
+export function assignTeacher(userId: string, data: AssignTeacherRequest) {
   return request.put(`/api/user/users/${userId}/assign-teacher`, data)
 }

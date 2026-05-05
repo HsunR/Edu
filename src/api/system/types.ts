@@ -1,8 +1,8 @@
 import type { PageRequest } from '@/types/api'
 
 export interface DeptVO {
-  deptId: number
-  parentId: number
+  deptId: string
+  parentId: string
   ancestors: string
   deptName: string
   orderNum: number
@@ -19,8 +19,8 @@ export interface DeptQueryRequest extends PageRequest {
 }
 
 export interface DeptRequest {
-  deptId?: number
-  parentId: number
+  deptId?: string
+  parentId: string
   deptName: string
   orderNum: number
   leader?: string
@@ -30,9 +30,9 @@ export interface DeptRequest {
 }
 
 export interface MenuVO {
-  menuId: number
+  menuId: string
   menuName: string
-  parentId: number
+  parentId: string
   orderNum: number
   path: string
   component: string
@@ -54,9 +54,9 @@ export interface MenuQueryRequest extends PageRequest {
 }
 
 export interface MenuRequest {
-  menuId?: number
+  menuId?: string
   menuName: string
-  parentId: number
+  parentId: string
   orderNum: number
   path?: string
   component?: string
@@ -72,13 +72,13 @@ export interface MenuRequest {
 }
 
 export interface TreeSelectVO {
-  id: number
+  id: string
   label: string
   children?: TreeSelectVO[]
 }
 
 export interface RoleVO {
-  roleId: number
+  roleId: string
   roleName: string
   roleKey: string
   roleSort: number
@@ -97,7 +97,7 @@ export interface RoleQueryRequest extends PageRequest {
 }
 
 export interface RoleRequest {
-  roleId?: number
+  roleId?: string
   roleName: string
   roleKey: string
   roleSort: number
@@ -106,12 +106,12 @@ export interface RoleRequest {
   deptCheckStrictly?: boolean
   status?: string
   remark?: string
-  menuIds?: number[]
-  deptIds?: number[]
+  menuIds?: string[]
+  deptIds?: string[]
 }
 
 export interface NoticeVO {
-  noticeId: number
+  noticeId: string
   noticeTitle: string
   noticeType: string
   noticeContent: string
@@ -129,7 +129,7 @@ export interface NoticeQueryRequest extends PageRequest {
 }
 
 export interface NoticeRequest {
-  noticeId?: number
+  noticeId?: string
   noticeTitle: string
   noticeType: string
   noticeContent?: string
@@ -138,8 +138,8 @@ export interface NoticeRequest {
 }
 
 export interface SysUserVO {
-  userId: number
-  deptId: number
+  userId: string
+  deptId: string
   userName: string
   nickName: string
   email: string
@@ -157,12 +157,12 @@ export interface SysUserQueryRequest extends PageRequest {
   userName?: string
   phonenumber?: string
   status?: string
-  deptId?: number
+  deptId?: string
 }
 
 export interface SysUserRequest {
-  userId?: number
-  deptId?: number
+  userId?: string
+  deptId?: string
   userName: string
   nickName: string
   password?: string
@@ -171,11 +171,11 @@ export interface SysUserRequest {
   sex?: string
   status?: string
   remark?: string
-  roleIds?: number[]
-  postIds?: number[]
+  roleIds?: string[]
+  postIds?: string[]
 }
 
 export interface AuthRoleRequest {
-  userId: number
-  roleIds: number[]
+  userId: string
+  roleIds: string[]
 }

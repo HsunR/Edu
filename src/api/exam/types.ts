@@ -10,10 +10,10 @@ import type {
 import type { PageRequest } from '@/types/api'
 
 export interface QuestionBankVO {
-  bankId: number
+  bankId: string
   bankName: string
-  courseId: number
-  teacherId: number
+  courseId: string
+  teacherId: string
   description: string
   questionCount: number
   createdAt: string
@@ -22,7 +22,7 @@ export interface QuestionBankVO {
 
 export interface QuestionBankCreateRequest {
   bankName: string
-  courseId: number
+  courseId: string
   description?: string
 }
 
@@ -32,12 +32,12 @@ export interface QuestionBankUpdateRequest {
 }
 
 export interface QuestionBankQueryRequest extends PageRequest {
-  courseId?: number
+  courseId?: string
   keyword?: string
 }
 
 export interface QuestionOptionVO {
-  optionId: number
+  optionId: string
   label: string
   content: string
   isCorrect: boolean
@@ -52,8 +52,8 @@ export interface QuestionOptionDTO {
 }
 
 export interface QuestionVO {
-  questionId: number
-  bankId: number
+  questionId: string
+  bankId: string
   questionType: QuestionType
   stem: string
   analysis: string
@@ -85,7 +85,7 @@ export interface QuestionUpdateRequest {
 }
 
 export interface QuestionQueryRequest extends PageRequest {
-  bankId?: number
+  bankId?: string
   questionType?: QuestionType
   difficulty?: Difficulty
   keyword?: string
@@ -97,10 +97,10 @@ export interface PaperSection {
 }
 
 export interface PaperVO {
-  paperId: number
+  paperId: string
   paperName: string
-  courseId: number
-  teacherId: number
+  courseId: string
+  teacherId: string
   totalScore: number
   sections: PaperSection[]
   status: PaperStatus
@@ -110,7 +110,7 @@ export interface PaperVO {
 }
 
 export interface QuestionSnapshot {
-  questionId: number
+  questionId: string
   questionType: QuestionType
   stem: string
   answer: string
@@ -124,9 +124,9 @@ export interface PaperDetailVO extends PaperVO {
 }
 
 export interface PaperQuestionVO {
-  id: number
-  paperId: number
-  questionId: number
+  id: string
+  paperId: string
+  questionId: string
   orderIndex: number
   score: number
   sectionIndex: number
@@ -136,7 +136,7 @@ export interface PaperQuestionVO {
 
 export interface PaperCreateRequest {
   paperName: string
-  courseId: number
+  courseId: string
   sections?: PaperSection[]
 }
 
@@ -146,13 +146,13 @@ export interface PaperUpdateRequest {
 }
 
 export interface PaperQueryRequest extends PageRequest {
-  courseId?: number
+  courseId?: string
   status?: PaperStatus
   keyword?: string
 }
 
 export interface QuestionItem {
-  questionId: number
+  questionId: string
   score: number
   sectionIndex?: number
 }
@@ -162,7 +162,7 @@ export interface PaperQuestionAddRequest {
 }
 
 export interface PaperQuestionOrderItem {
-  id: number
+  id: string
   orderIndex: number
   sectionIndex?: number
 }
@@ -172,13 +172,13 @@ export interface PaperQuestionOrderRequest {
 }
 
 export interface ExamVO {
-  examId: number
+  examId: string
   examName: string
-  paperId: number
+  paperId: string
   paperName: string
-  classId: number
-  courseId: number
-  teacherId: number
+  classId: string
+  courseId: string
+  teacherId: string
   examType: ExamType
   startTime: string
   endTime: string
@@ -190,8 +190,8 @@ export interface ExamVO {
 
 export interface ExamCreateRequest {
   examName: string
-  paperId: number
-  classId: number
+  paperId: string
+  classId: string
   examType: ExamType
   startTime: string
   endTime: string
@@ -208,8 +208,8 @@ export interface ExamUpdateRequest {
 }
 
 export interface ExamQueryRequest extends PageRequest {
-  classId?: number
-  courseId?: number
+  classId?: string
+  courseId?: string
   examType?: ExamType
   status?: ExamStatus
   keyword?: string
@@ -226,9 +226,9 @@ export interface ExamStatsVO {
 }
 
 export interface AnswerSheetVO {
-  sheetId: number
-  examId: number
-  studentId: number
+  sheetId: string
+  examId: string
+  studentId: string
   studentName: string
   status: SheetStatus
   totalScore: number
@@ -241,13 +241,13 @@ export interface AnswerSheetVO {
 }
 
 export interface AnswerRecordVO {
-  recordId: number
-  questionId: number
+  recordId: string
+  questionId: string
   answerContent: string
   score: number
   isCorrect: boolean
   gradingStatus: GradingStatus
-  graderId: number
+  graderId: string
   comment: string
   questionType: QuestionType
   stem: string
@@ -256,10 +256,10 @@ export interface AnswerRecordVO {
 }
 
 export interface AnswerSheetDetailVO {
-  sheetId: number
-  examId: number
+  sheetId: string
+  examId: string
   examName: string
-  studentId: number
+  studentId: string
   status: SheetStatus
   totalScore: number
   objectiveScore: number

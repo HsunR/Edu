@@ -1,7 +1,7 @@
 import request from '@/api/request'
 import type { AuthRoleRequest, SysUserQueryRequest, SysUserRequest } from './types'
 
-export function getAuthRole(userId: number) {
+export function getAuthRole(userId: string) {
   return request.get(`/system/user/authRole/${userId}`)
 }
 
@@ -9,7 +9,7 @@ export function updateAuthRole(data: AuthRoleRequest) {
   return request.put('/system/user/authRole', data)
 }
 
-export function changeUserStatus(userId: number, status: string) {
+export function changeUserStatus(userId: string, status: string) {
   return request.put('/system/user/changeStatus', { userId, status })
 }
 
@@ -17,15 +17,15 @@ export function listUser(params: SysUserQueryRequest) {
   return request.get('/system/user/list', { params })
 }
 
-export function resetUserPwd(userId: number, password: string) {
+export function resetUserPwd(userId: string, password: string) {
   return request.put('/system/user/resetPwd', { userId, password })
 }
 
-export function delUser(userId: number) {
+export function delUser(userId: string) {
   return request.delete(`/system/user/${userId}`)
 }
 
-export function getUser(userId: number) {
+export function getUser(userId: string) {
   return request.get(`/system/user/${userId}`)
 }
 

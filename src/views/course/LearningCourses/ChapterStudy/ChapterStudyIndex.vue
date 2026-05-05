@@ -9,7 +9,7 @@ import { YesNo, ResourceType } from '@/types/enums'
 const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const currentSectionDetail = ref<SectionDetailVO | null>(null)
@@ -25,6 +25,10 @@ async function loadCourse() {
   } finally {
     loading.value = false
   }
+}
+
+function openWindow(url: string) {
+  window.open(url, '_blank')
 }
 
 async function handleSectionClick(section: SectionVO) {
@@ -97,7 +101,7 @@ onMounted(loadCourse)
               >
                 <div class="resource-info">
                   <el-tag
-                    :type="res.resourceType === ResourceType.Video ? 'danger' : res.resourceType === ResourceType.Document ? '' : 'success'"
+                    :type="res.resourceType === ResourceType.Video ? 'danger' : res.resourceType === ResourceType.Document ? undefined : 'success'"
                     size="small"
                   >
                     {{ res.resourceType === ResourceType.Video ? '视频' : res.resourceType === ResourceType.Document ? '文档' : '图片' }}
@@ -117,7 +121,7 @@ onMounted(loadCourse)
                   <el-button
                     v-else
                     size="small"
-                    @click="window.open(res.accessUrl, '_blank')"
+                    @click="openWindow(res.accessUrl)"
                   >
                     查看
                   </el-button>

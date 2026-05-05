@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { useCourseStore } from '@/stores/course'
 import type { CourseQueryRequest } from '@/api/course/types'
 import type { CategoryVO } from '@/api/course/types'
 import { CourseStatus } from '@/types/enums'
+import CourseCard from '../components/CourseCard.vue'
 
-const router = useRouter()
 const courseStore = useCourseStore()
 
 const loading = ref(false)
 const searchKeyword = ref('')
-const selectedCategoryId = ref<number | null>(null)
+const selectedCategoryId = ref<string | null>(null)
 const currentPage = ref(1)
 const pageSize = ref(12)
 
@@ -63,10 +62,6 @@ function handleSizeChange(size: number) {
   pageSize.value = size
   currentPage.value = 1
   loadCourses()
-}
-
-function goToCourseDetail(courseId: number) {
-  router.push(`/course/detail/${courseId}`)
 }
 
 const treeProps = {
@@ -126,40 +121,12 @@ onMounted(async () => {
       <div v-loading="loading" class="course-grid">
         <el-empty v-if="!loading && courseStore.courseList.length === 0" description="暂无课程" />
 
-        <el-card
+        <CourseCard
           v-for="course in courseStore.courseList"
           :key="course.courseId"
-          class="course-card"
-          shadow="hover"
-          @click="goToCourseDetail(course.courseId)"
-        >
-          <div class="card-cover">
-            <el-image
-              :src="course.coverUrl || '/src/assets/images/test.png'"
-              fit="cover"
-              class="cover-image"
-            >
-              <template #error>
-                <div class="cover-fallback">
-                  <el-icon :size="40"><Reading /></el-icon>
-                </div>
-              </template>
-            </el-image>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title" :title="course.courseName">{{ course.courseName }}</h3>
-            <p class="card-desc" :title="course.description">{{ course.description || '暂无简介' }}</p>
-            <div class="card-meta">
-              <div class="meta-teacher">
-                <el-avatar :size="24" :src="course.teacherAvatar">
-                  {{ course.teacherName?.charAt(0) }}
-                </el-avatar>
-                <span class="teacher-name">{{ course.teacherName }}</span>
-              </div>
-              <el-tag size="small" type="info">{{ course.categoryName }}</el-tag>
-            </div>
-          </div>
-        </el-card>
+          :course="course"
+          mode="browse"
+        />
       </div>
 
       <div v-if="courseStore.courseTotal > 0" class="browse-pagination">
@@ -176,13 +143,6 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { Reading } from '@element-plus/icons-vue'
-export default {
-  components: { Reading }
-}
-</script>
 
 <style scoped lang="scss">
 .course-browse {
@@ -244,82 +204,6 @@ export default {
   gap: 16px;
   align-content: start;
   overflow-y: auto;
-}
-
-.course-card {
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border-radius: 8px;
-  overflow: hidden;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  :deep(.el-card__body) {
-    padding: 0;
-  }
-}
-
-.card-cover {
-  height: 160px;
-  overflow: hidden;
-
-  .cover-image {
-    width: 100%;
-    height: 100%;
-  }
-
-  .cover-fallback {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-  }
-}
-
-.card-body {
-  padding: 12px 16px 16px;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #303133;
-  margin: 0 0 6px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-desc {
-  font-size: 13px;
-  color: #909399;
-  margin: 0 0 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.meta-teacher {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  .teacher-name {
-    font-size: 13px;
-    color: #606266;
-  }
 }
 
 .browse-pagination {

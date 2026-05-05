@@ -8,7 +8,7 @@ import { ExamType, ExamStatus } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const exams = ref<ExamVO[]>([])
@@ -45,7 +45,7 @@ async function loadExams() {
   }
 }
 
-function enterExamPage(examId: number) {
+function enterExamPage(examId: string) {
   router.push(`/course/learning/${courseId}/exam-answer/${examId}`)
 }
 

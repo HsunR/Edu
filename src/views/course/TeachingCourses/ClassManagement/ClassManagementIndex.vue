@@ -15,7 +15,7 @@ import { ClassStatus } from '@/types/enums'
 import type { FormInstance, FormRules } from 'element-plus'
 
 const route = useRoute()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const classes = ref<ClassVO[]>([])
@@ -38,7 +38,7 @@ const createForm = ref<ClassCreateRequest>({
   endDate: ''
 })
 
-const editForm = ref<ClassUpdateRequest & { classId?: number }>({
+const editForm = ref<ClassUpdateRequest & { classId?: string }>({
   className: '',
   maxStudents: 100,
   startDate: '',
@@ -147,7 +147,7 @@ async function handleEdit() {
   })
 }
 
-async function handleRemoveMember(memberId: number) {
+async function handleRemoveMember(memberId: string) {
   if (!selectedClass.value) return
   try {
     await ElMessageBox.confirm('确认移除该学生吗？', '移除确认', {

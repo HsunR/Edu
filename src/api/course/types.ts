@@ -2,22 +2,22 @@ import type { ClassStatus, CourseStatus, SectionResourceType, YesNo } from '@/ty
 import type { PageRequest } from '@/types/api'
 
 export interface CategoryVO {
-  categoryId: number
+  categoryId: string
   name: string
-  parentId: number
+  parentId: string
   orderIndex: number
   children: CategoryVO[]
 }
 
 export interface CourseVO {
-  courseId: number
+  courseId: string
   courseName: string
   coverUrl: string
   description: string
-  teacherId: number
+  teacherId: string
   teacherName: string
   teacherAvatar: string
-  categoryId: number
+  categoryId: string
   categoryName: string
   status: CourseStatus
   isPublic: YesNo
@@ -32,7 +32,7 @@ export interface CourseCreateRequest {
   courseName: string
   description?: string
   coverUrl?: string
-  categoryId?: number
+  categoryId?: string
   isPublic?: YesNo
 }
 
@@ -40,19 +40,19 @@ export interface CourseUpdateRequest {
   courseName?: string
   description?: string
   coverUrl?: string
-  categoryId?: number
+  categoryId?: string
   isPublic?: YesNo
 }
 
 export interface CourseQueryRequest extends PageRequest {
-  categoryId?: number
+  categoryId?: string
   courseName?: string
   status?: CourseStatus
 }
 
 export interface ChapterVO {
-  chapterId: number
-  courseId: number
+  chapterId: string
+  courseId: string
   title: string
   orderIndex: number
   sections: SectionVO[]
@@ -67,8 +67,8 @@ export interface ChapterUpdateRequest {
 }
 
 export interface SectionVO {
-  sectionId: number
-  chapterId: number
+  sectionId: string
+  chapterId: string
   title: string
   orderIndex: number
   isFree: YesNo
@@ -90,9 +90,9 @@ export interface SectionUpdateRequest {
 }
 
 export interface SectionResourceVO {
-  id: number
-  sectionId: number
-  resourceId: number
+  id: string
+  sectionId: string
+  resourceId: string
   resourceType: SectionResourceType
   orderIndex: number
   resourceName: string
@@ -100,7 +100,7 @@ export interface SectionResourceVO {
 }
 
 export interface ResourceSimpleDTO {
-  resourceId: number
+  resourceId: string
   resourceName: string
   resourceType: number
   fileFormat: string
@@ -109,16 +109,16 @@ export interface ResourceSimpleDTO {
 }
 
 export interface SectionResourceAddRequest {
-  resourceId: number
+  resourceId: string
   resourceType: SectionResourceType
 }
 
 export interface ClassVO {
-  classId: number
-  courseId: number
+  classId: string
+  courseId: string
   courseName: string
   className: string
-  teacherId: number
+  teacherId: string
   teacherName: string
   inviteCode: string
   maxStudents: number
@@ -130,7 +130,7 @@ export interface ClassVO {
 }
 
 export interface ClassCreateRequest {
-  courseId: number
+  courseId: string
   className: string
   maxStudents?: number
   startDate?: string
@@ -150,8 +150,8 @@ export interface JoinClassRequest {
 }
 
 export interface ClassMemberVO {
-  id: number
-  studentId: number
+  id: string
+  studentId: string
   studentName: string
   avatarUrl: string
   status: number
@@ -159,6 +159,6 @@ export interface ClassMemberVO {
 }
 
 export interface OrderItem {
-  id: number
+  id: string
   orderIndex: number
 }

@@ -11,11 +11,9 @@ const props = withDefaults(defineProps<{
   accept?: string
   resourceType: ResourceType
   maxFileSize?: number
-  autoUpload?: boolean
 }>(), {
   accept: '',
-  maxFileSize: 500 * 1024 * 1024,
-  autoUpload: true
+  maxFileSize: 500 * 1024 * 1024
 })
 
 const emit = defineEmits<{
@@ -40,7 +38,13 @@ const typeLabel = computed(() => {
   return '图片'
 })
 
-async function handleUpload(file: File) {
+async function handleUpload(options: any) {
+  const file: File = options.file
+
+  if (uploading.value) {
+    return
+  }
+
   if (file.size > props.maxFileSize) {
     const msg = `文件大小超过限制（${(props.maxFileSize / 1024 / 1024).toFixed(0)}MB）`
     ElMessage.warning(msg)
@@ -83,7 +87,6 @@ async function handleUpload(file: File) {
         vodSessionKey: vodResult.vodSessionKey
       })
       progress.value = 100
-      ElMessage.success('视频上传成功')
       emit('success', result)
     } else {
       const docResult = presignResult as PresignedUrlVO
@@ -98,7 +101,6 @@ async function handleUpload(file: File) {
       progress.value = 85
       const result = await confirmUpload({ resourceId: docResult.resourceId })
       progress.value = 100
-      ElMessage.success(`${typeLabel.value}上传成功`)
       emit('success', result)
     }
   } catch (error) {
@@ -112,26 +114,17 @@ async function handleUpload(file: File) {
   }
 }
 
-function handleFileChange(uploadFile: any) {
-  if (uploadFile.raw && props.autoUpload) {
-    handleUpload(uploadFile.raw)
-  }
-}
-
 function handleExceed() {
   ElMessage.warning('请先删除已上传的文件再重新上传')
 }
-
-defineExpose({ handleUpload })
 </script>
 
 <template>
   <div class="resource-upload">
     <el-upload
-      :auto-upload="autoUpload"
+      :http-request="handleUpload"
       :show-file-list="false"
       :accept="acceptComputed"
-      :on-change="handleFileChange"
       :on-exceed="handleExceed"
       :limit="1"
       drag

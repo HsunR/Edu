@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { Edit, Delete, Plus } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCourseStore } from '@/stores/course'
 import { createCourse, updateCourse, deleteCourse, publishCourse, archiveCourse } from '@/api/course/course'
@@ -10,8 +9,8 @@ import { CourseStatus, YesNo } from '@/types/enums'
 import type { FormInstance, FormRules, UploadProps } from 'element-plus'
 import axios from 'axios'
 import { presignImage, confirmUpload } from '@/api/resource/resource'
+import CourseCard from '../components/CourseCard.vue'
 
-const router = useRouter()
 const courseStore = useCourseStore()
 
 const loading = ref(false)
@@ -21,14 +20,14 @@ const pageSize = ref(12)
 const dialogFormVisible = ref(false)
 const isEdit = ref(false)
 const courseFormRef = ref<FormInstance>()
-const editingCourseId = ref<number | null>(null)
+const editingCourseId = ref<string | null>(null)
 
-const CourseForm = reactive<CourseCreateRequest & { isPublic: YesNo | null }>({
+const CourseForm = reactive<CourseCreateRequest>({
   courseName: '',
   description: '',
   coverUrl: '',
   categoryId: undefined,
-  isPublic: null
+  isPublic: undefined
 })
 
 const formRules = reactive<FormRules>({
@@ -39,12 +38,6 @@ const imageUrl = ref('')
 const selectedFile = ref<File | null>(null)
 const uploadStatus = ref<'idle' | 'uploading' | 'confirming' | 'success' | 'error'>('idle')
 const errorMessage = ref('')
-
-const statusMap: Record<number, { label: string; type: 'info' | 'success' | 'warning' }> = {
-  [CourseStatus.Draft]: { label: '草稿', type: 'info' },
-  [CourseStatus.Published]: { label: '已发布', type: 'success' },
-  [CourseStatus.Archived]: { label: '已归档', type: 'warning' }
-}
 
 async function loadTeachingCourses() {
   loading.value = true
@@ -77,7 +70,7 @@ async function editCourse(course: CourseVO) {
   CourseForm.description = course.description
   CourseForm.coverUrl = course.coverUrl
   CourseForm.categoryId = course.categoryId || undefined
-  CourseForm.isPublic = course.isPublic
+  CourseForm.isPublic = course.isPublic ?? undefined
   imageUrl.value = course.coverUrl || ''
   dialogFormVisible.value = true
 }
@@ -127,10 +120,6 @@ async function handleArchive(course: CourseVO) {
   } catch {
     // cancelled or error
   }
-}
-
-function toCourse(courseId: number) {
-  router.push(`/course/teaching/${courseId}/chapters`)
 }
 
 const handleFileChange: UploadProps['onChange'] = (file) => {
@@ -185,7 +174,7 @@ function resetFormFields() {
   CourseForm.description = ''
   CourseForm.coverUrl = ''
   CourseForm.categoryId = undefined
-  CourseForm.isPublic = null
+  CourseForm.isPublic = undefined
   imageUrl.value = ''
   selectedFile.value = null
   uploadStatus.value = 'idle'
@@ -203,7 +192,7 @@ async function handleSubmit() {
           description: CourseForm.description,
           coverUrl: CourseForm.coverUrl,
           categoryId: CourseForm.categoryId,
-          isPublic: CourseForm.isPublic ?? undefined
+          isPublic: CourseForm.isPublic
         }
         await updateCourse(editingCourseId.value, data)
         ElMessage.success('修改成功')
@@ -237,76 +226,12 @@ onMounted(async () => {
     <div v-loading="loading" class="courses-grid">
       <el-empty v-if="!loading && courseStore.teachingCourses.length === 0" description="暂无课程，点击上方按钮创建" />
 
-      <el-card
+      <CourseCard
         v-for="course in courseStore.teachingCourses"
         :key="course.courseId"
-        class="course-card"
-        shadow="hover"
-      >
-        <div class="card-cover">
-          <el-image
-            :src="course.coverUrl || '/src/assets/images/test.png'"
-            fit="cover"
-            class="cover-image"
-          >
-            <template #error>
-              <div class="cover-fallback">
-                <el-icon :size="40"><Reading /></el-icon>
-              </div>
-            </template>
-          </el-image>
-          <div class="card-status">
-            <el-tag :type="statusMap[course.status]?.type || 'info'" size="small">
-              {{ statusMap[course.status]?.label || '未知' }}
-            </el-tag>
-          </div>
-        </div>
-        <div class="card-body">
-          <h3 class="card-title" :title="course.courseName">{{ course.courseName }}</h3>
-          <p class="card-desc">{{ course.description || '暂无简介' }}</p>
-          <div class="card-meta">
-            <el-tag size="small" type="info">{{ course.categoryName || '未分类' }}</el-tag>
-            <span class="card-time">{{ course.createdAt?.split(' ')[0] }}</span>
-          </div>
-          <div class="card-actions">
-            <el-button type="primary" size="small" @click="toCourse(course.courseId)">
-              进入课程
-            </el-button>
-            <el-button size="small" @click="editCourse(course)">
-              <el-icon><Edit /></el-icon>编辑
-            </el-button>
-            <el-dropdown trigger="click">
-              <el-button size="small">
-                更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-if="course.status === CourseStatus.Draft"
-                    @click="handlePublish(course)"
-                  >
-                    发布课程
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    v-if="course.status === CourseStatus.Published"
-                    @click="handleArchive(course)"
-                  >
-                    归档课程
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    v-if="course.status === CourseStatus.Draft"
-                    @click="handleDelete(course)"
-                    divided
-                    style="color: #f56c6c"
-                  >
-                    删除课程
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
-        </div>
-      </el-card>
+        :course="course"
+        mode="teaching"
+      />
     </div>
 
     <div v-if="courseStore.teachingTotal > pageSize" class="pagination">
@@ -364,7 +289,8 @@ onMounted(async () => {
           <el-tree-select
             v-model="CourseForm.categoryId"
             :data="courseStore.categoryTree"
-            :props="{ children: 'children', label: 'name', value: 'categoryId' }"
+            :props="{ children: 'children', label: 'name' }"
+            node-key="categoryId"
             placeholder="请选择课程分类"
             check-strictly
             clearable
@@ -385,13 +311,6 @@ onMounted(async () => {
     </el-dialog>
   </div>
 </template>
-
-<script lang="ts">
-import { Reading, ArrowDown } from '@element-plus/icons-vue'
-export default {
-  components: { Reading, ArrowDown }
-}
-</script>
 
 <style scoped lang="scss">
 .teaching-courses {
@@ -414,92 +333,9 @@ export default {
 
 .courses-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
   min-height: 200px;
-}
-
-.course-card {
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  :deep(.el-card__body) {
-    padding: 0;
-  }
-}
-
-.card-cover {
-  height: 160px;
-  overflow: hidden;
-  position: relative;
-
-  .cover-image {
-    width: 100%;
-    height: 100%;
-  }
-
-  .cover-fallback {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-  }
-
-  .card-status {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-  }
-}
-
-.card-body {
-  padding: 12px 16px 16px;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #303133;
-  margin: 0 0 6px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-desc {
-  font-size: 13px;
-  color: #909399;
-  margin: 0 0 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-
-  .card-time {
-    font-size: 12px;
-    color: #c0c4cc;
-  }
-}
-
-.card-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
 }
 
 .pagination {

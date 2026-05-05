@@ -8,15 +8,15 @@ import MindMappingMode from './MindMappingMode.vue'
 import AtlasMode from './AtlasMode.vue'
 
 const route = useRoute()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const treeData = ref<KnowledgeTreeVO[]>([])
 const activeTab = ref('outline')
 
 const selectedPoint = ref<KnowledgeTreeVO | null>(null)
-const selectedPointQuestions = ref<number[]>([])
-const selectedPointSections = ref<number[]>([])
+const selectedPointQuestions = ref<string[]>([])
+const selectedPointSections = ref<string[]>([])
 const detailDrawerVisible = ref(false)
 
 async function loadTree() {

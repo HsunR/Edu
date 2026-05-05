@@ -2,7 +2,7 @@ import type { ResourceType, UploadStatus } from '@/types/enums'
 import type { PageRequest } from '@/types/api'
 
 export interface ResourceVO {
-  resourceId: number
+  resourceId: string
   resourceName: string
   resourceType: ResourceType
   fileFormat: string
@@ -13,7 +13,7 @@ export interface ResourceVO {
 }
 
 export interface ResourceDetailVO extends ResourceVO {
-  uploaderId: number
+  uploaderId: string
   videoMeta?: VideoMetaVO
 }
 
@@ -39,7 +39,7 @@ export interface PresignRequest {
 }
 
 export interface PresignedUrlVO {
-  resourceId: number
+  resourceId: string
   uploadUrl: string
   storageKey: string
   accessUrl: string
@@ -47,7 +47,7 @@ export interface PresignedUrlVO {
 }
 
 export interface VodPresignedUrlVO {
-  resourceId: number
+  resourceId: string
   vodSessionKey: string
   mediaUploadUrls: string[]
   coverUploadUrl: string
@@ -55,10 +55,10 @@ export interface VodPresignedUrlVO {
 }
 
 export interface UploadConfirmRequest {
-  resourceId: number
+  resourceId: string
 }
 
 export interface VideoConfirmRequest {
-  resourceId: number
+  resourceId: string
   vodSessionKey: string
 }

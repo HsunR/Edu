@@ -8,7 +8,7 @@ import { QuestionType, SheetStatus } from '@/types/enums'
 const route = useRoute()
 const router = useRouter()
 const examStore = useExamStore()
-const examId = Number(route.params.examId)
+const examId = route.params.examId as string
 
 const loading = ref(false)
 const currentQuestionIndex = ref(0)
@@ -72,31 +72,31 @@ function stopAutoSave() {
   }
 }
 
-function getAnswer(questionId: number): string {
+function getAnswer(questionId: string): string {
   return examStore.answers.get(questionId) || ''
 }
 
-function setAnswer(questionId: number, value: string) {
+function setAnswer(questionId: string, value: string) {
   examStore.answers.set(questionId, value)
   if (sheet.value && isAnswering.value) {
     examStore.saveAnswerAction(sheet.value.sheetId, questionId, value).catch(() => {})
   }
 }
 
-function getMultiAnswer(questionId: number): string[] {
+function getMultiAnswer(questionId: string): string[] {
   const ans = examStore.answers.get(questionId) || ''
   return ans ? ans.split(',') : []
 }
 
-function setMultiAnswer(questionId: number, values: string[]) {
+function setMultiAnswer(questionId: string, values: string[]) {
   setAnswer(questionId, values.sort().join(','))
 }
 
-function isOptionSelected(questionId: number, label: string): boolean {
+function isOptionSelected(questionId: string, label: string): boolean {
   return getMultiAnswer(questionId).includes(label)
 }
 
-function toggleMultiOption(questionId: number, label: string) {
+function toggleMultiOption(questionId: string, label: string) {
   const current = getMultiAnswer(questionId)
   const idx = current.indexOf(label)
   if (idx >= 0) {

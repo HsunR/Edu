@@ -6,19 +6,19 @@ export function createClass(data: ClassCreateRequest) {
   return request.post<ClassVO>('/api/course/classes', data)
 }
 
-export function updateClass(classId: number, data: ClassUpdateRequest) {
+export function updateClass(classId: string, data: ClassUpdateRequest) {
   return request.put<ClassVO>(`/api/course/classes/${classId}`, data)
 }
 
-export function getClassMembers(classId: number, params?: { current?: number; pageSize?: number }) {
+export function getClassMembers(classId: string, params?: { current?: number; pageSize?: number }) {
   return request.get<PageResult<ClassMemberVO>>(`/api/course/classes/${classId}/members`, { params })
 }
 
-export function removeMember(classId: number, memberId: number) {
+export function removeMember(classId: string, memberId: string) {
   return request.delete(`/api/course/classes/${classId}/members/${memberId}`)
 }
 
-export function quitClass(classId: number) {
+export function quitClass(classId: string) {
   return request.post(`/api/course/classes/${classId}/quit`)
 }
 

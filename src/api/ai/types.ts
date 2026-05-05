@@ -1,5 +1,5 @@
 export interface ChatMessage {
-  id: number
+  id: string
   conversationId: string
   content: string
   role: 'user' | 'assistant' | 'system'
@@ -9,7 +9,7 @@ export interface ChatMessage {
 }
 
 export interface ChatListVO {
-  id: number
+  id: string
   userId: string
   conversationId: string
   conversationTitle: string
@@ -25,7 +25,7 @@ export interface ChatListAddRequest {
 }
 
 export interface ChatListUpdateRequest {
-  id: number
+  id: string
   userId?: string
   conversationId?: string
   conversationTitle?: string

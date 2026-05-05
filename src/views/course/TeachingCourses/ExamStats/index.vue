@@ -8,7 +8,7 @@ import { QuestionType, GradingStatus, SheetStatus } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
-const examId = Number(route.params.examId)
+const examId = route.params.examId as string
 
 const loading = ref(false)
 const stats = ref<ExamStatsVO | null>(null)
@@ -17,7 +17,7 @@ const sheets = ref<AnswerSheetVO[]>([])
 const gradingDrawerVisible = ref(false)
 const sheetDetail = ref<AnswerSheetDetailVO | null>(null)
 const sheetDetailLoading = ref(false)
-const gradingMap = ref<Map<number, GradeRequest>>(new Map())
+const gradingMap = ref<Map<string, GradeRequest>>(new Map())
 
 const questionTypeMap: Record<number, string> = {
   [QuestionType.SingleChoice]: '单选题',
@@ -27,15 +27,17 @@ const questionTypeMap: Record<number, string> = {
   [QuestionType.ShortAnswer]: '简答题'
 }
 
-const gradingStatusMap: Record<number, { label: string; type: string }> = {
+type TagType = 'success' | 'primary' | 'warning' | 'info' | 'danger' | undefined
+
+const gradingStatusMap: Record<number, { label: string; type: TagType }> = {
   [GradingStatus.NotGraded]: { label: '未批改', type: 'info' },
   [GradingStatus.Graded]: { label: '已批改', type: 'success' },
   [GradingStatus.AIGrading]: { label: 'AI批改中', type: 'warning' }
 }
 
-const sheetStatusMap: Record<number, { label: string; type: string }> = {
+const sheetStatusMap: Record<number, { label: string; type: TagType }> = {
   [SheetStatus.NotStarted]: { label: '未开始', type: 'info' },
-  [SheetStatus.InProgress]: { label: '进行中', type: '' },
+  [SheetStatus.InProgress]: { label: '进行中', type: 'primary' },
   [SheetStatus.Ended]: { label: '已交卷', type: 'warning' },
   [SheetStatus.Graded]: { label: '已批阅', type: 'success' }
 }
@@ -77,7 +79,7 @@ async function openGrading(sheet: AnswerSheetVO) {
   }
 }
 
-async function handleGrade(recordId: number) {
+async function handleGrade(recordId: string) {
   const gradeData = gradingMap.value.get(recordId)
   if (!gradeData) return
   try {

@@ -3,6 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Delete, View } from '@element-plus/icons-vue'
+import moment from 'moment'
 import {
   getExamList,
   createExam,
@@ -18,7 +19,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const exams = ref<ExamVO[]>([])
@@ -33,8 +34,8 @@ const createDialogVisible = ref(false)
 const createFormRef = ref<FormInstance>()
 const createForm = reactive<ExamCreateRequest>({
   examName: '',
-  paperId: 0,
-  classId: 0,
+  paperId: '',
+  classId: '',
   examType: ExamType.Exam,
   startTime: '',
   endTime: '',
@@ -108,12 +109,22 @@ function openCreateDialog() {
   loadFormData()
 }
 
+function toOffsetDateTime(value: string): string {
+  if (!value) return value
+  return moment(value).format('YYYY-MM-DDTHH:mm:ss+08:00')
+}
+
 async function handleCreate() {
   if (!createFormRef.value) return
   await createFormRef.value.validate(async (valid) => {
     if (!valid) return
     try {
-      await createExam(createForm)
+      const payload = {
+        ...createForm,
+        startTime: toOffsetDateTime(createForm.startTime),
+        endTime: toOffsetDateTime(createForm.endTime)
+      }
+      await createExam(payload)
       ElMessage.success('创建考试成功')
       createDialogVisible.value = false
       await loadExams()
@@ -143,7 +154,7 @@ async function handleDelete(exam: ExamVO) {
   }
 }
 
-function goToStats(examId: number) {
+function goToStats(examId: string) {
   router.push(`/course/teaching/${courseId}/exam-stats/${examId}`)
 }
 

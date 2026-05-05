@@ -12,7 +12,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResult {
-  userId: number
+  userId: string
   userType: UserType
   accessToken: string
   refreshToken: string
@@ -45,7 +45,7 @@ export interface SendRegisterCodeRequest {
 }
 
 export interface UserVO {
-  userId: number
+  userId: string
   name: string
   userType: UserType
   sex: Sex
@@ -55,7 +55,7 @@ export interface UserVO {
 }
 
 export interface UserDetailVO {
-  userId: number
+  userId: string
   name: string
   userType: UserType
   sex: Sex
@@ -107,7 +107,7 @@ export interface ProfileUpdateRequest {
 }
 
 export interface AssignTeacherRequest {
-  userId: number
+  userId: string
   teacherNo: string
   title?: string
   department?: string
@@ -115,7 +115,7 @@ export interface AssignTeacherRequest {
 }
 
 export interface UserQueryRequest extends PageRequest {
-  userId?: number
+  userId?: string
   name?: string
   userType?: UserType
   sex?: Sex

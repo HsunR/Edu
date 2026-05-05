@@ -6,14 +6,14 @@ import { SheetStatus } from '@/types/enums'
 
 export const useExamStore = defineStore('exam', () => {
   const currentSheet = ref<AnswerSheetDetailVO | null>(null)
-  const answers = ref<Map<number, string>>(new Map())
+  const answers = ref<Map<string, string>>(new Map())
   const remainingSeconds = ref(0)
   const countdownTimer = ref<ReturnType<typeof setInterval> | null>(null)
 
   const isAnswering = computed(() => currentSheet.value?.status === SheetStatus.InProgress)
   const answeredCount = computed(() => answers.value.size)
 
-  async function enterExamAction(examId: number) {
+  async function enterExamAction(examId: string) {
     const sheet = await enterExam(examId)
     if (sheet) {
       currentSheet.value = await getMySheet(examId)
@@ -23,7 +23,7 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function fetchMySheet(examId: number) {
+  async function fetchMySheet(examId: string) {
     currentSheet.value = await getMySheet(examId)
     if (currentSheet.value?.records) {
       for (const record of currentSheet.value.records) {
@@ -37,12 +37,12 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function saveAnswerAction(sheetId: number, questionId: number, content: string) {
+  async function saveAnswerAction(sheetId: string, questionId: string, content: string) {
     answers.value.set(questionId, content)
     await saveAnswer(sheetId, questionId, { answerContent: content })
   }
 
-  async function submitExamAction(sheetId: number) {
+  async function submitExamAction(sheetId: string) {
     await submitExam(sheetId)
     stopCountdown()
     if (currentSheet.value) {

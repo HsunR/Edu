@@ -19,7 +19,7 @@ const classes = ref<ClassVO[]>([])
 const joinDialogVisible = ref(false)
 const inviteCode = ref('')
 
-const courseId = Number(route.params.courseId)
+const courseId = route.params.courseId as string
 
 const statusMap: Record<number, { label: string; type: 'info' | 'success' | 'warning' }> = {
   [CourseStatus.Draft]: { label: '草稿', type: 'info' },
@@ -187,7 +187,7 @@ onUnmounted(() => courseStore.clearCurrentCourse())
             <el-table-column label="状态" width="100">
               <template #default="{ row }">
                 <el-tag
-                  :type="row.status === ClassStatus.Enrolling ? 'success' : row.status === ClassStatus.InProgress ? '' : 'info'"
+                  :type="row.status === ClassStatus.Enrolling ? 'success' : row.status === ClassStatus.InProgress ? undefined : 'info'"
                   size="small"
                 >
                   {{ row.status === ClassStatus.Enrolling ? '招生中' : row.status === ClassStatus.InProgress ? '进行中' : '已结束' }}

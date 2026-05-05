@@ -183,13 +183,13 @@ export const ResourceTypeLabels: Record<ResourceType, string> = {
 }
 
 export enum UploadStatus {
-  Pending = 0,
-  Success = 1,
-  Failed = 2
+  Pending = 1,
+  Success = 2,
+  Failed = 3
 }
 
 export const UploadStatusLabels: Record<UploadStatus, string> = {
-  [UploadStatus.Pending]: '待上传',
+  [UploadStatus.Pending]: '待确认',
   [UploadStatus.Success]: '上传成功',
   [UploadStatus.Failed]: '上传失败'
 }

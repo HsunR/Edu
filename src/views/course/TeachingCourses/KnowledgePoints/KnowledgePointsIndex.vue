@@ -26,17 +26,17 @@ import { useCourseStore } from '@/stores/course'
 
 const route = useRoute()
 const courseStore = useCourseStore()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const treeData = ref<KnowledgeTreeVO[]>([])
 const selectedPoint = ref<KnowledgeTreeVO | null>(null)
-const linkedQuestionIds = ref<number[]>([])
-const linkedSectionIds = ref<number[]>([])
+const linkedQuestionIds = ref<string[]>([])
+const linkedSectionIds = ref<string[]>([])
 
 const pointDialogVisible = ref(false)
 const isEdit = ref(false)
-const editingPointId = ref<number | null>(null)
+const editingPointId = ref<string | null>(null)
 const pointForm = reactive<PointCreateRequest & { pointName: string; description: string }>({
   pointName: '',
   courseId,
@@ -47,10 +47,10 @@ const pointForm = reactive<PointCreateRequest & { pointName: string; description
 const bindQuestionDialogVisible = ref(false)
 const searchQuestions = ref<QuestionVO[]>([])
 const searchLoading = ref(false)
-const selectedQuestionIds = ref<number[]>([])
+const selectedQuestionIds = ref<string[]>([])
 
 const bindSectionDialogVisible = ref(false)
-const selectedSectionIds = ref<number[]>([])
+const selectedSectionIds = ref<string[]>([])
 
 const treeProps = {
   children: 'children',
@@ -72,7 +72,7 @@ function handleNodeClick(data: KnowledgeTreeVO) {
   loadLinkedData(data.pointId)
 }
 
-async function loadLinkedData(pointId: number) {
+async function loadLinkedData(pointId: string) {
   try {
     const [qIds, sIds] = await Promise.all([
       getPointQuestions(pointId),
@@ -173,7 +173,7 @@ async function openBindQuestions() {
   }
 }
 
-function toggleQuestionSelect(qId: number) {
+function toggleQuestionSelect(qId: string) {
   const idx = selectedQuestionIds.value.indexOf(qId)
   if (idx >= 0) {
     selectedQuestionIds.value.splice(idx, 1)
@@ -198,7 +198,7 @@ async function handleBindQuestions() {
   }
 }
 
-async function handleUnbindQuestion(questionId: number) {
+async function handleUnbindQuestion(questionId: string) {
   if (!selectedPoint.value) return
   try {
     await unbindQuestion(selectedPoint.value.pointId, questionId)
@@ -217,7 +217,7 @@ function openBindSections() {
   courseStore.fetchCourseDetail(courseId)
 }
 
-function toggleSectionSelect(sId: number) {
+function toggleSectionSelect(sId: string) {
   const idx = selectedSectionIds.value.indexOf(sId)
   if (idx >= 0) {
     selectedSectionIds.value.splice(idx, 1)
@@ -242,7 +242,7 @@ async function handleBindSections() {
   }
 }
 
-async function handleUnbindSection(sectionId: number) {
+async function handleUnbindSection(sectionId: string) {
   if (!selectedPoint.value) return
   try {
     await unbindSection(selectedPoint.value.pointId, sectionId)
@@ -254,8 +254,8 @@ async function handleUnbindSection(sectionId: number) {
   }
 }
 
-function getAllSections(): { sectionId: number; title: string; chapterTitle: string }[] {
-  const sections: { sectionId: number; title: string; chapterTitle: string }[] = []
+function getAllSections(): { sectionId: string; title: string; chapterTitle: string }[] {
+  const sections: { sectionId: string; title: string; chapterTitle: string }[] = []
   for (const chapter of courseStore.currentCourse?.chapters || []) {
     for (const section of chapter.sections || []) {
       sections.push({

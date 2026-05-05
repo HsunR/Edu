@@ -13,7 +13,7 @@ import axios from 'axios'
 
 const route = useRoute()
 const courseStore = useCourseStore()
-const courseId = Number(route.params.id)
+const courseId = route.params.id as string
 
 const loading = ref(false)
 const saving = ref(false)

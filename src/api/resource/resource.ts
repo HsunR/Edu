@@ -6,20 +6,20 @@ export function getResourceList(params: ResourceQueryRequest) {
   return request.get<any, PageResult<ResourceVO>>('/api/resource/resources', { params })
 }
 
-export function getResourceDetail(resourceId: number) {
+export function getResourceDetail(resourceId: string) {
   return request.get<any, ResourceDetailVO>(`/api/resource/resources/${resourceId}`)
 }
 
-export function deleteResource(resourceId: number) {
+export function deleteResource(resourceId: string) {
   return request.delete(`/api/resource/resources/${resourceId}`)
 }
 
 export function confirmUpload(data: UploadConfirmRequest) {
-  return request.post('/api/resource/resources/confirm', data)
+  return request.post<any, ResourceVO>('/api/resource/resources/confirm', data)
 }
 
 export function confirmVideoUpload(data: VideoConfirmRequest) {
-  return request.post('/api/resource/resources/confirm/video', data)
+  return request.post<any, ResourceDetailVO>('/api/resource/resources/confirm/video', data)
 }
 
 export function presignDocument(data: PresignRequest) {
