@@ -33,14 +33,14 @@ const questionTypeMap: Record<number, string> = {
   [QuestionType.ShortAnswer]: '简答题'
 }
 
-const isAnswering = computed(() => sheet.value?.status === SheetStatus.InProgress)
-const isEnded = computed(() => sheet.value?.status === SheetStatus.Ended || sheet.value?.status === SheetStatus.Graded)
+const isAnswering = computed(() => sheet.value?.status === 'IN_PROGRESS')
+const isEnded = computed(() => sheet.value?.status === 'ENDED' || sheet.value?.status === 'GRADED')
 
 async function initExam() {
   loading.value = true
   try {
     await examStore.fetchMySheet(examId)
-    if (!sheet.value || sheet.value.status === SheetStatus.NotStarted) {
+    if (!sheet.value || sheet.value?.status === 'NOT_STARTED') {
       await examStore.enterExamAction(examId)
     }
   } catch (error) {

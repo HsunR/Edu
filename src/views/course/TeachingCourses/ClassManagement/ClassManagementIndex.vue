@@ -382,6 +382,7 @@ onMounted(loadClasses)
     gap: 8px;
     flex: 1;
     min-width: 0;
+    margin-right: 20px;
 
     .class-name {
       font-size: 14px;

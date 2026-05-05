@@ -187,7 +187,7 @@ onUnmounted(() => courseStore.clearCurrentCourse())
             <el-table-column label="状态" width="100">
               <template #default="{ row }">
                 <el-tag
-                  :type="row.status === ClassStatus.Enrolling ? 'success' : row.status === ClassStatus.InProgress ? undefined : 'info'"
+                  :type="row.status === ClassStatus.Enrolling ? 'success' : row.status === ClassStatus.InProgress ? '' : 'info'"
                   size="small"
                 >
                   {{ row.status === ClassStatus.Enrolling ? '招生中' : row.status === ClassStatus.InProgress ? '进行中' : '已结束' }}

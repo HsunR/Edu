@@ -9,7 +9,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Breadcrumb: typeof import('./../components/Breadcrumb/index.vue')['default']
-    CourseCard: typeof import('./../components/CourseCard/index.vue')['default']
     DictTag: typeof import('./../components/DictTag/index.vue')['default']
     Editor: typeof import('./../components/Editor/index.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']

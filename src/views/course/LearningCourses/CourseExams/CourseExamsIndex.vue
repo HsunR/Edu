@@ -22,11 +22,11 @@ const examTypeMap: Record<number, { label: string; type: string }> = {
   [ExamType.Homework]: { label: '作业', type: 'success' }
 }
 
-const examStatusMap: Record<number, { label: string; type: string }> = {
-  [ExamStatus.NotStarted]: { label: '未开始', type: 'info' },
-  [ExamStatus.InProgress]: { label: '进行中', type: 'success' },
-  [ExamStatus.Ended]: { label: '已结束', type: 'warning' },
-  [ExamStatus.Graded]: { label: '已批阅', type: '' }
+const examStatusMap: Record<string, { label: string; type: string }> = {
+  'NOT_STARTED': { label: '未开始', type: 'info' },
+  'IN_PROGRESS': { label: '进行中', type: 'success' },
+  'ENDED': { label: '已结束', type: 'warning' },
+  'GRADED': { label: '已批阅', type: '' }
 }
 
 async function loadExams() {
@@ -72,8 +72,8 @@ onMounted(loadExams)
       <div class="toolbar">
         <el-radio-group v-model="statusFilter" size="small" @change="() => { examPage = 1; loadExams() }">
           <el-radio-button :value="undefined">全部</el-radio-button>
-          <el-radio-button :value="1">进行中</el-radio-button>
-          <el-radio-button :value="2">已结束</el-radio-button>
+          <el-radio-button :value="'IN_PROGRESS'">进行中</el-radio-button>
+          <el-radio-button :value="'ENDED'">已结束</el-radio-button>
         </el-radio-group>
       </div>
 
@@ -100,19 +100,19 @@ onMounted(loadExams)
             </div>
             <div class="exam-action">
               <el-button
-                v-if="exam.status === ExamStatus.InProgress"
+                v-if="exam.status === 'IN_PROGRESS'"
                 type="primary"
                 @click="enterExamPage(exam.examId)"
               >
                 进入考试
               </el-button>
               <el-button
-                v-if="exam.status === ExamStatus.Ended || exam.status === ExamStatus.Graded"
+                v-if="exam.status === 'ENDED' || exam.status === 'GRADED'"
                 @click="enterExamPage(exam.examId)"
               >
                 查看结果
               </el-button>
-              <el-tag v-if="exam.status === ExamStatus.NotStarted" type="info">未开放</el-tag>
+              <el-tag v-if="exam.status === 'NOT_STARTED'" type="info">未开放</el-tag>
             </div>
           </div>
         </el-card>

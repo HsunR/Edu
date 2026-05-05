@@ -2,13 +2,19 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { getExamStats, getExamSheets, getSheetDetail, gradeRecord, finishGrading } from '@/api/exam/index'
 import type { ExamStatsVO, AnswerSheetVO, AnswerSheetDetailVO, AnswerRecordVO, GradeRequest } from '@/api/exam/types'
 import { QuestionType, GradingStatus, SheetStatus } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
+const courseId = route.params.id as string
 const examId = route.params.examId as string
+
+function goBack() {
+  router.push(`/course/teaching/${courseId}/exams`)
+}
 
 const loading = ref(false)
 const stats = ref<ExamStatsVO | null>(null)
@@ -29,17 +35,17 @@ const questionTypeMap: Record<number, string> = {
 
 type TagType = 'success' | 'primary' | 'warning' | 'info' | 'danger' | undefined
 
-const gradingStatusMap: Record<number, { label: string; type: TagType }> = {
-  [GradingStatus.NotGraded]: { label: '未批改', type: 'info' },
-  [GradingStatus.Graded]: { label: '已批改', type: 'success' },
-  [GradingStatus.AIGrading]: { label: 'AI批改中', type: 'warning' }
+const gradingStatusMap: Record<string, { label: string; type: TagType }> = {
+  'NOT_GRADED': { label: '未批改', type: 'info' },
+  'GRADED': { label: '已批改', type: 'success' },
+  'AI_GRADING': { label: 'AI批改中', type: 'warning' }
 }
 
-const sheetStatusMap: Record<number, { label: string; type: TagType }> = {
-  [SheetStatus.NotStarted]: { label: '未开始', type: 'info' },
-  [SheetStatus.InProgress]: { label: '进行中', type: 'primary' },
-  [SheetStatus.Ended]: { label: '已交卷', type: 'warning' },
-  [SheetStatus.Graded]: { label: '已批阅', type: 'success' }
+const sheetStatusMap: Record<string, { label: string; type: TagType }> = {
+  'NOT_STARTED': { label: '未开始', type: 'info' },
+  'IN_PROGRESS': { label: '进行中', type: 'primary' },
+  'ENDED': { label: '已交卷', type: 'warning' },
+  'GRADED': { label: '已批阅', type: 'success' }
 }
 
 async function loadStats() {
@@ -89,7 +95,7 @@ async function handleGrade(recordId: string) {
       const record = sheetDetail.value.records.find(r => r.recordId === recordId)
       if (record) {
         record.score = gradeData.score
-        record.gradingStatus = GradingStatus.Graded
+        record.gradingStatus = 'GRADED'
         record.comment = gradeData.comment || ''
       }
     }
@@ -127,6 +133,7 @@ onMounted(loadStats)
     <el-card>
       <template #header>
         <div class="card-header">
+          <el-button :icon="ArrowLeft" @click="goBack">返回</el-button>
           <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/course/teaching' }">我教的课</el-breadcrumb-item>
             <el-breadcrumb-item>考试统计</el-breadcrumb-item>
@@ -194,7 +201,7 @@ onMounted(loadStats)
           <el-table-column label="操作" width="120">
             <template #default="{ row }">
               <el-button
-                v-if="row.status === SheetStatus.Ended || row.status === SheetStatus.InProgress"
+                v-if="row.status === 'ENDED' || row.status === 'IN_PROGRESS'"
                 size="small"
                 link
                 type="primary"
@@ -277,10 +284,10 @@ onMounted(loadStats)
                   <el-button
                     size="small"
                     type="primary"
-                    :disabled="record.gradingStatus === GradingStatus.Graded"
+                    :disabled="record.gradingStatus === 'GRADED'"
                     @click="handleGrade(record.recordId)"
                   >
-                    {{ record.gradingStatus === GradingStatus.Graded ? '已批改' : '批改' }}
+                    {{ record.gradingStatus === 'GRADED' ? '已批改' : '批改' }}
                   </el-button>
                 </div>
               </template>
@@ -293,6 +300,12 @@ onMounted(loadStats)
 </template>
 
 <style scoped lang="scss">
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .stats-cards {
   display: flex;
   gap: 16px;

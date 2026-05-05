@@ -15,14 +15,14 @@ import {
   bindSections,
   unbindSection
 } from '@/api/knowledge/index'
-import { getQuestionList } from '@/api/exam/index'
 import type {
   KnowledgeTreeVO,
   PointCreateRequest,
   PointUpdateRequest
 } from '@/api/knowledge/types'
-import type { QuestionVO } from '@/api/exam/types'
+import type { QuestionItem } from '@/api/exam/types'
 import { useCourseStore } from '@/stores/course'
+import QuestionSelector from '../PaperManagement/QuestionSelector.vue'
 
 const route = useRoute()
 const courseStore = useCourseStore()
@@ -44,10 +44,7 @@ const pointForm = reactive<PointCreateRequest & { pointName: string; description
   description: ''
 })
 
-const bindQuestionDialogVisible = ref(false)
-const searchQuestions = ref<QuestionVO[]>([])
-const searchLoading = ref(false)
-const selectedQuestionIds = ref<string[]>([])
+const questionSelectorVisible = ref(false)
 
 const bindSectionDialogVisible = ref(false)
 const selectedSectionIds = ref<string[]>([])
@@ -160,40 +157,20 @@ async function handleDelete(node: KnowledgeTreeVO) {
   }
 }
 
-async function openBindQuestions() {
+function openBindQuestions() {
   if (!selectedPoint.value) return
-  selectedQuestionIds.value = []
-  bindQuestionDialogVisible.value = true
-  searchLoading.value = true
-  try {
-    const result = await getQuestionList({ current: 1, pageSize: 100 })
-    searchQuestions.value = result.records
-  } finally {
-    searchLoading.value = false
-  }
+  questionSelectorVisible.value = true
 }
 
-function toggleQuestionSelect(qId: string) {
-  const idx = selectedQuestionIds.value.indexOf(qId)
-  if (idx >= 0) {
-    selectedQuestionIds.value.splice(idx, 1)
-  } else {
-    selectedQuestionIds.value.push(qId)
-  }
-}
-
-async function handleBindQuestions() {
-  if (!selectedPoint.value || selectedQuestionIds.value.length === 0) {
-    ElMessage.warning('请选择至少一道题目')
-    return
-  }
+async function handleQuestionsSelected(items: QuestionItem[]) {
+  if (!selectedPoint.value) return
+  const questionIds = items.map(item => item.questionId)
   try {
-    await bindQuestions(selectedPoint.value.pointId, { questionIds: selectedQuestionIds.value })
-    ElMessage.success('绑定成功')
-    bindQuestionDialogVisible.value = false
+    await bindQuestions(selectedPoint.value.pointId, { questionIds })
+    ElMessage.success('关联成功')
     await loadLinkedData(selectedPoint.value.pointId)
   } catch (error) {
-    const msg = error instanceof Error ? error.message : '绑定失败'
+    const msg = error instanceof Error ? error.message : '关联失败'
     ElMessage.error(msg)
   }
 }
@@ -385,25 +362,13 @@ onMounted(loadTree)
       </template>
     </el-dialog>
 
-    <el-dialog v-model="bindQuestionDialogVisible" title="关联题目" width="600px">
-      <el-table v-loading="searchLoading" :data="searchQuestions" stripe max-height="400" @row-click="(row: QuestionVO) => toggleQuestionSelect(row.questionId)">
-        <el-table-column width="50">
-          <template #default="{ row }">
-            <el-checkbox :model-value="selectedQuestionIds.includes(row.questionId)" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="stem" label="题干" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="questionType" label="题型" width="80" />
-        <el-table-column prop="score" label="分值" width="60" />
-      </el-table>
-      <div v-if="selectedQuestionIds.length > 0" style="margin-top: 8px; color: #409eff">
-        已选 {{ selectedQuestionIds.length }} 道题目
-      </div>
-      <template #footer>
-        <el-button @click="bindQuestionDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleBindQuestions">确认绑定</el-button>
-      </template>
-    </el-dialog>
+    <QuestionSelector
+      v-model="questionSelectorVisible"
+      :course-id="courseId"
+      simple
+      title="关联题目"
+      @confirm="handleQuestionsSelected"
+    />
 
     <el-dialog v-model="bindSectionDialogVisible" title="关联章节" width="500px">
       <div class="section-select-list">
