@@ -22,7 +22,7 @@ public class UsUserVO implements Serializable {
     /**
      * 用户身份
      */
-    private String type;
+    private String userType;
 
     /**
      * openID微信或者qq

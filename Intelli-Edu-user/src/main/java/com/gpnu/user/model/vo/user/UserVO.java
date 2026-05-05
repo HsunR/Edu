@@ -29,7 +29,7 @@ public class UserVO  implements Serializable {
      * 用户身份
      */
     @Schema(description = "用户身份，1学生，2教师", example = "1")
-    private UserType type;
+    private UserType userType;
 
 
     /**
