@@ -126,7 +126,7 @@ onMounted(loadStats)
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/TeachingCourses' }">我教的课</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/course/teaching' }">我教的课</el-breadcrumb-item>
             <el-breadcrumb-item>考试统计</el-breadcrumb-item>
           </el-breadcrumb>
         </div>

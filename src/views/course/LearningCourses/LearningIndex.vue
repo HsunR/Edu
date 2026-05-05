@@ -29,17 +29,17 @@ watch(
 const activeIndex = ref('/')
 
 const menuItems = [
-  { key: '/AITeachingAssistantLearning', label: 'AI助教', icon: StarFilled },
-  { key: '/ChapterStudyLearning', label: '章节学习', icon: Document },
-  { key: '/CourseWorkLearning', label: '课程作业', icon: DocumentChecked },
-  { key: '/CourseExamsLearning', label: '课程考试', icon: Monitor },
-  { key: '/CourseMaterialsLearning', label: '课程资料', icon: FolderOpened },
-  { key: '/CurriculumMapLearning', label: '课程图谱', icon: Share },
-  { key: '/ErrorSetLearning', label: '错题集', icon: DocumentDelete },
+  { key: '/ai-assistant', label: 'AI助教', icon: StarFilled },
+  { key: '/chapters', label: '章节学习', icon: Document },
+  { key: '/homework', label: '课程作业', icon: DocumentChecked },
+  { key: '/exams', label: '课程考试', icon: Monitor },
+  { key: '/materials', label: '课程资料', icon: FolderOpened },
+  { key: '/knowledge-map', label: '课程图谱', icon: Share },
+  { key: '/error-set', label: '错题集', icon: DocumentDelete },
 ]
 
 function handleSelect(key: string) {
-  router.push(`/course/LearningCourses/CourseDetails/${route.params.id}${key}`)
+  router.push(`/course/learning/${route.params.id}${key}`)
 }
 </script>
 

@@ -1,24 +1,31 @@
 import { useUserStore } from '@/stores'
+import { UserType } from '@/types/enums'
 
 export function usePermission() {
   const userStore = useUserStore()
 
-  function hasRole(role: string | string[]): boolean {
+  function hasRole(role: UserType | UserType[]): boolean {
     const roles = Array.isArray(role) ? role : [role]
-    return roles.includes(userStore.userInfo?.type || '')
+    const currentType = userStore.userType
+    if (!currentType) return false
+    return roles.includes(currentType)
   }
 
-  function hasPermission(_permission: string | string[]): boolean {
-    return true
+  function hasAnyRole(...roles: UserType[]): boolean {
+    return roles.some((role) => hasRole(role))
   }
 
-  function hasRoleOr(roles: string[]): boolean {
-    return roles.some(role => hasRole(role))
+  function isAdmin(): boolean {
+    return userStore.isAdmin
   }
 
-  function hasPermissionOr(permissions: string[]): boolean {
-    return permissions.some(p => hasPermission(p))
+  function isTeacher(): boolean {
+    return userStore.isTeacher
   }
 
-  return { hasRole, hasPermission, hasRoleOr, hasPermissionOr }
+  function isStudent(): boolean {
+    return userStore.isStudent
+  }
+
+  return { hasRole, hasAnyRole, isAdmin, isTeacher, isStudent }
 }

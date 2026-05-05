@@ -130,7 +130,7 @@ async function handleArchive(course: CourseVO) {
 }
 
 function toCourse(courseId: number) {
-  router.push(`/course/TeachingCourses/CourseDetails/${courseId}/ChapterStudyTeaching`)
+  router.push(`/course/teaching/${courseId}/chapters`)
 }
 
 const handleFileChange: UploadProps['onChange'] = (file) => {

@@ -1,37 +1,24 @@
 import type { App, Directive, DirectiveBinding } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { UserType } from '@/types/enums'
 
-function hasRole(el: HTMLElement, binding: DirectiveBinding) {
-  const { value } = binding
-  const superAdmin = 'admin'
-  const roles = useUserStore().roles
+function hasRole(el: HTMLElement, binding: DirectiveBinding<UserType | UserType[]>) {
+  const userStore = useUserStore()
+  const requiredRoles = Array.isArray(binding.value) ? binding.value : [binding.value]
 
-  if (value && Array.isArray(value) && value.length > 0) {
-    const hasRole = roles.some(role => superAdmin === role || value.includes(role))
-    if (!hasRole) {
-      el.parentNode?.removeChild(el)
-    }
-  } else {
-    throw new Error('请设置角色权限标签值')
+  if (requiredRoles.length === 0) {
+    throw new Error('v-hasRole 需要指定角色')
   }
-}
 
-function hasPermi(el: HTMLElement, binding: DirectiveBinding) {
-  const { value } = binding
-  const allPermission = '*:*:*'
-  const permissions = useUserStore().permissions
+  const currentType = userStore.userType
+  if (!currentType) return
 
-  if (value && Array.isArray(value) && value.length > 0) {
-    const hasPermissions = permissions.some(permission => allPermission === permission || value.includes(permission))
-    if (!hasPermissions) {
-      el.parentNode?.removeChild(el)
-    }
-  } else {
-    throw new Error('请设置操作权限标签值')
+  const hasAccess = requiredRoles.includes(currentType)
+  if (!hasAccess) {
+    el.parentNode?.removeChild(el)
   }
 }
 
 export function setupPermissionDirectives(app: App) {
   app.directive('hasRole', hasRole as Directive)
-  app.directive('hasPermi', hasPermi as Directive)
 }

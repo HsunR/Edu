@@ -1,4 +1,4 @@
-import 'vue-router'
+import type { UserType } from '@/types/enums'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -9,8 +9,7 @@ declare module 'vue-router' {
     noCache?: boolean
     breadcrumb?: boolean
     activeMenu?: string
-    permissions?: string[]
-    roles?: string[]
+    roles?: UserType[]
     link?: string
   }
 }

@@ -35,7 +35,7 @@
                      </li>
                      <li class="list-group-item">
                         <svg-icon icon-class="peoples" style="margin-right: 10px;" />角色
-                        <div class="pull-right">{{ userStore.userInfo?.type }}</div>
+                        <div class="pull-right">{{ userStore.userInfo?.userType }}</div>
                      </li>
                   </ul>
                </div>

@@ -33,29 +33,4 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/error/404.vue'),
     meta: { hidden: true },
   },
-  {
-    path: '',
-    component: Layout,
-    redirect: '/index',
-    children: [
-      {
-        path: '/index',
-        component: () => import('@/views/course/Browse/index.vue'),
-        name: 'Index',
-        meta: { title: '课程浏览', icon: 'dashboard', affix: true },
-      },
-    ],
-  },
-  {
-    path: '/user',
-    component: Layout,
-    children: [
-      {
-        path: 'profile',
-        component: () => import('@/views/system/user/profile/index.vue'),
-        name: 'Profile',
-        meta: { title: '个人中心', icon: 'user' },
-      },
-    ],
-  },
 ]

@@ -144,7 +144,7 @@ async function handleDelete(exam: ExamVO) {
 }
 
 function goToStats(examId: number) {
-  router.push(`/course/TeachingCourses/CourseDetails/${courseId}/ExamStats/${examId}`)
+  router.push(`/course/teaching/${courseId}/exam-stats/${examId}`)
 }
 
 function handlePageChange(page: number) {
@@ -166,7 +166,7 @@ onMounted(loadExams)
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/TeachingCourses' }">我教的课</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/course/teaching' }">我教的课</el-breadcrumb-item>
             <el-breadcrumb-item>考试管理</el-breadcrumb-item>
           </el-breadcrumb>
         </div>

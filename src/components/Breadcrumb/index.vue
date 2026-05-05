@@ -28,7 +28,7 @@ function getBreadcrumb() {
       if (index !== 0) item = item.slice(1)
       return item
     })
-    getMatched(pathList, permissionStore.defaultRoutes, matched)
+    getMatched(pathList, permissionStore.routes, matched)
   } else {
     matched = route.matched.filter((item) => item.meta && item.meta.title)
   }

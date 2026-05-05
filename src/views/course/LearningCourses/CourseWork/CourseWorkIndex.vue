@@ -54,7 +54,7 @@ onMounted(() => {
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/LearningCourses' }">我学的课</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/course/learning' }">我学的课</el-breadcrumb-item>
             <el-breadcrumb-item>课程作业</el-breadcrumb-item>
           </el-breadcrumb>
 
@@ -92,7 +92,7 @@ onMounted(() => {
         </template>
         <template #default>
           <el-card v-for="item in lists" :key="item.name" :body-style="{ padding: '0px', marginBottom: '1px' }"
-            class="homework-card" @click="router.push({ path: `/course/homeworkWorkDetail/1/${item.id}` })">
+            class="homework-card" @click="router.push({ path: `/course/homework-detail/1/${item.id}` })">
             <span>
               <img :src="item.imgUrl" class="image multi-content" style="width: 50px;border-radius: 10px;" />
             </span>

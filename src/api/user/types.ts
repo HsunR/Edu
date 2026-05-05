@@ -47,7 +47,7 @@ export interface SendRegisterCodeRequest {
 export interface UserVO {
   userId: number
   name: string
-  type: UserType
+  userType: UserType
   sex: Sex
   avatarUrl: string
   personalSignature: string
@@ -57,7 +57,7 @@ export interface UserVO {
 export interface UserDetailVO {
   userId: number
   name: string
-  type: UserType
+  userType: UserType
   sex: Sex
   avatarUrl: string
   personalSignature: string

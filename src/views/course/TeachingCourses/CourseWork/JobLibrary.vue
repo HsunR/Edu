@@ -147,7 +147,7 @@ const handleEdit = (id) => {
 
           <div class="header-buttons">
             <el-button class="gradient-btn" style="color: #fff; margin-top: 0px;"
-              @click="router.push(`/course/createExam/${1}`)">新建作业</el-button>
+              @click="router.push(`/course/create-exam/${1}`)">新建作业</el-button>
             <el-upload class="upload-demo" action="#" :on-change="handleChange" :show-file-list="false"
               :auto-upload="false">
               <el-button :icon="UploadFilled" type="warning" plain>导入作业</el-button>

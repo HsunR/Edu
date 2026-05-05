@@ -30,19 +30,19 @@ watch(
 
 const activeIndex = ref('1')
 const menuItems = [
-  { key: '/ClassManagementTeaching', label: '班级管理', icon: Grid },
-  { key: '/ChapterStudyTeaching', label: '章节学习', icon: Document },
-  { key: '/CourseWorkTeaching', label: '课程作业', icon: DocumentChecked },
-  { key: '/CourseExamsTeaching', label: '课程考试', icon: Monitor },
-  { key: '/CourseMaterialsTeaching', label: '课程资料', icon: FolderOpened },
-  { key: '/QuestionBankManagementTeaching', label: '题库管理', icon: Reading },
-  { key: '/PaperManagementTeaching', label: '试卷管理', icon: CopyDocument },
-  { key: '/KnowledgePointsTeaching', label: '知识点', icon: SetUp },
-  { key: '/SettingManagementTeaching', label: '管理', icon: Setting },
+  { key: '/classes', label: '班级管理', icon: Grid },
+  { key: '/chapters', label: '章节学习', icon: Document },
+  { key: '/homework', label: '课程作业', icon: DocumentChecked },
+  { key: '/exams', label: '课程考试', icon: Monitor },
+  { key: '/materials', label: '课程资料', icon: FolderOpened },
+  { key: '/question-bank', label: '题库管理', icon: Reading },
+  { key: '/papers', label: '试卷管理', icon: CopyDocument },
+  { key: '/knowledge-points', label: '知识点', icon: SetUp },
+  { key: '/settings', label: '管理', icon: Setting },
 ]
 
 function handleSelect(key: string) {
-  router.push(`/course/TeachingCourses/CourseDetails/${route.params.id}${key}`)
+  router.push(`/course/teaching/${route.params.id}${key}`)
 }
 </script>
 

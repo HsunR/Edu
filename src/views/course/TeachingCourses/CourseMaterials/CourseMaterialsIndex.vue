@@ -123,7 +123,7 @@ onMounted(loadResources)
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/TeachingCourses' }">我教的课</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/course/teaching' }">我教的课</el-breadcrumb-item>
             <el-breadcrumb-item>课程资料</el-breadcrumb-item>
           </el-breadcrumb>
           <el-button type="primary" :icon="Upload" @click="uploadDialogVisible = true">

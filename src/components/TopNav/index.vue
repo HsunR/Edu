@@ -55,7 +55,7 @@ const router = useRouter()
 // 主题颜色
 const theme = computed(() => settingsStore.theme)
 // 所有的路由信息
-const routers = computed(() => permissionStore.topbarRouters)
+const routers = computed(() => permissionStore.sidebarRouters)
 
 // 顶部显示菜单
 const topMenus = computed(() => {
@@ -150,7 +150,7 @@ function activeRoutes(key) {
     })
   }
   if(routes.length > 0) {
-    permissionStore.sidebarRouters = routes
+    permissionStore.setSidebarRouters(routes)
   } else {
     appStore.toggleSideBarHide(true)
   }

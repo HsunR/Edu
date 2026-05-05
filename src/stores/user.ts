@@ -11,7 +11,7 @@ export const useUserStore = defineStore('user', () => {
   const refreshToken = ref(getRefreshToken() || '')
   const userInfo = ref<UserDetailVO | null>(null)
 
-  const userType = computed(() => userInfo.value?.type)
+  const userType = computed(() => userInfo.value?.userType)
   const isStudent = computed(() => userType.value === UserType.Student)
   const isTeacher = computed(() => userType.value === UserType.Teacher)
   const isAdmin = computed(() => userType.value === UserType.Admin)
@@ -49,6 +49,9 @@ export const useUserStore = defineStore('user', () => {
       userInfo.value = null
       removeToken()
       removeRefreshToken()
+
+      const { usePermissionStore } = await import('@/stores/permission')
+      usePermissionStore().resetRoutes()
     }
   }
 

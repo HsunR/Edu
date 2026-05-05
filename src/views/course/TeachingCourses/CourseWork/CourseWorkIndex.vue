@@ -138,14 +138,14 @@ const handleEdit = (id) => {
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/TeachingCourses' }">我教的课</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/course/teaching' }">我教的课</el-breadcrumb-item>
             <el-breadcrumb-item>课程作业</el-breadcrumb-item>
           </el-breadcrumb>
 
           <div class="header-buttons">
             <el-button class="gradient-btn" round style="color: #fff; margin-top: 0px;"
-              @click="router.push(`/course/createExam/${1}`)">新建作业</el-button>
-            <el-button @click="router.push('/course/jobLibrary')" round>作业库</el-button>
+              @click="router.push(`/course/create-exam/${1}`)">新建作业</el-button>
+            <el-button @click="router.push('/course/job-library')" round>作业库</el-button>
 
             <!-- 查询 -->
             <div class="form" style="margin-left: 580px;">

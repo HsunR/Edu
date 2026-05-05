@@ -33,7 +33,7 @@
                plain
                icon="Plus"
                @click="handleAdd"
-               v-hasPermi="['system:menu:add']"
+              
             >新增</el-button>
          </el-col>
          <el-col :span="1.5">
@@ -76,9 +76,9 @@
          </el-table-column>
          <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
             <template #default="scope">
-               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:menu:edit']">修改</el-button>
-               <el-button link type="primary" icon="Plus" @click="handleAdd(scope.row)" v-hasPermi="['system:menu:add']">新增</el-button>
-               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:menu:remove']">删除</el-button>
+               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+               <el-button link type="primary" icon="Plus" @click="handleAdd(scope.row)">新增</el-button>
+               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
             </template>
          </el-table-column>
       </el-table>

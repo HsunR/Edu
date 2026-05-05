@@ -57,7 +57,7 @@ const fuse = ref(undefined)
 const headerSearchSelectRef = ref(null)
 const router = useRouter()
 const theme = computed(() => useSettingsStore().theme)
-const routes = computed(() => usePermissionStore().defaultRoutes)
+const routes = computed(() => usePermissionStore().routes)
 
 function click() {
   show.value = !show.value

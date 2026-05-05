@@ -46,7 +46,7 @@ async function loadExams() {
 }
 
 function enterExamPage(examId: number) {
-  router.push(`/course/LearningCourses/CourseDetails/${courseId}/ExamAnswer/${examId}`)
+  router.push(`/course/learning/${courseId}/exam-answer/${examId}`)
 }
 
 function handlePageChange(page: number) {
@@ -63,7 +63,7 @@ onMounted(loadExams)
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/LearningCourses' }">我学的课</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/course/learning' }">我学的课</el-breadcrumb-item>
             <el-breadcrumb-item>课程考试</el-breadcrumb-item>
           </el-breadcrumb>
         </div>

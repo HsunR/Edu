@@ -53,7 +53,7 @@ onMounted(loadTree)
       <template #header>
         <div class="card-header">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/course/LearningCourses' }">我学的课</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/course/learning' }">我学的课</el-breadcrumb-item>
             <el-breadcrumb-item>知识图谱</el-breadcrumb-item>
           </el-breadcrumb>
         </div>

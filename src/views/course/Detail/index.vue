@@ -63,11 +63,11 @@ async function handleJoinClass() {
 }
 
 function goToTeaching() {
-  router.push(`/course/TeachingCourses/CourseDetails/${courseId}/ChapterStudyTeaching`)
+  router.push(`/course/teaching/${courseId}/chapters`)
 }
 
 function goToLearning() {
-  router.push(`/course/LearningCourses/CourseDetails/${courseId}/ChapterStudyLearning`)
+  router.push(`/course/learning/${courseId}/chapters`)
 }
 
 onMounted(loadCourseDetail)

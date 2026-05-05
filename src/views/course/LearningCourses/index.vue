@@ -42,7 +42,7 @@ async function handleJoinClass() {
 }
 
 function goToCourse(courseId: number) {
-  router.push(`/course/LearningCourses/CourseDetails/${courseId}/ChapterStudyLearning`)
+  router.push(`/course/learning/${courseId}/chapters`)
 }
 
 function goToCourseDetail(courseId: number) {
