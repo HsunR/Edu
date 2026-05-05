@@ -30,4 +30,11 @@ public interface IExamService extends IService<Exam> {
     // ----- Feign -----
 
     ExamSimpleDTO getExamSimple(Long examId);
+
+    /**
+     * 根据时间自动更新考试状态
+     * - NOT_STARTED -> IN_PROGRESS（当前时间 >= 开始时间）
+     * - IN_PROGRESS -> ENDED（当前时间 >= 结束时间）
+     */
+    void updateExamStatus();
 }

@@ -203,6 +203,29 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
         return dto;
     }
 
+    @Override
+    public void updateExamStatus() {
+        OffsetDateTime now = OffsetDateTime.now();
+
+        List<Exam> toStart = list(new LambdaQueryWrapper<Exam>()
+                .eq(Exam::getStatus, ExamStatus.NOT_STARTED)
+                .le(Exam::getStartTime, now));
+
+        if (!toStart.isEmpty()) {
+            toStart.forEach(exam -> exam.setStatus(ExamStatus.IN_PROGRESS));
+            updateBatchById(toStart);
+        }
+
+        List<Exam> toEnd = list(new LambdaQueryWrapper<Exam>()
+                .eq(Exam::getStatus, ExamStatus.IN_PROGRESS)
+                .le(Exam::getEndTime, now));
+
+        if (!toEnd.isEmpty()) {
+            toEnd.forEach(exam -> exam.setStatus(ExamStatus.ENDED));
+            updateBatchById(toEnd);
+        }
+    }
+
     // ==================== 私有方法 ====================
 
     private Exam getAndValidate(Long teacherId, Long examId) {
