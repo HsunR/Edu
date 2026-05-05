@@ -1,5 +1,7 @@
 package com.gpnu.exam.exam.model.vo;
 
+import com.gpnu.exam.exam.model.enums.GradingStatus;
+import com.gpnu.exam.question.model.enums.QuestionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.io.Serializable;
@@ -26,7 +28,7 @@ public class AnswerRecordVO implements Serializable {
     private Boolean isCorrect;
 
     @Schema(description = "批改状态，0=未批改 1=已批改 2-AI批改中")
-    private Integer gradingStatus;
+    private GradingStatus gradingStatus;
 
     @Schema(description = "批改教师ID，null表示未批改或AI批改中")
     private Long graderId;
@@ -36,7 +38,7 @@ public class AnswerRecordVO implements Serializable {
 
     /** 题目快照信息（来自试卷） */
     @Schema(description = "题目类型，0=单选 1=多选 2=判断 3=填空 4=简答")
-    private Integer questionType;
+    private QuestionType questionType;
 
     @Schema(description = "题目内容")
     private String stem;

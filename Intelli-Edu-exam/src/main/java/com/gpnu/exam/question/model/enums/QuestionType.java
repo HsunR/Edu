@@ -1,6 +1,7 @@
 package com.gpnu.exam.question.model.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -12,6 +13,7 @@ public enum QuestionType {
     SHORT_ANSWER(4, "简答");
 
     @EnumValue
+    @JsonValue
     private final int code;
     private final String desc;
 

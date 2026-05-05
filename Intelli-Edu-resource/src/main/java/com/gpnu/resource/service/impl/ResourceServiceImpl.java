@@ -168,7 +168,7 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
     public ResourceVO confirmCosUpload(Long userId,UploadConfirmRequest request) {
         // 1. 查询资源记录
         RsResource resource = getResourceOrThrow(request.getResourceId());
-        if (!UploadStatus.PENDING.getCode().equals(resource.getUploadStatus())) {
+        if (!UploadStatus.PENDING.equals(resource.getUploadStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "该资源不处于待确认状态");
         }
 
@@ -196,11 +196,14 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
                     "文件大小超过限制，最大允许 " + (maxSize / 1024 / 1024) + "MB");
         }
 
-        // 3. 更新资源记录
+        // 3. 更新资源记录（带乐观锁，防止并发重复确认）
         resource.setFileSize(actualSize);
         resource.setAccessUrl(cosManager.getFileAccessUrl(resource.getStorageKey()));
         resource.setUploadStatus(UploadStatus.SUCCESS);
-        baseMapper.updateById(resource);
+        int affected = baseMapper.updateById(resource);
+        if (affected == 0) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "资源状态已变更，请勿重复确认");
+        }
 
         log.info("COS upload confirmed, resource={}, size={}", resource.getResourceId(), actualSize);
         return buildResourceVO(resource);
@@ -211,7 +214,7 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
     public ResourceDetailVO confirmVodUpload(Long userId,VideoConfirmRequest request) {
         // 1. 查询资源记录
         RsResource resource = getResourceOrThrow(request.getResourceId());
-        if (!UploadStatus.PENDING.getCode().equals(resource.getUploadStatus())) {
+        if (!UploadStatus.PENDING.equals(resource.getUploadStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "该资源不处于待确认状态");
         }
 
@@ -229,11 +232,14 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
         // 3. 调腾讯云确认上传
         CommitUploadResponse commitResponse = tencentCloudVodManager.commitVodUpload(vodSessionKey);
 
-        // 4. 更新资源记录
+        // 4. 更新资源记录（带乐观锁，防止并发重复确认）
         resource.setAccessUrl(commitResponse.getMediaUrl());
         resource.setStorageKey(commitResponse.getFileId());
         resource.setUploadStatus(UploadStatus.SUCCESS);
-        baseMapper.updateById(resource);
+        int affected = baseMapper.updateById(resource);
+        if (affected == 0) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "资源状态已变更，请勿重复确认");
+        }
 
         // 5. 更新视频元数据
         RsVideoMeta videoMeta = videoMetaMapper.selectById(request.getResourceId());
@@ -313,7 +319,7 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
         }
 
         // 1. 删除云存储文件
-        if (resource.getUploadStatus().equals(UploadStatus.SUCCESS.getCode())
+        if (UploadStatus.SUCCESS.equals(resource.getUploadStatus())
                 && resource.getStorageKey() != null) {
             try {
                 if (ResourceType.VIDEO.getCode() == resource.getResourceType().getCode()) {

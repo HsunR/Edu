@@ -75,7 +75,7 @@ public class ClassServiceImpl extends ServiceImpl<ClazzMapper, Clazz>
         BeanUtil.copyProperties(request, clazz);
         clazz.setTeacherId(teacherId);
         clazz.setInviteCode(generateUniqueInviteCode());
-        clazz.setStatus(ClassStatus.RECRUITING.getCode());
+        clazz.setStatus(ClassStatus.RECRUITING);
         save(clazz);
 
         log.info("Class created, classId={}, courseId={}, teacherId={}",

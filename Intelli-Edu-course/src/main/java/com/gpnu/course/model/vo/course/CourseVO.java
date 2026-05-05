@@ -1,5 +1,6 @@
 package com.gpnu.course.model.vo.course;
 
+import com.gpnu.course.model.enums.CourseStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -22,7 +23,7 @@ public class CourseVO implements Serializable {
     String  teacherAvatar;
     Long    categoryId;
     String  categoryName;
-    Integer status;
+    CourseStatus status;
     Integer isPublic;
     OffsetDateTime createdAt;
 }

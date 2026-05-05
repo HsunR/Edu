@@ -15,6 +15,7 @@ import com.gpnu.exam.exam.model.entity.Exam;
 import com.gpnu.exam.exam.model.enums.ExamType;
 import com.gpnu.exam.exam.model.enums.GradingStatus;
 import com.gpnu.exam.exam.model.enums.SheetStatus;
+import com.gpnu.exam.question.model.enums.QuestionType;
 import com.gpnu.exam.exam.model.vo.AnswerRecordVO;
 import com.gpnu.exam.exam.model.vo.AnswerSheetDetailVO;
 import com.gpnu.exam.exam.model.vo.AnswerSheetVO;
@@ -365,7 +366,6 @@ public class AnswerServiceImpl implements IAnswerService {
     private AnswerSheetDetailVO buildSheetDetail(AnswerSheet sheet) {
         AnswerSheetDetailVO detail = new AnswerSheetDetailVO();
         BeanUtils.copyProperties(sheet, detail);
-        detail.setStatus(sheet.getStatus().getCode());
 
         // 查考试名称
         Exam exam = examService.getById(sheet.getExamId());
@@ -391,14 +391,13 @@ public class AnswerServiceImpl implements IAnswerService {
         List<AnswerRecordVO> recordVOs = records.stream().map(r -> {
             AnswerRecordVO vo = new AnswerRecordVO();
             BeanUtils.copyProperties(r, vo);
-            vo.setGradingStatus(r.getGradingStatus().getCode());
 
             PaperQuestion pq = finalPqMap.get(r.getQuestionId());
             if (pq != null) {
                 vo.setQuestionScore(pq.getScore());
                 if (pq.getQuestionSnapshot() != null) {
                     Map<String, Object> snap = pq.getQuestionSnapshot();
-                    vo.setQuestionType((Integer) snap.get("question_type"));
+                    vo.setQuestionType(QuestionType.valueOf((String) snap.get("question_type")));
                     vo.setStem((String) snap.get("stem"));
                     vo.setCorrectAnswer((String) snap.get("answer"));
                 }
@@ -413,7 +412,6 @@ public class AnswerServiceImpl implements IAnswerService {
     private AnswerSheetVO toSheetVO(AnswerSheet sheet) {
         AnswerSheetVO vo = new AnswerSheetVO();
         BeanUtils.copyProperties(sheet, vo);
-        vo.setStatus(sheet.getStatus().getCode());
         return vo;
     }
 }

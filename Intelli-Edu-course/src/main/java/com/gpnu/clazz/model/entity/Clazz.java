@@ -3,6 +3,7 @@ package com.gpnu.clazz.model.entity;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import com.gpnu.clazz.model.enums.ClassStatus;
@@ -49,12 +50,12 @@ public class Clazz implements Serializable {
     /**
      * 开课日期
      */
-    private OffsetDateTime startDate;
+    private LocalDate startDate;
 
     /**
      * 结课日期
      */
-    private OffsetDateTime endDate;
+    private LocalDate endDate;
 
     /**
      * 班级状态：0=招生中 1=进行中 2=已结束
@@ -84,8 +85,4 @@ public class Clazz implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
-
-    public void setStatus(int code) {
-
-    }
 }

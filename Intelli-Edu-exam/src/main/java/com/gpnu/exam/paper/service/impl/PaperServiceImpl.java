@@ -230,7 +230,7 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper>
         detail.setTeacherId(paper.getTeacherId());
         detail.setTotalScore(paper.getTotalScore());
         detail.setSections(paper.getSections());
-        detail.setStatus(paper.getStatus().getCode());
+        detail.setStatus(paper.getStatus());
         detail.setQuestions(pqVOs);
         detail.setCreatedAt(paper.getCreatedAt());
         detail.setUpdatedAt(paper.getUpdatedAt());
@@ -289,15 +289,7 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper>
 
     private PaperVO toVO(Paper paper) {
         PaperVO vo = new PaperVO();
-        vo.setPaperId(paper.getPaperId());
-        vo.setPaperName(paper.getPaperName());
-        vo.setCourseId(paper.getCourseId());
-        vo.setTeacherId(paper.getTeacherId());
-        vo.setTotalScore(paper.getTotalScore());
-        vo.setSections(paper.getSections());
-        vo.setStatus(paper.getStatus().getCode());
-        vo.setCreatedAt(paper.getCreatedAt());
-        vo.setUpdatedAt(paper.getUpdatedAt());
+        BeanUtils.copyProperties(paper, vo);
         return vo;
     }
 }

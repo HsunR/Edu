@@ -1,7 +1,10 @@
 package com.gpnu.course.model.vo.section;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class SectionResourceVO implements Serializable {
 
     private static final long serialVersionUID = 1L;

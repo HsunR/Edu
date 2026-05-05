@@ -199,8 +199,6 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
     private ExamVO toVO(Exam exam, String paperName) {
         ExamVO vo = new ExamVO();
         BeanUtils.copyProperties(exam, vo);
-        vo.setExamType(exam.getExamType().getCode());
-        vo.setStatus(exam.getStatus().getCode());
         vo.setPaperName(paperName);
         return vo;
     }
@@ -208,7 +206,6 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
     private AnswerSheetVO toSheetVO(AnswerSheet sheet) {
         AnswerSheetVO vo = new AnswerSheetVO();
         BeanUtils.copyProperties(sheet, vo);
-        vo.setStatus(sheet.getStatus().getCode());
         return vo;
     }
 }

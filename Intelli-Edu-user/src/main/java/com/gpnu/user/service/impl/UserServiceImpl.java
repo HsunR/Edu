@@ -336,7 +336,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public List<UserSimpleDTO> getUserSimpleBatch(List<Long> userIds) {
-        return List.of();
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        List<User> users = listByIds(userIds);
+        return users.stream().map(user -> {
+            UserSimpleDTO dto = new UserSimpleDTO();
+            BeanUtil.copyProperties(user, dto);
+            return dto;
+        }).toList();
     }
 
     @Override

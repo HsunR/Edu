@@ -1,5 +1,6 @@
 package com.gpnu.clazz.model.vo;
 
+import com.gpnu.clazz.model.enums.MemberStatus;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ public class ClassMemberVO implements Serializable {
 
     private String avatarUrl;
 
-    private Integer status;
+    private MemberStatus status;
 
     private OffsetDateTime joinedAt;
 

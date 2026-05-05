@@ -1,5 +1,7 @@
 package com.gpnu.resource.model.vo;
 
+import com.gpnu.resource.model.enums.ResourceType;
+import com.gpnu.resource.model.enums.UploadStatus;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,10 +13,10 @@ public class ResourceVO implements Serializable {
 
     private Long resourceId;
     private String resourceName;
-    private Integer resourceType;
+    private ResourceType resourceType;
     private String fileFormat;
     private Long fileSize;
     private String accessUrl;
-    private Integer uploadStatus;
+    private UploadStatus uploadStatus;
     private OffsetDateTime createdAt;
 }

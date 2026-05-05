@@ -1,5 +1,6 @@
 package com.gpnu.exam.paper.model.vo;
 
+import com.gpnu.exam.paper.model.enums.PaperStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.io.Serializable;
@@ -19,7 +20,7 @@ public class PaperVO implements Serializable {
     private Long teacherId;
     private BigDecimal totalScore;
     private List<Map<String, Object>> sections;
-    private Integer status;
+    private PaperStatus status;
     private Integer questionCount;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

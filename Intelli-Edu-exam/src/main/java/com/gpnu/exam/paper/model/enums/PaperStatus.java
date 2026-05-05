@@ -1,6 +1,7 @@
 package com.gpnu.exam.paper.model.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -9,6 +10,7 @@ public enum PaperStatus {
     PUBLISHED(1, "已发布");
 
     @EnumValue
+    @JsonValue
     private final int code;
     private final String desc;
 

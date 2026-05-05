@@ -1,8 +1,10 @@
 package com.gpnu.clazz.model.vo;
 
+import com.gpnu.clazz.model.enums.ClassStatus;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Data
@@ -30,11 +32,11 @@ public class ClassVO implements Serializable {
     //当前学生人数，动态统计
     private Integer currentStudents;
 
-    private OffsetDateTime startDate;
+    private LocalDate startDate;
 
-    private OffsetDateTime endDate;
+    private LocalDate endDate;
 
-    private Integer status;
+    private ClassStatus status;
 
     private OffsetDateTime createdAt;
 

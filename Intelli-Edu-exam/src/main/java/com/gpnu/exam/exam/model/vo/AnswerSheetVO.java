@@ -1,5 +1,6 @@
 package com.gpnu.exam.exam.model.vo;
 
+import com.gpnu.exam.exam.model.enums.SheetStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.io.Serializable;
@@ -24,7 +25,7 @@ public class AnswerSheetVO implements Serializable {
     private String studentName;
 
     @Schema(description = "答卷状态，0=未开始 1=进行中 2=已结束 3-已批阅完成")
-    private Integer status;
+    private SheetStatus status;
 
     @Schema(description = "总分")
     private BigDecimal totalScore;

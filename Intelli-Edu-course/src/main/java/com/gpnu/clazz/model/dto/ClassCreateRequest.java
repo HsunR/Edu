@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 @Data
 @Schema(description = "创建班级请求对象")
@@ -29,9 +29,9 @@ public class ClassCreateRequest implements Serializable {
     private Integer maxStudents;
 
 
-    @Schema(description = "开课日期",example = "2024-09-01T00:00:00Z")
-    private OffsetDateTime startDate;
+    @Schema(description = "开课日期",example = "2024-09-01")
+    private LocalDate startDate;
 
-    @Schema(description = "结课日期",example = "2025-06-30T23:59:59Z")
-    private OffsetDateTime endDate;
+    @Schema(description = "结课日期",example = "2025-06-30")
+    private LocalDate endDate;
 }

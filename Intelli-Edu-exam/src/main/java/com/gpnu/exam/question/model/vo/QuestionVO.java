@@ -1,5 +1,7 @@
 package com.gpnu.exam.question.model.vo;
 
+import com.gpnu.exam.question.model.enums.Difficulty;
+import com.gpnu.exam.question.model.enums.QuestionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.io.Serializable;
@@ -14,12 +16,12 @@ public class QuestionVO implements Serializable {
 
     private Long questionId;
     private Long bankId;
-    private Integer questionType;
+    private QuestionType questionType;
     private String stem;
     private String analysis;
     private String answer;
     private BigDecimal score;
-    private Integer difficulty;
+    private Difficulty difficulty;
     private List<QuestionOptionVO> options;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

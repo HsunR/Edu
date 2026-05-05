@@ -220,16 +220,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
 
     private QuestionVO toVO(Question question, List<QuestionOption> options) {
         QuestionVO vo = new QuestionVO();
-        vo.setQuestionId(question.getQuestionId());
-        vo.setBankId(question.getBankId());
-        vo.setQuestionType(question.getQuestionType().getCode());
-        vo.setStem(question.getStem());
-        vo.setAnalysis(question.getAnalysis());
-        vo.setAnswer(question.getAnswer());
-        vo.setScore(question.getScore());
-        vo.setDifficulty(question.getDifficulty().getCode());
-        vo.setCreatedAt(question.getCreatedAt());
-        vo.setUpdatedAt(question.getUpdatedAt());
+        BeanUtils.copyProperties(question, vo);
         vo.setOptions(options.stream().map(this::toOptionVO).toList());
         return vo;
     }

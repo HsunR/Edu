@@ -1,6 +1,7 @@
 package com.gpnu.exam.exam.model.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -10,6 +11,7 @@ public enum SheetStatus {
     GRADED(2, "已批阅");
 
     @EnumValue
+    @JsonValue
     private final int code;
     private final String desc;
 

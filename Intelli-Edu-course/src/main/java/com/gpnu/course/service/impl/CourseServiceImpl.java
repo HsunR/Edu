@@ -202,6 +202,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course>
         ThrowUtils.throwIf(course == null, ErrorCode.NOT_FOUND_ERROR, "课程不存在");
         CourseSimpleDTO dto = new CourseSimpleDTO();
         BeanUtil.copyProperties(course, dto);
+        dto.setStatus(course.getStatus().getCode());
         dto.setCourseCover(course.getCoverUrl());
         return dto;
     }
