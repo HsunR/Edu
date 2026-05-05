@@ -235,7 +235,7 @@ public class SectionServiceImpl extends ServiceImpl<SectionMapper, Section>
                 vo.setResourceDetails(details);
             } catch (Exception e) {
                 log.warn("Failed to fetch resource details, sectionId={}", sectionId, e);
-                vo.setResources(List.of());
+                vo.setResourceDetails(List.of());
             }
 
             // 同时填充简要资源列表

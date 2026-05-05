@@ -32,7 +32,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
@@ -129,7 +130,22 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
 
         Page<Exam> page = page(new Page<>(request.getCurrent(), request.getPageSize()), wrapper);
         Page<ExamVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
-        voPage.setRecords(page.getRecords().stream().map(e -> toVO(e, null)).toList());
+
+        Set<Long> paperIds = page.getRecords().stream()
+                .map(Exam::getPaperId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Long, String> paperNameMap = new HashMap<>();
+        if (!paperIds.isEmpty()) {
+            paperNameMap = paperService.listByIds(paperIds).stream()
+                    .collect(Collectors.toMap(Paper::getPaperId, Paper::getPaperName));
+        }
+
+        Map<Long, String> finalPaperNameMap = paperNameMap;
+        voPage.setRecords(page.getRecords().stream()
+                .map(e -> toVO(e, finalPaperNameMap.get(e.getPaperId())))
+                .toList());
         return voPage;
     }
 

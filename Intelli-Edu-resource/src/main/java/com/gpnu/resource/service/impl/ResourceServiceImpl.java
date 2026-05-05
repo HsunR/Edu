@@ -365,7 +365,7 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
 
         List<RsResource> resources = baseMapper.selectByIds(resourceIds);
         if(resources.isEmpty()){
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "资源不存在");
+            return List.of();
         }
 
         //

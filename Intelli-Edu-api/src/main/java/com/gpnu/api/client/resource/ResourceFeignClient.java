@@ -1,6 +1,6 @@
 package com.gpnu.api.client.resource;
 
-import com.gpnu.api.client.user.fallback.UserFeignFallback;
+import com.gpnu.api.client.resource.fallback.ResourceFeignFallback;
 import com.gpnu.api.dto.resource.ResourceSimpleDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "Intelli-Edu-resource", path = "/api/resource",
-        fallbackFactory = UserFeignFallback.class)
+@FeignClient(name = "Intelli-Edu-resource", path = "/api/resource/inner/resources",
+        fallbackFactory = ResourceFeignFallback.class)
 public interface ResourceFeignClient {
     /**
      * 根据资源ID获取资源的简单信息
