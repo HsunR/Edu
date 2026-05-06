@@ -24,7 +24,6 @@ import com.gpnu.exam.exam.service.IAnswerService;
 import com.gpnu.exam.exam.service.IExamService;
 import com.gpnu.exam.paper.mapper.PaperQuestionMapper;
 import com.gpnu.exam.paper.model.entity.PaperQuestion;
-import com.gpnu.exam.question.model.vo.QuestionOptionVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -480,31 +479,6 @@ public class AnswerServiceImpl implements IAnswerService {
                 vo.setCorrectAnswer((String) answerVal);
             } else if (answerVal != null) {
                 vo.setCorrectAnswer(answerVal.toString());
-            }
-            Object optionsObj = snap.get("options");
-            if (optionsObj instanceof List<?> optionsList) {
-                List<QuestionOptionVO> optionVOs = new ArrayList<>();
-                for (Object item : optionsList) {
-                    if (item instanceof Map<?, ?> optionMap) {
-                        QuestionOptionVO optVo = new QuestionOptionVO();
-                        Object labelVal = optionMap.get("label");
-                        optVo.setLabel(labelVal instanceof String ? (String) labelVal : (labelVal != null ? labelVal.toString() : ""));
-                        Object contentVal = optionMap.get("content");
-                        optVo.setContent(contentVal instanceof String ? (String) contentVal : (contentVal != null ? contentVal.toString() : ""));
-                        Object correctVal = optionMap.get("is_correct");
-                        if (correctVal instanceof Boolean) {
-                            optVo.setIsCorrect((Boolean) correctVal);
-                        } else if (correctVal instanceof Number) {
-                            optVo.setIsCorrect(((Number) correctVal).intValue() == 1);
-                        }
-                        if (optionMap.get("order_index") instanceof Number n) {
-                            optVo.setOrderIndex(n.intValue());
-                        }
-                        optionVOs.add(optVo);
-                    }
-                }
-                optionVOs.sort(Comparator.comparingInt(o -> o.getOrderIndex() != null ? o.getOrderIndex() : 999));
-                vo.setOptions(optionVOs);
             }
         }
     }

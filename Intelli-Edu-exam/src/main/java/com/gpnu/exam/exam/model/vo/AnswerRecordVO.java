@@ -2,12 +2,10 @@ package com.gpnu.exam.exam.model.vo;
 
 import com.gpnu.exam.exam.model.enums.GradingStatus;
 import com.gpnu.exam.question.model.enums.QuestionType;
-import com.gpnu.exam.question.model.vo.QuestionOptionVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 @Schema(description = "答题记录VO")
@@ -50,7 +48,4 @@ public class AnswerRecordVO implements Serializable {
 
     @Schema(description = "正确答案，客观题有值")
     private String correctAnswer;
-
-    @Schema(description = "题目选项列表（单选/多选/判断题）")
-    private List<QuestionOptionVO> options;
 }
