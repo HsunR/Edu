@@ -18,10 +18,8 @@ const permissionStore = usePermissionStore()
 const levelList = ref([])
 
 function getBreadcrumb() {
-  // only show routes with meta.title
   let matched = []
   const pathNum = findPathNum(route.path)
-  // multi-level menu
   if (pathNum > 2) {
     const reg = /\/\w+/gi
     const pathList = route.path.match(reg).map((item, index) => {
@@ -32,9 +30,8 @@ function getBreadcrumb() {
   } else {
     matched = route.matched.filter((item) => item.meta && item.meta.title)
   }
-  // 判断是否为首页
-  if (!isDashboard(matched[0])) {
-    matched = [{ path: "/index", meta: { title: "首页" } }].concat(matched)
+  if (!isHome(matched[0])) {
+    matched = [{ path: "/home", meta: { title: "首页" } }].concat(matched)
   }
   levelList.value = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
 }
@@ -57,7 +54,7 @@ function getMatched(pathList, routeList, matched) {
     }
   }
 }
-function isDashboard(route) {
+function isHome(route) {
   const name = route && route.name
   if (!name) {
     return false
@@ -74,7 +71,6 @@ function handleLink(item) {
 }
 
 watchEffect(() => {
-  // if you go to the redirect page, do not update the breadcrumbs
   if (route.path.startsWith('/redirect/')) {
     return
   }

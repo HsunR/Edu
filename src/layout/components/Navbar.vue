@@ -1,17 +1,17 @@
 <template>
   <div class="navbar">
-    <hamburger id="hamburger-container" :is-active="appStore.sidebar.opened" class="hamburger-container"
-      @toggleClick="toggleSideBar" />
-    <breadcrumb v-if="!settingsStore.topNav" id="breadcrumb-container" class="breadcrumb-container" />
-    <top-nav v-if="settingsStore.topNav" id="topmenu-container" class="topmenu-container" />
+    <div class="navbar-left">
+      <div class="logo-area" @click="goHome">
+        <svg-icon icon-class="education" class="logo-icon" />
+        <span class="logo-text">Intelli-Edu</span>
+      </div>
+    </div>
 
     <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
         <div class="invite right-menu-item">
           <span @click="inviteFormVisible = true">输入邀请码</span>
         </div>
-
-        <header-search id="header-search" class="right-menu-item" />
 
         <el-tooltip content="主题模式" effect="dark" placement="bottom">
           <div class="right-menu-item hover-effect theme-switch-wrapper" @click="toggleTheme">
@@ -57,22 +57,19 @@
 
 <script setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
-import Breadcrumb from '@/components/Breadcrumb'
-import TopNav from '@/components/TopNav'
-import Hamburger from '@/components/Hamburger'
-import HeaderSearch from '@/components/HeaderSearch'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useSettingsStore } from '@/stores/settings'
 import { joinClass } from '@/api/course/class'
 import { UserFilled } from '@element-plus/icons-vue'
 
+const router = useRouter()
 const appStore = useAppStore()
 const userStore = useUserStore()
 const settingsStore = useSettingsStore()
 
-function toggleSideBar() {
-  appStore.toggleSideBar()
+function goHome() {
+  router.push('/home')
 }
 
 function handleCommand(command) {
@@ -135,132 +132,129 @@ function handleCancel() {
 
 <style lang='scss' scoped>
 .navbar {
-  height: 50px;
+  height: 56px;
   overflow: hidden;
   position: relative;
   background: var(--navbar-bg);
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
 
-  .hamburger-container {
-    line-height: 46px;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-    transition: background 0.3s;
-    -webkit-tap-highlight-color: transparent;
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
 
-    &:hover {
-      background: rgba(0, 0, 0, 0.025);
-    }
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.logo-icon {
+  font-size: 26px;
+  color: var(--el-color-primary);
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+  letter-spacing: 0.5px;
+}
+
+.right-menu {
+  height: 100%;
+  line-height: 56px;
+  display: flex;
+  align-items: center;
+
+  &:focus {
+    outline: none;
   }
 
-  .breadcrumb-container {
-    float: left;
-  }
-
-  .topmenu-container {
-    position: absolute;
-    left: 50px;
-  }
-
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
-  }
-
-  .right-menu {
-    float: right;
-    height: 100%;
-    line-height: 50px;
+  .invite.right-menu-item {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 
-    &:focus {
-      outline: none;
+    span{
+      font-size: 14px;
+      font-weight: 600;
+      height: 20px;
+      line-height: 20px;
+    }
+  }
+
+  .invite:hover {
+    cursor: pointer;
+    background-color: #eeeeee4b;
+    border-radius:10px ;
+  }
+
+  .right-menu-item {
+    display: inline-block;
+    padding: 0 8px;
+    height: 100%;
+    font-size: 18px;
+    color: #5a5e66;
+    vertical-align: text-bottom;
+
+    &.hover-effect {
+      cursor: pointer;
+      transition: background 0.3s;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.025);
+      }
     }
 
-    .invite.right-menu-item {
+    &.theme-switch-wrapper {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-direction: column;
 
-      span{
-        font-size: 14px;
-        font-weight: 600;
-        height: 20px;
-        line-height: 20px;
-      }
-    }
-
-    .invite:hover {
-      cursor: pointer;
-      background-color: #eeeeee4b;
-      border-radius:10px ;
-    }
-
-    .right-menu-item {
-      display: inline-block;
-      padding: 0 8px;
-      height: 100%;
-      font-size: 18px;
-      color: #5a5e66;
-      vertical-align: text-bottom;
-
-      &.hover-effect {
-        cursor: pointer;
-        transition: background 0.3s;
+      svg {
+        transition: transform 0.3s;
 
         &:hover {
-          background: rgba(0, 0, 0, 0.025);
-        }
-      }
-
-      &.theme-switch-wrapper {
-        display: flex;
-        align-items: center;
-
-        svg {
-          transition: transform 0.3s;
-
-          &:hover {
-            transform: scale(1.15);
-          }
+          transform: scale(1.15);
         }
       }
     }
+  }
 
-    .avatar-container {
-      margin-right: 0px;
-      padding-right: 0px;
+  .avatar-container {
+    margin-right: 0px;
+    padding-right: 0px;
 
-      .avatar-wrapper {
-        margin-top: 10px;
-        right: 5px;
-        position: relative;
+    .avatar-wrapper {
+      margin-top: 10px;
+      right: 5px;
+      position: relative;
 
-        .user-avatar {
-          cursor: pointer;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-        }
+      .user-avatar {
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+      }
 
-        .user-nickname {
-          position: relative;
-          left: 5px;
-          bottom: 10px;
-          font-size: 14px;
-          font-weight: bold;
-          margin-right: 10px;
-        }
-
-        i {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
-          font-size: 12px;
-        }
+      i {
+        cursor: pointer;
+        position: absolute;
+        right: -20px;
+        top: 25px;
+        font-size: 12px;
       }
     }
   }
