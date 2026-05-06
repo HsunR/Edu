@@ -225,6 +225,32 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
             toEnd.forEach(exam -> exam.setStatus(ExamStatus.ENDED));
             updateBatchById(toEnd);
         }
+
+        List<Exam> endedExams = list(new LambdaQueryWrapper<Exam>()
+                .eq(Exam::getStatus, ExamStatus.ENDED));
+
+        if (!endedExams.isEmpty()) {
+            List<Exam> toGraded = new ArrayList<>();
+            for (Exam exam : endedExams) {
+                Long submittedCount = answerSheetMapper.selectCount(
+                        new LambdaQueryWrapper<AnswerSheet>()
+                                .eq(AnswerSheet::getExamId, exam.getExamId())
+                                .ge(AnswerSheet::getStatus, SheetStatus.SUBMITTED));
+
+                Long gradedCount = answerSheetMapper.selectCount(
+                        new LambdaQueryWrapper<AnswerSheet>()
+                                .eq(AnswerSheet::getExamId, exam.getExamId())
+                                .eq(AnswerSheet::getStatus, SheetStatus.GRADED));
+
+                if (submittedCount > 0 && submittedCount.equals(gradedCount)) {
+                    exam.setStatus(ExamStatus.GRADED);
+                    toGraded.add(exam);
+                }
+            }
+            if (!toGraded.isEmpty()) {
+                updateBatchById(toGraded);
+            }
+        }
     }
 
     // ==================== 私有方法 ====================

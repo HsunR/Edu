@@ -12,6 +12,7 @@ import com.gpnu.exam.exam.model.dto.GradeRequest;
 import com.gpnu.exam.exam.model.entity.AnswerRecord;
 import com.gpnu.exam.exam.model.entity.AnswerSheet;
 import com.gpnu.exam.exam.model.entity.Exam;
+import com.gpnu.exam.exam.model.enums.ExamStatus;
 import com.gpnu.exam.exam.model.enums.ExamType;
 import com.gpnu.exam.exam.model.enums.GradingStatus;
 import com.gpnu.exam.exam.model.enums.SheetStatus;
@@ -205,6 +206,26 @@ public class AnswerServiceImpl implements IAnswerService {
         sheet.setTotalScore(sheet.getObjectiveScore().add(subjectiveScore));
         sheet.setStatus(SheetStatus.GRADED);
         answerSheetMapper.updateById(sheet);
+
+        // 检查该考试下所有已提交答卷是否都已批阅，是则更新考试状态为 GRADED
+        Long examId = sheet.getExamId();
+        Long submittedCount = answerSheetMapper.selectCount(
+                new LambdaQueryWrapper<AnswerSheet>()
+                        .eq(AnswerSheet::getExamId, examId)
+                        .ge(AnswerSheet::getStatus, SheetStatus.SUBMITTED));
+
+        Long gradedCount = answerSheetMapper.selectCount(
+                new LambdaQueryWrapper<AnswerSheet>()
+                        .eq(AnswerSheet::getExamId, examId)
+                        .eq(AnswerSheet::getStatus, SheetStatus.GRADED));
+
+        if (submittedCount > 0 && submittedCount.equals(gradedCount)) {
+            Exam exam = examService.getById(examId);
+            if (exam != null && exam.getStatus() == ExamStatus.ENDED) {
+                exam.setStatus(ExamStatus.GRADED);
+                examService.updateById(exam);
+            }
+        }
     }
 
     // ==================== 定时任务 ====================
