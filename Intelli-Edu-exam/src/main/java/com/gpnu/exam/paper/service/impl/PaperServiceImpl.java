@@ -280,6 +280,7 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper>
                 m.put("label", o.getLabel());
                 m.put("content", o.getContent());
                 m.put("is_correct", o.getIsCorrect());
+                m.put("order_index", o.getOrderIndex());
                 return m;
             }).toList();
             snapshot.put("options", optList);

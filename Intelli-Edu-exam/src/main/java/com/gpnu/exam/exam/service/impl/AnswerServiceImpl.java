@@ -23,6 +23,7 @@ import com.gpnu.exam.exam.service.IAnswerService;
 import com.gpnu.exam.exam.service.IExamService;
 import com.gpnu.exam.paper.mapper.PaperQuestionMapper;
 import com.gpnu.exam.paper.model.entity.PaperQuestion;
+import com.gpnu.exam.question.model.vo.QuestionOptionVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -367,46 +368,95 @@ public class AnswerServiceImpl implements IAnswerService {
         AnswerSheetDetailVO detail = new AnswerSheetDetailVO();
         BeanUtils.copyProperties(sheet, detail);
 
-        // 查考试名称
         Exam exam = examService.getById(sheet.getExamId());
         if (exam != null) {
             detail.setExamName(exam.getExamName());
         }
 
-        // 查答题记录
         List<AnswerRecord> records = answerRecordMapper.selectList(
                 new LambdaQueryWrapper<AnswerRecord>()
                         .eq(AnswerRecord::getSheetId, sheet.getSheetId()));
 
-        // 查试卷题目快照以填充题目信息
         Map<Long, PaperQuestion> pqMap = Map.of();
         if (exam != null) {
             List<PaperQuestion> pqs = paperQuestionMapper.selectList(
                     new LambdaQueryWrapper<PaperQuestion>()
-                            .eq(PaperQuestion::getPaperId, exam.getPaperId()));
+                            .eq(PaperQuestion::getPaperId, exam.getPaperId())
+                            .orderByAsc(PaperQuestion::getOrderIndex));
             pqMap = pqs.stream().collect(Collectors.toMap(PaperQuestion::getQuestionId, Function.identity()));
         }
 
-        Map<Long, PaperQuestion> finalPqMap = pqMap;
-        List<AnswerRecordVO> recordVOs = records.stream().map(r -> {
-            AnswerRecordVO vo = new AnswerRecordVO();
-            BeanUtils.copyProperties(r, vo);
+        Map<Long, AnswerRecord> recordMap = records.stream()
+                .collect(Collectors.toMap(AnswerRecord::getQuestionId, Function.identity()));
 
-            PaperQuestion pq = finalPqMap.get(r.getQuestionId());
-            if (pq != null) {
-                vo.setQuestionScore(pq.getScore());
-                if (pq.getQuestionSnapshot() != null) {
-                    Map<String, Object> snap = pq.getQuestionSnapshot();
-                    vo.setQuestionType(QuestionType.valueOf((String) snap.get("question_type")));
-                    vo.setStem((String) snap.get("stem"));
-                    vo.setCorrectAnswer((String) snap.get("answer"));
+        Map<Long, PaperQuestion> finalPqMap = pqMap;
+        List<AnswerRecordVO> recordVOs;
+
+        if (!records.isEmpty()) {
+            recordVOs = records.stream().map(r -> {
+                AnswerRecordVO vo = new AnswerRecordVO();
+                BeanUtils.copyProperties(r, vo);
+
+                PaperQuestion pq = finalPqMap.get(r.getQuestionId());
+                if (pq != null) {
+                    fillFromSnapshot(vo, pq);
                 }
-            }
-            return vo;
-        }).toList();
+                return vo;
+            }).toList();
+        } else {
+            recordVOs = finalPqMap.values().stream().map(pq -> {
+                AnswerRecordVO vo = new AnswerRecordVO();
+                vo.setQuestionId(pq.getQuestionId());
+                vo.setAnswerContent(null);
+                vo.setScore(null);
+                vo.setIsCorrect(null);
+                vo.setGradingStatus(GradingStatus.PENDING);
+                fillFromSnapshot(vo, pq);
+                return vo;
+            }).toList();
+        }
 
         detail.setRecords(recordVOs);
         return detail;
+    }
+
+    private void fillFromSnapshot(AnswerRecordVO vo, PaperQuestion pq) {
+        vo.setQuestionScore(pq.getScore());
+        if (pq.getQuestionSnapshot() != null) {
+            Map<String, Object> snap = pq.getQuestionSnapshot();
+            Object qtObj = snap.get("question_type");
+            if (qtObj instanceof Number qtNum) {
+                int code = qtNum.intValue();
+                for (QuestionType qt : QuestionType.values()) {
+                    if (qt.getCode() == code) {
+                        vo.setQuestionType(qt);
+                        break;
+                    }
+                }
+            } else if (qtObj instanceof String qtStr) {
+                vo.setQuestionType(QuestionType.valueOf(qtStr));
+            }
+            vo.setStem((String) snap.get("stem"));
+            vo.setCorrectAnswer((String) snap.get("answer"));
+            Object optionsObj = snap.get("options");
+            if (optionsObj instanceof List<?> optionsList) {
+                List<QuestionOptionVO> optionVOs = new ArrayList<>();
+                for (Object item : optionsList) {
+                    if (item instanceof Map<?, ?> optionMap) {
+                        QuestionOptionVO optVo = new QuestionOptionVO();
+                        optVo.setLabel((String) optionMap.get("label"));
+                        optVo.setContent((String) optionMap.get("content"));
+                        optVo.setIsCorrect((Boolean) optionMap.get("is_correct"));
+                        if (optionMap.get("order_index") instanceof Number n) {
+                            optVo.setOrderIndex(n.intValue());
+                        }
+                        optionVOs.add(optVo);
+                    }
+                }
+                optionVOs.sort(Comparator.comparingInt(o -> o.getOrderIndex() != null ? o.getOrderIndex() : 999));
+                vo.setOptions(optionVOs);
+            }
+        }
     }
 
     private AnswerSheetVO toSheetVO(AnswerSheet sheet) {
