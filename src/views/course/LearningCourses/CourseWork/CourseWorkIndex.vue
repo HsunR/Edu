@@ -15,11 +15,11 @@ const homeworkTotal = ref(0)
 const homeworkPage = ref(1)
 const statusFilter = ref<ExamStatus | undefined>(undefined)
 
-const examStatusMap: Record<number, { label: string; type: string }> = {
+const examStatusMap: Record<number, { label: string; type: 'primary' | 'success' | 'warning' | 'info' | 'danger' }> = {
   [ExamStatus.NotStarted]: { label: '未开始', type: 'info' },
   [ExamStatus.InProgress]: { label: '进行中', type: 'success' },
   [ExamStatus.Ended]: { label: '已结束', type: 'warning' },
-  [ExamStatus.Graded]: { label: '已批阅', type: '' }
+  [ExamStatus.Graded]: { label: '已批阅', type: 'success' }
 }
 
 async function loadHomework() {

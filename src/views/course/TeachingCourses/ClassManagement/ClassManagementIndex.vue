@@ -50,9 +50,9 @@ const createRules = reactive<FormRules>({
   className: [{ required: true, message: '请输入班级名称', trigger: 'blur' }]
 })
 
-const statusMap: Record<number, { label: string; type: 'success' | '' | 'info' }> = {
+const statusMap: Record<number, { label: string; type: 'primary' | 'success' | 'warning' | 'info' | 'danger' | undefined }> = {
   [ClassStatus.Enrolling]: { label: '招生中', type: 'success' },
-  [ClassStatus.InProgress]: { label: '进行中', type: '' },
+  [ClassStatus.InProgress]: { label: '进行中', type: 'primary' },
   [ClassStatus.Ended]: { label: '已结束', type: 'info' }
 }
 

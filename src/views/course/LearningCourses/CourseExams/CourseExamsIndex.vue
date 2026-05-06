@@ -15,17 +15,17 @@ const examTotal = ref(0)
 const examPage = ref(1)
 const statusFilter = ref<ExamStatus | undefined>(undefined)
 
-const examTypeMap: Record<number, { label: string; type: string }> = {
+const examTypeMap: Record<number, { label: string; type: 'primary' | 'success' | 'warning' | 'info' | 'danger' }> = {
   [ExamType.Exam]: { label: '考试', type: 'danger' },
   [ExamType.Practice]: { label: '练习', type: 'primary' },
   [ExamType.Homework]: { label: '作业', type: 'success' }
 }
 
-const examStatusMap: Record<number, { label: string; type: string }> = {
+const examStatusMap: Record<number, { label: string; type: 'primary' | 'success' | 'warning' | 'info' | 'danger' }> = {
   [ExamStatus.NotStarted]: { label: '未开始', type: 'info' },
   [ExamStatus.InProgress]: { label: '进行中', type: 'success' },
   [ExamStatus.Ended]: { label: '已结束', type: 'warning' },
-  [ExamStatus.Graded]: { label: '已批阅', type: '' }
+  [ExamStatus.Graded]: { label: '已批阅', type: 'success' }
 }
 
 async function loadExams() {
