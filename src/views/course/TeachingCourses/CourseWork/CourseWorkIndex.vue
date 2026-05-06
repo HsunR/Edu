@@ -53,7 +53,7 @@ const selectedQuestions = ref<QuestionItem[]>([])
 const existingQuestionIds = computed(() => selectedQuestions.value.map(q => q.questionId))
 const creating = ref(false)
 
-const examStatusMap: Record<number, { label: string; type: string }> = {
+const examStatusMap: Record<number, { label: string; type: 'primary' | 'success' | 'warning' | 'info' | 'danger' }> = {
   0: { label: '未开始', type: 'info' },
   1: { label: '进行中', type: 'success' },
   2: { label: '已结束', type: 'warning' },

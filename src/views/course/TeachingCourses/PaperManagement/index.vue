@@ -112,7 +112,7 @@ const difficultyLabels: Record<number, string> = {
   [Difficulty.VeryHard]: '非常困难'
 }
 
-const paperStatusMap: Record<number, { label: string; type: string }> = {
+const paperStatusMap: Record<number, { label: string; type: 'primary' | 'success' | 'warning' | 'info' | 'danger' }> = {
   [PaperStatus.Draft]: { label: '草稿', type: 'info' },
   [PaperStatus.Published]: { label: '已发布', type: 'success' }
 }
