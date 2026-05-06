@@ -35,6 +35,7 @@ async function loadExams() {
       current: examPage.value,
       pageSize: 20,
       courseId,
+      examType: ExamType.Exam,
       status: statusFilter.value
     })
     exams.value = result.records

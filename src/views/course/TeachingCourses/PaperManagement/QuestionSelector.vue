@@ -55,7 +55,7 @@ const questionTypeMap: Record<number, string> = {
   [QuestionType.ShortAnswer]: '简答题'
 }
 
-const questionTypeTagType: Record<number, string> = {
+const questionTypeTagType: Record<number, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
   [QuestionType.SingleChoice]: 'primary',
   [QuestionType.MultipleChoice]: 'success',
   [QuestionType.TrueFalse]: 'warning',

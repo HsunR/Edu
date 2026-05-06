@@ -62,7 +62,7 @@ const allMenuCards: MenuCard[] = [
     title: '课程浏览',
     desc: '浏览和搜索所有课程',
     icon: 'dashboard',
-    path: '/index',
+    path: '/course/browse',
     color: '#409EFF',
   },
   {

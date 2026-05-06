@@ -69,7 +69,7 @@ const userStore = useUserStore()
 const settingsStore = useSettingsStore()
 
 function goHome() {
-  router.push('/home')
+  router.push('/index')
 }
 
 function handleCommand(command) {

@@ -5,18 +5,18 @@ export const courseRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('@/layout/index.vue'),
-    redirect: '/home',
+    redirect: '/index',
     name: 'CourseLayout',
     meta: { title: '课程', icon: 'education' },
     children: [
       {
-        path: '/home',
+        path: '/index',
         component: () => import('@/views/home/index.vue'),
         name: 'Index',
         meta: { title: '首页', icon: 'dashboard', affix: true },
       },
       {
-        path: '/index',
+        path: '/course/browse',
         component: () => import('@/views/course/Browse/index.vue'),
         name: 'CourseBrowse',
         meta: { title: '课程浏览', icon: 'dashboard' },

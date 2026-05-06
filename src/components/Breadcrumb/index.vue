@@ -31,7 +31,7 @@ function getBreadcrumb() {
     matched = route.matched.filter((item) => item.meta && item.meta.title)
   }
   if (!isHome(matched[0])) {
-    matched = [{ path: "/home", meta: { title: "首页" } }].concat(matched)
+    matched = [{ path: "/index", meta: { title: "首页" } }].concat(matched)
   }
   levelList.value = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
 }
