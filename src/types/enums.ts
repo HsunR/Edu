@@ -135,17 +135,15 @@ export const ExamStatusLabels: Record<ExamStatus, string> = {
 }
 
 export enum SheetStatus {
-  NotStarted = 0,
-  InProgress = 1,
-  Ended = 2,
-  Graded = 3
+  Answering = 0,
+  Submitted = 1,
+  Graded = 2
 }
 
 export const SheetStatusLabels: Record<SheetStatus, string> = {
-  [SheetStatus.NotStarted]: '未开始',
-  [SheetStatus.InProgress]: '进行中',
-  [SheetStatus.Ended]: '已结束',
-  [SheetStatus.Graded]: '已批改'
+  [SheetStatus.Answering]: '答题中',
+  [SheetStatus.Submitted]: '已提交',
+  [SheetStatus.Graded]: '已批阅'
 }
 
 export enum GradingStatus {

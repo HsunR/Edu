@@ -1,55 +1,63 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getExamList } from '@/api/exam/index'
+import type { ExamVO } from '@/api/exam/types'
+import { ExamType, ExamStatus, ExamStatusLabels } from '@/types/enums'
+
+const route = useRoute()
 const router = useRouter()
-const status = ref(1)
+const courseId = route.params.id as string
 
-interface ListItem {
-  id:string
-  imgUrl: string
-  name: string
-  status: string
+const loading = ref(false)
+const homeworkList = ref<ExamVO[]>([])
+const homeworkTotal = ref(0)
+const homeworkPage = ref(1)
+const statusFilter = ref<ExamStatus | undefined>(undefined)
+
+const examStatusMap: Record<number, { label: string; type: string }> = {
+  [ExamStatus.NotStarted]: { label: '未开始', type: 'info' },
+  [ExamStatus.InProgress]: { label: '进行中', type: 'success' },
+  [ExamStatus.Ended]: { label: '已结束', type: 'warning' },
+  [ExamStatus.Graded]: { label: '已批阅', type: '' }
 }
 
-const loading = ref(true)
-// 作业列表
-const lists = ref<ListItem[]>([])
-const currentDate = new Date().toDateString()
-
-const setLoading = () => {
+async function loadHomework() {
   loading.value = true
-  setTimeout(() => {
+  try {
+    const result = await getExamList({
+      current: homeworkPage.value,
+      pageSize: 20,
+      courseId,
+      examType: ExamType.Homework,
+      status: statusFilter.value
+    })
+    homeworkList.value = result.records
+    homeworkTotal.value = result.total
+  } finally {
     loading.value = false
-  }, 2000)
+  }
 }
 
-onMounted(() => {
-  loading.value = false
-  lists.value = [
-    {
-      id: "1001",
-      imgUrl:'/src/assets/images/homework.png',
-      name: '作业一',
-      status: 'success'
-    },
-    {
-      id: "1002",
-      imgUrl: '/src/assets/images/homework.png',
-      name: '作业二',
-      status: 'success'
-    },
-    {
-      id: "1003",
-      imgUrl: '/src/assets/images/homework.png',
-      name: '作业三',
-      status: 'success'
-    },
-  ]
-})
+function enterHomework(examId: string) {
+  router.push(`/course/learning/${courseId}/exam-answer/${examId}`)
+}
+
+function handlePageChange(page: number) {
+  homeworkPage.value = page
+  loadHomework()
+}
+
+function formatTime(time?: string) {
+  if (!time) return ''
+  return time.replace('T', ' ').split('.')[0]
+}
+
+onMounted(loadHomework)
 </script>
 
 <template>
-  <div>
+  <div class="learning-homework">
     <el-card>
       <template #header>
         <div class="card-header">
@@ -57,73 +65,122 @@ onMounted(() => {
             <el-breadcrumb-item :to="{ path: '/course/learning' }">我学的课</el-breadcrumb-item>
             <el-breadcrumb-item>课程作业</el-breadcrumb-item>
           </el-breadcrumb>
-
-          <div class="status">
-            <span style="margin: 10px 10px 0 0;">筛选：</span>
-            <el-radio-group v-model="status">
-              <el-radio :value="1">全部</el-radio>
-              <el-radio :value="2">已完成</el-radio>
-              <el-radio :value="3">未完成</el-radio>
-            </el-radio-group>
-          </div>
-
         </div>
       </template>
 
-      <!-- 作业列表 -->
-      <el-skeleton style="display: flex; gap: 8px" :loading="loading" animated :count="3">
-        <template #template>
-          <div style="flex: 1">
-            <el-skeleton-item variant="image" style="height: 240px" />
-            <div style="padding: 14px">
-              <el-skeleton-item variant="h3" style="width: 50%" />
-              <div style="
-                display: flex;
-                align-items: center;
-                justify-items: space-between;
-                margin-top: 16px;
-                height: 16px;
-              ">
-                <el-skeleton-item variant="text" style="margin-right: 16px" />
-                <el-skeleton-item variant="text" style="width: 30%" />
+      <div class="toolbar">
+        <el-radio-group v-model="statusFilter" size="small" @change="() => { homeworkPage = 1; loadHomework() }">
+          <el-radio-button :value="undefined">全部</el-radio-button>
+          <el-radio-button :value="ExamStatus.InProgress">进行中</el-radio-button>
+          <el-radio-button :value="ExamStatus.Ended">已结束</el-radio-button>
+          <el-radio-button :value="ExamStatus.Graded">已批阅</el-radio-button>
+        </el-radio-group>
+      </div>
+
+      <div v-loading="loading" class="homework-cards">
+        <el-empty v-if="!loading && homeworkList.length === 0" description="暂无作业" />
+
+        <el-card v-for="hw in homeworkList" :key="hw.examId" class="homework-card" shadow="hover">
+          <div class="homework-card-body">
+            <div class="homework-info">
+              <h3 class="homework-name">{{ hw.examName }}</h3>
+              <div class="homework-meta">
+                <el-tag type="success" size="small">作业</el-tag>
+                <el-tag :type="examStatusMap[hw.status]?.type" size="small">
+                  {{ examStatusMap[hw.status]?.label || ExamStatusLabels[hw.status] }}
+                </el-tag>
+                <span class="homework-time">{{ formatTime(hw.startTime) }} ~ {{ formatTime(hw.endTime) }}</span>
+              </div>
+              <div class="homework-detail">
+                <span v-if="hw.durationMinutes">时长：{{ hw.durationMinutes }}分钟</span>
+                <span>试卷：{{ hw.paperName }}</span>
+                <span v-if="hw.allowLateSubmit" style="color: #e6a23c">允许迟交</span>
               </div>
             </div>
+            <div class="homework-action">
+              <el-button
+                v-if="hw.status === ExamStatus.InProgress"
+                type="primary"
+                @click="enterHomework(hw.examId)"
+              >
+                做作业
+              </el-button>
+              <el-button
+                v-if="hw.status === ExamStatus.Ended || hw.status === ExamStatus.Graded"
+                @click="enterHomework(hw.examId)"
+              >
+                查看结果
+              </el-button>
+              <el-tag v-if="hw.status === ExamStatus.NotStarted" type="info">未开放</el-tag>
+            </div>
           </div>
-        </template>
-        <template #default>
-          <el-card v-for="item in lists" :key="item.name" :body-style="{ padding: '0px', marginBottom: '1px' }"
-            class="homework-card" @click="router.push({ path: `/course/homework-detail/1/${item.id}` })">
-            <span>
-              <img :src="item.imgUrl" class="image multi-content" style="width: 50px;border-radius: 10px;" />
-            </span>
-            <span style=" display: flex; flex-direction: column;">
-              <span>{{ item.name }}</span>
-              <span>{{ item.status }}</span>
-            </span>
-          </el-card>
-        </template>
-      </el-skeleton>
+        </el-card>
+      </div>
+
+      <el-pagination
+        v-if="homeworkTotal > 20"
+        v-model:current-page="homeworkPage"
+        :total="homeworkTotal"
+        :page-size="20"
+        layout="prev, pager, next"
+        style="margin-top: 12px"
+        @current-change="handlePageChange"
+      />
     </el-card>
   </div>
 </template>
 
 <style scoped lang="scss">
-.status {
-  margin: 15px 0 0 10px;
+.toolbar {
+  margin-bottom: 16px;
+}
+
+.homework-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .homework-card {
-  margin: 10px;
-  padding: 10px;
-  cursor: pointer;
-
-  span {
-    float: left;
-    margin-right: 20px;
+  .homework-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  &:hover{
-    background-color: #f5f5f5;
+  .homework-info {
+    .homework-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #303133;
+      margin: 0 0 8px;
+    }
+
+    .homework-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+
+      .homework-time {
+        font-size: 12px;
+        color: #909399;
+      }
+    }
+
+    .homework-detail {
+      display: flex;
+      gap: 16px;
+
+      span {
+        font-size: 13px;
+        color: #606266;
+      }
+    }
+  }
+
+  .homework-action {
+    flex-shrink: 0;
   }
 }
 </style>

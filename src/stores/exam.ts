@@ -10,7 +10,7 @@ export const useExamStore = defineStore('exam', () => {
   const remainingSeconds = ref(0)
   const countdownTimer = ref<ReturnType<typeof setInterval> | null>(null)
 
-  const isAnswering = computed(() => currentSheet.value?.status === SheetStatus.InProgress)
+  const isAnswering = computed(() => currentSheet.value?.status === SheetStatus.Answering)
   const answeredCount = computed(() => answers.value.size)
 
   async function enterExamAction(examId: string) {
@@ -32,7 +32,7 @@ export const useExamStore = defineStore('exam', () => {
         }
       }
     }
-    if (currentSheet.value?.deadline && currentSheet.value.status === SheetStatus.InProgress) {
+    if (currentSheet.value?.deadline && currentSheet.value.status === SheetStatus.Answering) {
       startCountdown()
     }
   }
@@ -46,7 +46,7 @@ export const useExamStore = defineStore('exam', () => {
     await submitExam(sheetId)
     stopCountdown()
     if (currentSheet.value) {
-      currentSheet.value.status = SheetStatus.Ended
+      currentSheet.value.status = SheetStatus.Submitted
     }
   }
 

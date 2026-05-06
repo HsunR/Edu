@@ -35,17 +35,16 @@ const questionTypeMap: Record<number, string> = {
 
 type TagType = 'success' | 'primary' | 'warning' | 'info' | 'danger' | undefined
 
-const gradingStatusMap: Record<string, { label: string; type: TagType }> = {
-  'NOT_GRADED': { label: '未批改', type: 'info' },
-  'GRADED': { label: '已批改', type: 'success' },
-  'AI_GRADING': { label: 'AI批改中', type: 'warning' }
+const gradingStatusMap: Record<number, { label: string; type: TagType }> = {
+  [GradingStatus.NotGraded]: { label: '未批改', type: 'info' },
+  [GradingStatus.Graded]: { label: '已批改', type: 'success' },
+  [GradingStatus.AIGrading]: { label: 'AI批改中', type: 'warning' }
 }
 
-const sheetStatusMap: Record<string, { label: string; type: TagType }> = {
-  'NOT_STARTED': { label: '未开始', type: 'info' },
-  'IN_PROGRESS': { label: '进行中', type: 'primary' },
-  'ENDED': { label: '已交卷', type: 'warning' },
-  'GRADED': { label: '已批阅', type: 'success' }
+const sheetStatusMap: Record<number, { label: string; type: TagType }> = {
+  [SheetStatus.Answering]: { label: '答题中', type: 'primary' },
+  [SheetStatus.Submitted]: { label: '已交卷', type: 'warning' },
+  [SheetStatus.Graded]: { label: '已批阅', type: 'success' }
 }
 
 async function loadStats() {
@@ -95,7 +94,7 @@ async function handleGrade(recordId: string) {
       const record = sheetDetail.value.records.find(r => r.recordId === recordId)
       if (record) {
         record.score = gradeData.score
-        record.gradingStatus = 'GRADED'
+        record.gradingStatus = GradingStatus.Graded
         record.comment = gradeData.comment || ''
       }
     }
@@ -201,7 +200,7 @@ onMounted(loadStats)
           <el-table-column label="操作" width="120">
             <template #default="{ row }">
               <el-button
-                v-if="row.status === 'ENDED' || row.status === 'IN_PROGRESS'"
+                v-if="row.status === SheetStatus.Submitted || row.status === SheetStatus.Answering"
                 size="small"
                 link
                 type="primary"
@@ -284,10 +283,10 @@ onMounted(loadStats)
                   <el-button
                     size="small"
                     type="primary"
-                    :disabled="record.gradingStatus === 'GRADED'"
+                    :disabled="record.gradingStatus === GradingStatus.Graded"
                     @click="handleGrade(record.recordId)"
                   >
-                    {{ record.gradingStatus === 'GRADED' ? '已批改' : '批改' }}
+                    {{ record.gradingStatus === GradingStatus.Graded ? '已批改' : '批改' }}
                   </el-button>
                 </div>
               </template>

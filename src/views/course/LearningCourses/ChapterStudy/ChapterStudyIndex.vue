@@ -18,6 +18,14 @@ const sectionLoading = ref(false)
 const course = computed(() => courseStore.currentCourse)
 const chapters = computed(() => course.value?.chapters || [])
 
+function getSectionOrder(chapterIndex: number, sectionIndex: number): number {
+  let order = 0
+  for (let i = 0; i < chapterIndex; i++) {
+    order += chapters.value[i]?.sections?.length || 0
+  }
+  return order + sectionIndex + 1
+}
+
 async function loadCourse() {
   loading.value = true
   try {
@@ -67,15 +75,16 @@ onMounted(loadCourse)
           <el-scrollbar height="70vh">
             <el-empty v-if="chapters.length === 0" description="暂无章节" :image-size="60" />
 
-            <div v-for="chapter in chapters" :key="chapter.chapterId" class="chapter-group">
+            <div v-for="(chapter, chapterIndex) in chapters" :key="chapter.chapterId" class="chapter-group">
               <div class="chapter-label">{{ chapter.title }}</div>
               <div
-                v-for="section in chapter.sections"
+                v-for="(section, sectionIndex) in chapter.sections"
                 :key="section.sectionId"
                 class="section-link"
                 :class="{ active: currentSectionDetail?.sectionId === section.sectionId }"
                 @click="handleSectionClick(section)"
               >
+                <i class="order-badge">{{ getSectionOrder(chapterIndex, sectionIndex) }}</i>
                 <el-tag v-if="section.isFree === YesNo.Yes" size="small" type="warning" style="margin-right: 6px">免费</el-tag>
                 <span>{{ section.title }}</span>
               </div>
@@ -191,6 +200,22 @@ onMounted(loadCourse)
   transition: background 0.2s;
   font-size: 13px;
   color: #606266;
+
+  .order-badge {
+    background-color: #ffa500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    margin-right: 8px;
+    border-radius: 50%;
+    font-size: 11px;
+    color: #ffffff;
+    font-style: normal;
+    font-weight: 500;
+  }
 
   &:hover {
     background: #f5f7fa;

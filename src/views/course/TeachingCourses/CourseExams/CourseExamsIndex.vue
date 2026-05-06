@@ -50,11 +50,11 @@ const createRules = reactive<FormRules>({
 const publishedPapers = ref<PaperVO[]>([])
 const classes = ref<ClassVO[]>([])
 
-const examStatusMap: Record<string, { label: string; type: string }> = {
-  'NOT_STARTED': { label: '未开始', type: 'info' },
-  'IN_PROGRESS': { label: '进行中', type: 'success' },
-  'ENDED': { label: '已结束', type: 'warning' },
-  'GRADED': { label: '已批阅', type: 'success' }
+const examStatusMap: Record<number, { label: string; type: string }> = {
+  0: { label: '未开始', type: 'info' },
+  1: { label: '进行中', type: 'success' },
+  2: { label: '已结束', type: 'warning' },
+  3: { label: '已批阅', type: 'success' }
 }
 
 async function loadExams() {
@@ -129,7 +129,7 @@ async function handleCreate() {
 }
 
 async function handleDelete(exam: ExamVO) {
-  if (exam.status !== 'NOT_STARTED') {
+  if (exam.status !== 0) {
     ElMessage.warning('仅未开始的考试可删除')
     return
   }
@@ -179,10 +179,10 @@ onMounted(loadExams)
       <div class="toolbar">
         <div class="toolbar-left">
           <el-select v-model="examStatusFilter" placeholder="状态" clearable size="small" style="width: 120px" @change="handleFilterSearch">
-            <el-option label="未开始" :value="'NOT_STARTED'" />
-            <el-option label="进行中" :value="'IN_PROGRESS'" />
-            <el-option label="已结束" :value="'ENDED'" />
-            <el-option label="已批阅" :value="'GRADED'" />
+            <el-option label="未开始" :value="0" />
+            <el-option label="进行中" :value="1" />
+            <el-option label="已结束" :value="2" />
+            <el-option label="已批阅" :value="3" />
           </el-select>
           <el-input v-model="examKeyword" placeholder="搜索考试名称" clearable size="small" style="width: 200px" @keyup.enter="handleFilterSearch" @clear="handleFilterSearch" />
         </div>
@@ -215,7 +215,7 @@ onMounted(loadExams)
         <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button size="small" link :icon="View" @click="goToStats(row.examId)">统计</el-button>
-            <el-button v-if="row.status === 'NOT_STARTED'" size="small" link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="row.status === 0" size="small" link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

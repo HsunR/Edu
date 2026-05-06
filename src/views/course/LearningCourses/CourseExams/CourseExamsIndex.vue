@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { getExamList } from '@/api/exam/index'
 import type { ExamVO } from '@/api/exam/types'
-import { ExamType, ExamStatus } from '@/types/enums'
+import { ExamType, ExamStatus, ExamStatusLabels } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,7 +13,7 @@ const loading = ref(false)
 const exams = ref<ExamVO[]>([])
 const examTotal = ref(0)
 const examPage = ref(1)
-const statusFilter = ref<0 | 1 | 2 | 3 | undefined>(undefined)
+const statusFilter = ref<ExamStatus | undefined>(undefined)
 
 const examTypeMap: Record<number, { label: string; type: string }> = {
   [ExamType.Exam]: { label: '考试', type: 'danger' },
@@ -22,11 +21,11 @@ const examTypeMap: Record<number, { label: string; type: string }> = {
   [ExamType.Homework]: { label: '作业', type: 'success' }
 }
 
-const examStatusMap: Record<string, { label: string; type: string }> = {
-  'NOT_STARTED': { label: '未开始', type: 'info' },
-  'IN_PROGRESS': { label: '进行中', type: 'success' },
-  'ENDED': { label: '已结束', type: 'warning' },
-  'GRADED': { label: '已批阅', type: '' }
+const examStatusMap: Record<number, { label: string; type: string }> = {
+  [ExamStatus.NotStarted]: { label: '未开始', type: 'info' },
+  [ExamStatus.InProgress]: { label: '进行中', type: 'success' },
+  [ExamStatus.Ended]: { label: '已结束', type: 'warning' },
+  [ExamStatus.Graded]: { label: '已批阅', type: '' }
 }
 
 async function loadExams() {
@@ -54,6 +53,11 @@ function handlePageChange(page: number) {
   loadExams()
 }
 
+function formatTime(time?: string) {
+  if (!time) return ''
+  return time.replace('T', ' ').split('.')[0]
+}
+
 onMounted(loadExams)
 </script>
 
@@ -72,8 +76,9 @@ onMounted(loadExams)
       <div class="toolbar">
         <el-radio-group v-model="statusFilter" size="small" @change="() => { examPage = 1; loadExams() }">
           <el-radio-button :value="undefined">全部</el-radio-button>
-          <el-radio-button :value="'IN_PROGRESS'">进行中</el-radio-button>
-          <el-radio-button :value="'ENDED'">已结束</el-radio-button>
+          <el-radio-button :value="ExamStatus.InProgress">进行中</el-radio-button>
+          <el-radio-button :value="ExamStatus.Ended">已结束</el-radio-button>
+          <el-radio-button :value="ExamStatus.Graded">已批阅</el-radio-button>
         </el-radio-group>
       </div>
 
@@ -89,9 +94,9 @@ onMounted(loadExams)
                   {{ examTypeMap[exam.examType]?.label }}
                 </el-tag>
                 <el-tag :type="examStatusMap[exam.status]?.type" size="small">
-                  {{ examStatusMap[exam.status]?.label }}
+                  {{ examStatusMap[exam.status]?.label || ExamStatusLabels[exam.status] }}
                 </el-tag>
-                <span class="exam-time">{{ exam.startTime?.split(' ')[0] }} ~ {{ exam.endTime?.split(' ')[0] }}</span>
+                <span class="exam-time">{{ formatTime(exam.startTime) }} ~ {{ formatTime(exam.endTime) }}</span>
               </div>
               <div class="exam-detail">
                 <span v-if="exam.durationMinutes">时长：{{ exam.durationMinutes }}分钟</span>
@@ -100,19 +105,19 @@ onMounted(loadExams)
             </div>
             <div class="exam-action">
               <el-button
-                v-if="exam.status === 'IN_PROGRESS'"
+                v-if="exam.status === ExamStatus.InProgress"
                 type="primary"
                 @click="enterExamPage(exam.examId)"
               >
                 进入考试
               </el-button>
               <el-button
-                v-if="exam.status === 'ENDED' || exam.status === 'GRADED'"
+                v-if="exam.status === ExamStatus.Ended || exam.status === ExamStatus.Graded"
                 @click="enterExamPage(exam.examId)"
               >
                 查看结果
               </el-button>
-              <el-tag v-if="exam.status === 'NOT_STARTED'" type="info">未开放</el-tag>
+              <el-tag v-if="exam.status === ExamStatus.NotStarted" type="info">未开放</el-tag>
             </div>
           </div>
         </el-card>

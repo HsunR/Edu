@@ -253,6 +253,7 @@ export interface AnswerRecordVO {
   stem: string
   questionScore: number
   correctAnswer: string
+  options: QuestionOptionVO[]
 }
 
 export interface AnswerSheetDetailVO {
