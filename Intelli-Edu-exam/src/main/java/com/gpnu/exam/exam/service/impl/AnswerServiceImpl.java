@@ -364,19 +364,29 @@ public class AnswerServiceImpl implements IAnswerService {
         return byDuration.isBefore(exam.getEndTime()) ? byDuration : exam.getEndTime();
     }
 
+    /**
+     * 构建答卷详情VO，包含考试名称、题目列表及每道题的详细信息
+     *
+     * @param sheet 答卷实体
+     * @return 答卷详情视图对象
+     */
     private AnswerSheetDetailVO buildSheetDetail(AnswerSheet sheet) {
+        // 1. 拷贝基本属性到VO
         AnswerSheetDetailVO detail = new AnswerSheetDetailVO();
         BeanUtils.copyProperties(sheet, detail);
 
+        // 2. 获取考试信息并设置考试名称
         Exam exam = examService.getById(sheet.getExamId());
         if (exam != null) {
             detail.setExamName(exam.getExamName());
         }
 
+        // 3. 查询该答卷的所有答题记录
         List<AnswerRecord> records = answerRecordMapper.selectList(
                 new LambdaQueryWrapper<AnswerRecord>()
                         .eq(AnswerRecord::getSheetId, sheet.getSheetId()));
 
+        // 4. 获取试卷题目映射（按题目ID索引），用于后续填充快照信息
         Map<Long, PaperQuestion> pqMap = Map.of();
         if (exam != null) {
             List<PaperQuestion> pqs = paperQuestionMapper.selectList(
@@ -386,17 +396,17 @@ public class AnswerServiceImpl implements IAnswerService {
             pqMap = pqs.stream().collect(Collectors.toMap(PaperQuestion::getQuestionId, Function.identity()));
         }
 
-        Map<Long, AnswerRecord> recordMap = records.stream()
-                .collect(Collectors.toMap(AnswerRecord::getQuestionId, Function.identity()));
-
+        // 5. 最终不可变的题目映射
         Map<Long, PaperQuestion> finalPqMap = pqMap;
         List<AnswerRecordVO> recordVOs;
 
+        // 6. 如果有答题记录，则根据记录生成VO；否则根据试卷题目生成空记录VO
         if (!records.isEmpty()) {
             recordVOs = records.stream().map(r -> {
                 AnswerRecordVO vo = new AnswerRecordVO();
                 BeanUtils.copyProperties(r, vo);
 
+                // 从快照中填充题目类型、题干、选项等额外信息
                 PaperQuestion pq = finalPqMap.get(r.getQuestionId());
                 if (pq != null) {
                     fillFromSnapshot(vo, pq);
@@ -404,6 +414,7 @@ public class AnswerServiceImpl implements IAnswerService {
                 return vo;
             }).toList();
         } else {
+            // 无答题记录时，使用试卷题目生成空回答的VO
             recordVOs = finalPqMap.values().stream().map(pq -> {
                 AnswerRecordVO vo = new AnswerRecordVO();
                 vo.setQuestionId(pq.getQuestionId());
@@ -416,6 +427,7 @@ public class AnswerServiceImpl implements IAnswerService {
             }).toList();
         }
 
+        // 7. 设置VO中的答题记录列表
         detail.setRecords(recordVOs);
         return detail;
     }
@@ -436,17 +448,34 @@ public class AnswerServiceImpl implements IAnswerService {
             } else if (qtObj instanceof String qtStr) {
                 vo.setQuestionType(QuestionType.valueOf(qtStr));
             }
-            vo.setStem((String) snap.get("stem"));
-            vo.setCorrectAnswer((String) snap.get("answer"));
+            Object stemVal = snap.get("stem");
+            if (stemVal instanceof String) {
+                vo.setStem((String) stemVal);
+            } else if (stemVal != null) {
+                vo.setStem(stemVal.toString());
+            }
+            Object answerVal = snap.get("answer");
+            if (answerVal instanceof String) {
+                vo.setCorrectAnswer((String) answerVal);
+            } else if (answerVal != null) {
+                vo.setCorrectAnswer(answerVal.toString());
+            }
             Object optionsObj = snap.get("options");
             if (optionsObj instanceof List<?> optionsList) {
                 List<QuestionOptionVO> optionVOs = new ArrayList<>();
                 for (Object item : optionsList) {
                     if (item instanceof Map<?, ?> optionMap) {
                         QuestionOptionVO optVo = new QuestionOptionVO();
-                        optVo.setLabel((String) optionMap.get("label"));
-                        optVo.setContent((String) optionMap.get("content"));
-                        optVo.setIsCorrect((Boolean) optionMap.get("is_correct"));
+                        Object labelVal = optionMap.get("label");
+                        optVo.setLabel(labelVal instanceof String ? (String) labelVal : (labelVal != null ? labelVal.toString() : ""));
+                        Object contentVal = optionMap.get("content");
+                        optVo.setContent(contentVal instanceof String ? (String) contentVal : (contentVal != null ? contentVal.toString() : ""));
+                        Object correctVal = optionMap.get("is_correct");
+                        if (correctVal instanceof Boolean) {
+                            optVo.setIsCorrect((Boolean) correctVal);
+                        } else if (correctVal instanceof Number) {
+                            optVo.setIsCorrect(((Number) correctVal).intValue() == 1);
+                        }
                         if (optionMap.get("order_index") instanceof Number n) {
                             optVo.setOrderIndex(n.intValue());
                         }
