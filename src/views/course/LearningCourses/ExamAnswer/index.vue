@@ -2,11 +2,12 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import { useExamStore } from '@/stores/exam'
-import { QuestionType, SheetStatus, ExamType } from '@/types/enums'
 import { getExamList } from '@/api/exam/index'
 import type { ExamVO } from '@/api/exam/types'
-import type { QuestionOptionVO } from '@/api/exam/types'
+import type { AnswerRecordVO, QuestionOptionVO } from '@/api/exam/types'
+import { QuestionType, SheetStatus, ExamType, ExamStatus } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,7 +22,8 @@ const examInfo = ref<ExamVO | null>(null)
 
 const sheet = computed(() => examStore.currentSheet)
 const records = computed(() => sheet.value?.records || [])
-const currentRecord = computed(() => records.value[currentQuestionIndex])
+const currentRecord = computed(() => records.value[currentQuestionIndex.value] || null)
+
 const remainingTime = computed(() => {
   const s = examStore.remainingSeconds
   const h = Math.floor(s / 3600)
@@ -38,68 +40,39 @@ const questionTypeMap: Record<number, string> = {
   [QuestionType.ShortAnswer]: '简答题'
 }
 
+const questionTypeTagType = {
+  [QuestionType.SingleChoice]: 'primary',
+  [QuestionType.MultipleChoice]: 'success',
+  [QuestionType.TrueFalse]: 'warning',
+  [QuestionType.FillBlank]: 'info',
+  [QuestionType.ShortAnswer]: 'danger'
+} as const
+
+const sheetStatusMap: Record<number, { label: string; type: string }> = {
+  [SheetStatus.Answering]: { label: '答题中', type: 'primary' },
+  [SheetStatus.Submitted]: { label: '已提交', type: 'warning' },
+  [SheetStatus.Graded]: { label: '已批阅', type: 'success' }
+}
+
 const isHomework = computed(() => examInfo.value?.examType === ExamType.Homework)
 const isAnswering = computed(() => sheet.value?.status === SheetStatus.Answering)
-const isEnded = computed(() => sheet.value?.status === SheetStatus.Submitted || sheet.value?.status === SheetStatus.Graded)
-const canReEnter = computed(() => isHomework.value && sheet.value?.status === SheetStatus.Submitted)
+const isSubmitted = computed(() => sheet.value?.status === SheetStatus.Submitted)
+const isGraded = computed(() => sheet.value?.status === SheetStatus.Graded)
+const isEnded = computed(() => isSubmitted.value || isGraded.value)
+const isNotStarted = computed(() => examInfo.value?.status === ExamStatus.NotStarted)
+const canReEnter = computed(() => isHomework.value && isSubmitted.value)
+const answeredCount = computed(() => {
+  let count = 0
+  for (const record of records.value) {
+    const ans = examStore.answers.get(record.questionId)
+    if (ans && ans.trim()) count++
+  }
+  return count
+})
 
-function getOptions(record: typeof currentRecord.value): QuestionOptionVO[] {
-  if (!record?.options) return []
+function getSortedOptions(record: AnswerRecordVO): QuestionOptionVO[] {
+  if (!record.options) return []
   return [...record.options].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
-}
-
-async function initExam() {
-  loading.value = true
-  try {
-    const result = await getExamList({ current: 1, pageSize: 100, courseId })
-    examInfo.value = result.records.find(e => e.examId === examId) || null
-
-    try {
-      await examStore.fetchMySheet(examId)
-    } catch {
-      await examStore.enterExamAction(examId)
-    }
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : '进入考试失败'
-    ElMessage.error(msg)
-  } finally {
-    loading.value = false
-  }
-  startAutoSave()
-}
-
-async function reEnterHomework() {
-  loading.value = true
-  try {
-    await examStore.enterExamAction(examId)
-    ElMessage.success('已重新进入作业，可继续作答')
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : '重新进入失败'
-    ElMessage.error(msg)
-  } finally {
-    loading.value = false
-  }
-  startAutoSave()
-}
-
-function startAutoSave() {
-  stopAutoSave()
-  autoSaveTimer.value = setInterval(() => {
-    if (!sheet.value || !isAnswering.value) return
-    for (const record of records.value) {
-      const savedAnswer = examStore.answers.get(record.questionId)
-      if (savedAnswer) {
-        examStore.saveAnswerAction(sheet.value.sheetId, record.questionId, savedAnswer).catch(() => {})
-      }
-    }
-  }, 30000)
-}
-
-function stopAutoSave() {
-  if (autoSaveTimer.value) {
-    clearInterval(autoSaveTimer.value)
-    autoSaveTimer.value = null
-  }
 }
 
 function getAnswer(questionId: string): string {
@@ -115,7 +88,7 @@ function setAnswer(questionId: string, value: string) {
 
 function getMultiAnswer(questionId: string): string[] {
   const ans = examStore.answers.get(questionId) || ''
-  return ans ? ans.split(',') : []
+  return ans ? ans.split(',').filter(Boolean) : []
 }
 
 function setMultiAnswer(questionId: string, values: string[]) {
@@ -153,6 +126,64 @@ function nextQuestion() {
   }
 }
 
+function startAutoSave() {
+  stopAutoSave()
+  autoSaveTimer.value = setInterval(() => {
+    if (!sheet.value || !isAnswering.value) return
+    for (const record of records.value) {
+      const savedAnswer = examStore.answers.get(record.questionId)
+      if (savedAnswer) {
+        examStore.saveAnswerAction(sheet.value.sheetId, record.questionId, savedAnswer).catch(() => {})
+      }
+    }
+  }, 30000)
+}
+
+function stopAutoSave() {
+  if (autoSaveTimer.value) {
+    clearInterval(autoSaveTimer.value)
+    autoSaveTimer.value = null
+  }
+}
+
+async function initExam() {
+  loading.value = true
+  try {
+    try {
+      const result = await getExamList({ current: 1, pageSize: 100, courseId })
+      examInfo.value = result.records.find(e => e.examId === examId) || null
+    } catch {
+      examInfo.value = null
+    }
+
+    try {
+      await examStore.fetchMySheet(examId)
+    } catch {
+      await examStore.enterExamAction(examId)
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : '进入考试失败'
+    ElMessage.error(msg)
+  } finally {
+    loading.value = false
+  }
+  startAutoSave()
+}
+
+async function reEnterHomework() {
+  loading.value = true
+  try {
+    await examStore.enterExamAction(examId)
+    ElMessage.success('已重新进入作业，可继续作答')
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : '重新进入失败'
+    ElMessage.error(msg)
+  } finally {
+    loading.value = false
+  }
+  startAutoSave()
+}
+
 async function handleSubmit() {
   if (!sheet.value) return
   try {
@@ -167,7 +198,7 @@ async function handleSubmit() {
     await examStore.submitExamAction(sheet.value.sheetId)
     ElMessage.success('提交成功')
   } catch {
-    // cancelled
+    // cancelled or error
   }
 }
 
@@ -188,23 +219,28 @@ onUnmounted(() => {
       <div class="answer-header">
         <div class="header-left">
           <el-button text @click="goBack">
-            <el-icon><i class="el-icon-arrow-left" /></el-icon>
+            <el-icon><ArrowLeft /></el-icon>
             返回
           </el-button>
           <h2 class="exam-title">{{ sheet.examName }}</h2>
           <el-tag v-if="isHomework" type="success" size="small">作业</el-tag>
+          <el-tag :type="(sheetStatusMap[sheet.status]?.type as any)" size="small">
+            {{ sheetStatusMap[sheet.status]?.label }}
+          </el-tag>
         </div>
         <div class="header-right">
+          <div v-if="isNotStarted && examInfo" class="not-started-info">
+            <el-tag type="info" size="large">
+              考试未开始，开始时间：{{ examInfo.startTime?.split(' ')[0] }} {{ examInfo.startTime?.split(' ')[1] }}
+            </el-tag>
+          </div>
           <div v-if="isAnswering" class="countdown">
             <el-tag type="danger" size="large" effect="dark">
               剩余时间：{{ remainingTime }}
             </el-tag>
           </div>
           <div v-if="isEnded" class="result-info">
-            <el-tag :type="sheet.status === SheetStatus.Graded ? 'success' : 'warning'" size="large">
-              {{ sheet.status === SheetStatus.Graded ? '已批阅' : '已提交' }}
-            </el-tag>
-            <span v-if="sheet.totalScore > 0" style="margin-left: 12px; font-size: 16px; font-weight: 600">
+            <span v-if="sheet.totalScore > 0" style="font-size: 16px; font-weight: 600">
               总分：{{ sheet.totalScore }}
             </span>
           </div>
@@ -233,7 +269,7 @@ onUnmounted(() => {
             <span class="legend-item"><span class="dot"></span>未答</span>
           </div>
           <div class="nav-progress">
-            已答 {{ examStore.answeredCount }} / {{ records.length }}
+            已答 {{ answeredCount }} / {{ records.length }}
           </div>
           <el-button
             v-if="isAnswering"
@@ -256,42 +292,35 @@ onUnmounted(() => {
         <div class="question-area">
           <template v-if="currentRecord">
             <div class="question-header">
-              <span class="question-index">第 {{ currentQuestionIndex + 1 }} 题</span>
-              <el-tag size="small">{{ questionTypeMap[currentRecord.questionType] }}</el-tag>
-              <span class="question-score">分值：{{ currentRecord.questionScore }}</span>
+              <span class="question-index">第 {{ currentQuestionIndex +1 }} 题</span>
+              <el-tag :type="(questionTypeTagType[currentRecord.questionType] as any)" size="small">
+                {{ questionTypeMap[currentRecord.questionType] }}
+              </el-tag>
+              <span class="question-score">分值：{{ currentRecord.questionScore }}分</span>
             </div>
 
             <div class="question-stem">{{ currentRecord.stem }}</div>
 
             <div class="question-answer">
               <template v-if="currentRecord.questionType === QuestionType.SingleChoice">
-                <el-radio-group
-                  :model-value="getAnswer(currentRecord.questionId)"
-                  @change="(val: string) => setAnswer(currentRecord.questionId, val)"
-                  :disabled="isEnded"
-                >
+                <div v-for="opt in getSortedOptions(currentRecord)" :key="opt.label" class="option-item">
                   <el-radio
-                    v-for="opt in getOptions(currentRecord)"
-                    :key="opt.label"
+                    :model-value="getAnswer(currentRecord.questionId)"
                     :value="opt.label"
-                    style="display: flex; margin-bottom: 12px; align-items: flex-start"
+                    :disabled="isEnded"
+                    @change="(val: string) => setAnswer(currentRecord.questionId, val)"
                   >
                     <span class="option-label">{{ opt.label }}.</span>
                     <span class="option-content">{{ opt.content }}</span>
                   </el-radio>
-                </el-radio-group>
-                <div v-if="!getOptions(currentRecord).length" class="no-options-hint">
+                </div>
+                <div v-if="!getSortedOptions(currentRecord).length" class="no-options">
                   <el-radio-group
                     :model-value="getAnswer(currentRecord.questionId)"
-                    @change="(val: string) => setAnswer(currentRecord.questionId, val)"
                     :disabled="isEnded"
+                    @change="(val: string) => setAnswer(currentRecord.questionId, val as string)"
                   >
-                    <el-radio
-                      v-for="label in ['A', 'B', 'C', 'D', 'E', 'F']"
-                      :key="label"
-                      :value="label"
-                      style="display: flex; margin-bottom: 8px"
-                    >
+                    <el-radio v-for="label in ['A', 'B', 'C', 'D', 'E', 'F']" :key="label" :value="label">
                       {{ label }}
                     </el-radio>
                   </el-radio-group>
@@ -299,7 +328,7 @@ onUnmounted(() => {
               </template>
 
               <template v-if="currentRecord.questionType === QuestionType.MultipleChoice">
-                <div v-for="opt in getOptions(currentRecord)" :key="opt.label" style="margin-bottom: 12px">
+                <div v-for="opt in getSortedOptions(currentRecord)" :key="opt.label" class="option-item">
                   <el-checkbox
                     :model-value="isOptionSelected(currentRecord.questionId, opt.label)"
                     :disabled="isEnded"
@@ -309,7 +338,7 @@ onUnmounted(() => {
                     <span class="option-content">{{ opt.content }}</span>
                   </el-checkbox>
                 </div>
-                <div v-if="!getOptions(currentRecord).length" class="no-options-hint">
+                <div v-if="!getSortedOptions(currentRecord).length" class="no-options">
                   <div v-for="label in ['A', 'B', 'C', 'D', 'E', 'F']" :key="label" style="margin-bottom: 8px">
                     <el-checkbox
                       :model-value="isOptionSelected(currentRecord.questionId, label)"
@@ -325,10 +354,10 @@ onUnmounted(() => {
               <template v-if="currentRecord.questionType === QuestionType.TrueFalse">
                 <el-radio-group
                   :model-value="getAnswer(currentRecord.questionId)"
-                  @change="(val: string) => setAnswer(currentRecord.questionId, val)"
                   :disabled="isEnded"
+                  @change="(val: string) => setAnswer(currentRecord.questionId, val)"
                 >
-                  <el-radio value="正确" style="margin-right: 24px">正确</el-radio>
+                  <el-radio value="正确">正确</el-radio>
                   <el-radio value="错误">错误</el-radio>
                 </el-radio-group>
               </template>
@@ -336,20 +365,20 @@ onUnmounted(() => {
               <template v-if="currentRecord.questionType === QuestionType.FillBlank">
                 <el-input
                   :model-value="getAnswer(currentRecord.questionId)"
-                  @input="(val: string) => setAnswer(currentRecord.questionId, val)"
                   :disabled="isEnded"
                   placeholder="请输入答案"
+                  @input="(val: string) => setAnswer(currentRecord.questionId, val)"
                 />
               </template>
 
               <template v-if="currentRecord.questionType === QuestionType.ShortAnswer">
                 <el-input
                   :model-value="getAnswer(currentRecord.questionId)"
-                  @input="(val: string) => setAnswer(currentRecord.questionId, val)"
                   :disabled="isEnded"
                   type="textarea"
                   :rows="6"
                   placeholder="请输入答案"
+                  @input="(val: string) => setAnswer(currentRecord.questionId, val)"
                 />
               </template>
             </div>
@@ -371,12 +400,7 @@ onUnmounted(() => {
                   <span class="result-label">得分：</span>
                   <span class="result-value">{{ currentRecord.score ?? '待批阅' }}</span>
                 </div>
-                <div class="result-row" v-if="currentRecord.isCorrect !== null && currentRecord.isCorrect !== undefined">
-                  <el-tag :type="currentRecord.isCorrect ? 'success' : 'danger'" size="small">
-                    {{ currentRecord.isCorrect ? '正确' : '错误' }}
-                  </el-tag>
-                </div>
-                <div class="result-row" v-if="currentRecord.comment">
+                <div v-if="currentRecord.comment" class="result-row">
                   <span class="result-label">评语：</span>
                   <span class="result-value">{{ currentRecord.comment }}</span>
                 </div>
@@ -384,8 +408,11 @@ onUnmounted(() => {
             </template>
 
             <div class="question-nav-buttons">
-              <el-button :disabled="currentQuestionIndex === 0" @click="prevQuestion">上一题</el-button>
-              <el-button :disabled="currentQuestionIndex === records.length - 1" @click="nextQuestion">下一题</el-button>
+              <el-button :icon="ArrowLeft" :disabled="currentQuestionIndex === 0" @click="prevQuestion">上一题</el-button>
+              <el-button :disabled="currentQuestionIndex === records.length - 1" @click="nextQuestion">
+                下一题
+                <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+              </el-button>
             </div>
           </template>
 
@@ -393,6 +420,8 @@ onUnmounted(() => {
         </div>
       </div>
     </template>
+
+    <el-empty v-if="!loading && !sheet" description="暂无考试信息" />
   </div>
 </template>
 
@@ -423,6 +452,7 @@ onUnmounted(() => {
   .header-right {
     display: flex;
     align-items: center;
+    gap: 12px;
   }
 }
 
@@ -432,11 +462,12 @@ onUnmounted(() => {
 }
 
 .question-nav {
-  width: 200px;
+  width: 220px;
   flex-shrink: 0;
   background: #fff;
   border-radius: 8px;
   padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 
   .nav-title {
     font-size: 14px;
@@ -524,7 +555,8 @@ onUnmounted(() => {
   min-width: 0;
   background: #fff;
   border-radius: 8px;
-  padding: 20px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .question-header {
@@ -541,8 +573,9 @@ onUnmounted(() => {
 
   .question-score {
     margin-left: auto;
-    font-size: 13px;
-    color: #909399;
+    font-size: 14px;
+    color: #e6a23c;
+    font-weight: 600;
   }
 }
 
@@ -555,24 +588,29 @@ onUnmounted(() => {
 }
 
 .question-answer {
-  padding: 0 16px;
+  padding: 0 8px;
 
-  .option-label {
-    font-weight: 600;
-    margin-right: 4px;
+  .option-item {
+    margin-bottom: 14px;
+
+    .option-label {
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .option-content {
+      white-space: pre-wrap;
+    }
   }
 
-  .option-content {
-    white-space: pre-wrap;
-  }
-
-  .no-options-hint {
+  .no-options {
     color: #909399;
     font-size: 13px;
   }
 }
 
 .question-result {
+  margin-top: 8px;
   font-size: 14px;
   color: #606266;
   line-height: 2;
