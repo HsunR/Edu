@@ -20,10 +20,43 @@ import type {
   PaperUpdateRequest,
   PaperQuestionVO,
   PaperSection,
-  QuestionItem
+  QuestionItem,
+  QuestionOptionVO
 } from '@/api/exam/types'
 import { PaperStatus, QuestionType, Difficulty } from '@/types/enums'
 import QuestionSelector from './QuestionSelector.vue'
+
+interface NormalizedQuestion {
+  questionType: QuestionType
+  stem: string
+  answer: string
+  difficulty: number
+  options: QuestionOptionVO[]
+}
+
+function normalizeSnapshot(snapshot: Record<string, any>): NormalizedQuestion {
+  return {
+    questionType: snapshot.question_type,
+    stem: snapshot.stem,
+    answer: snapshot.answer,
+    difficulty: 0,
+    options: Array.isArray(snapshot.options)
+      ? snapshot.options.map((o: Record<string, any>) => ({
+          optionId: '',
+          label: o.label,
+          content: o.content,
+          isCorrect: o.is_correct,
+          orderIndex: o.order_index
+        }))
+      : []
+  }
+}
+
+function getEffectiveQuestion(pq: PaperQuestionVO): NormalizedQuestion | undefined {
+  if (pq.question) return pq.question
+  if (pq.questionSnapshot) return normalizeSnapshot(pq.questionSnapshot as Record<string, any>)
+  return undefined
+}
 
 const route = useRoute()
 const courseId = route.params.id as string
@@ -63,13 +96,13 @@ const questionTypeMap: Record<number, string> = {
   [QuestionType.ShortAnswer]: '简答题'
 }
 
-const questionTypeTagType: Record<number, string> = {
+const questionTypeTagType = {
   [QuestionType.SingleChoice]: 'primary',
   [QuestionType.MultipleChoice]: 'success',
   [QuestionType.TrueFalse]: 'warning',
   [QuestionType.FillBlank]: 'info',
   [QuestionType.ShortAnswer]: 'danger'
-}
+} as const
 
 const difficultyLabels: Record<number, string> = {
   [Difficulty.VeryEasy]: '非常简单',
@@ -552,42 +585,45 @@ onMounted(loadPapers)
                     <div
                       v-for="(pq, idx) in sectionQuestionsMap.get(sec.index)"
                       :key="pq.id"
+                      v-show="getEffectiveQuestion(pq)"
                       class="question-card"
                     >
-                      <div class="question-top">
-                        <span class="question-number">{{ idx + 1 }}.</span>
-                        <el-tag :type="questionTypeTagType[pq.question?.questionType]" size="small">
-                          {{ questionTypeMap[pq.question?.questionType] || '未知' }}
-                        </el-tag>
-                        <span class="question-difficulty" v-if="pq.question?.difficulty">
-                          <el-icon v-for="i in pq.question.difficulty" :key="i" class="star-icon">
-                            <StarFilled />
-                          </el-icon>
-                        </span>
-                        <span class="question-score-badge">{{ pq.score }} 分</span>
-                        <el-button
-                          v-if="isDraft"
-                          size="small"
-                          link
-                          type="danger"
-                          class="question-remove"
-                          @click="handleRemoveQuestion(pq)"
-                        >
-                          移除
-                        </el-button>
-                      </div>
-                      <div class="question-stem">{{ pq.question?.stem }}</div>
-                      <div v-if="pq.question?.options?.length" class="question-options">
-                        <div v-for="opt in pq.question.options" :key="opt.optionId" class="option-item">
-                          <span class="option-label" :class="{ correct: opt.isCorrect }">{{ opt.label }}.</span>
-                          <span class="option-content" :class="{ correct: opt.isCorrect }">{{ opt.content }}</span>
-                          <el-tag v-if="opt.isCorrect" type="success" size="small" class="correct-tag">正确答案</el-tag>
+                      <template v-if="getEffectiveQuestion(pq)">
+                        <div class="question-top">
+                          <span class="question-number">{{ idx + 1 }}.</span>
+                          <el-tag :type="questionTypeTagType[getEffectiveQuestion(pq)!.questionType]" size="small">
+                            {{ questionTypeMap[getEffectiveQuestion(pq)!.questionType] || '未知' }}
+                          </el-tag>
+                          <span class="question-difficulty" v-if="getEffectiveQuestion(pq)!.difficulty">
+                            <el-icon v-for="i in getEffectiveQuestion(pq)!.difficulty" :key="i" class="star-icon">
+                              <StarFilled />
+                            </el-icon>
+                          </span>
+                          <span class="question-score-badge">{{ pq.score }} 分</span>
+                          <el-button
+                            v-if="isDraft"
+                            size="small"
+                            link
+                            type="danger"
+                            class="question-remove"
+                            @click="handleRemoveQuestion(pq)"
+                          >
+                            移除
+                          </el-button>
                         </div>
-                      </div>
-                      <div v-if="pq.question?.answer && (pq.question.questionType === QuestionType.FillBlank || pq.question.questionType === QuestionType.ShortAnswer)" class="question-answer">
-                        <span class="answer-label">参考答案：</span>
-                        <span class="answer-content">{{ pq.question.answer }}</span>
-                      </div>
+                        <div class="question-stem">{{ getEffectiveQuestion(pq)!.stem }}</div>
+                        <div v-if="getEffectiveQuestion(pq)!.options?.length" class="question-options">
+                          <div v-for="opt in getEffectiveQuestion(pq)!.options" :key="opt.optionId || opt.label" class="option-item">
+                            <span class="option-label" :class="{ correct: opt.isCorrect }">{{ opt.label }}.</span>
+                            <span class="option-content" :class="{ correct: opt.isCorrect }">{{ opt.content }}</span>
+                            <el-tag v-if="opt.isCorrect" type="success" size="small" class="correct-tag">正确答案</el-tag>
+                          </div>
+                        </div>
+                        <div v-if="getEffectiveQuestion(pq)!.answer && (getEffectiveQuestion(pq)!.questionType === QuestionType.FillBlank || getEffectiveQuestion(pq)!.questionType === QuestionType.ShortAnswer)" class="question-answer">
+                          <span class="answer-label">参考答案：</span>
+                          <span class="answer-content">{{ getEffectiveQuestion(pq)!.answer }}</span>
+                        </div>
+                      </template>
                     </div>
                   </template>
                   <template v-else>
