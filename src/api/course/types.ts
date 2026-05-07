@@ -133,14 +133,18 @@ export interface ClassCreateRequest {
   courseId: string
   className: string
   maxStudents?: number
+  /** ISO 8601 with timezone, e.g. "2024-09-01T00:00:00+08:00" */
   startDate?: string
+  /** ISO 8601 with timezone, e.g. "2025-06-30T23:59:59+08:00" */
   endDate?: string
 }
 
 export interface ClassUpdateRequest {
   className: string
   maxStudents?: number
+  /** ISO 8601 with timezone, e.g. "2024-09-01T00:00:00+08:00" */
   startDate?: string
+  /** ISO 8601 with timezone, e.g. "2025-06-30T23:59:59+08:00" */
   endDate?: string
   status?: ClassStatus
 }

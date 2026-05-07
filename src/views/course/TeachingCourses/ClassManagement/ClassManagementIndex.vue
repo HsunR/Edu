@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CirclePlus, Search, MoreFilled, CopyDocument } from '@element-plus/icons-vue'
+import moment from 'moment'
 import { getCourseClasses } from '@/api/course/course'
 import {
   createClass,
@@ -101,12 +102,27 @@ function openCreateDialog() {
   createDialogVisible.value = true
 }
 
+function toOffsetDate(value: string): string {
+  if (!value) return ''
+  return moment(value).format('YYYY-MM-DDTHH:mm:ss+08:00')
+}
+
+function fromOffsetDate(value: string): string {
+  if (!value) return ''
+  return value.split('T')[0]
+}
+
 async function handleCreate() {
   if (!createFormRef.value) return
   await createFormRef.value.validate(async (valid) => {
     if (!valid) return
     try {
-      await createClass(createForm.value)
+      const payload = {
+        ...createForm.value,
+        startDate: toOffsetDate(createForm.value.startDate),
+        endDate: toOffsetDate(createForm.value.endDate)
+      }
+      await createClass(payload)
       ElMessage.success('创建班级成功')
       createDialogVisible.value = false
       await loadClasses()
@@ -122,8 +138,8 @@ function openEditDialog(cls: ClassVO) {
     classId: cls.classId,
     className: cls.className,
     maxStudents: cls.maxStudents,
-    startDate: cls.startDate,
-    endDate: cls.endDate,
+    startDate: fromOffsetDate(cls.startDate),
+    endDate: fromOffsetDate(cls.endDate),
     status: cls.status
   }
   editDialogVisible.value = true
@@ -136,7 +152,12 @@ async function handleEdit() {
     try {
       const { classId, ...data } = editForm.value
       if (!classId) return
-      await updateClass(classId, data as ClassUpdateRequest)
+      const payload = {
+        ...data,
+        startDate: toOffsetDate(data.startDate),
+        endDate: toOffsetDate(data.endDate)
+      }
+      await updateClass(classId, payload as ClassUpdateRequest)
       ElMessage.success('更新成功')
       editDialogVisible.value = false
       await loadClasses()
@@ -246,8 +267,8 @@ onMounted(loadClasses)
               </div>
               <div class="header-meta">
                 <span>学生：{{ selectedClass.currentStudents }} / {{ selectedClass.maxStudents }}</span>
-                <span v-if="selectedClass.startDate">开始：{{ selectedClass.startDate?.split(' ')[0] }}</span>
-                <span v-if="selectedClass.endDate">结束：{{ selectedClass.endDate?.split(' ')[0] }}</span>
+                <span v-if="selectedClass.startDate">开始：{{ selectedClass.startDate?.split('T')[0] }}</span>
+                <span v-if="selectedClass.endDate">结束：{{ selectedClass.endDate?.split('T')[0] }}</span>
               </div>
             </div>
 
@@ -260,7 +281,7 @@ onMounted(loadClasses)
                 <el-table-column prop="studentId" label="学号" width="120" />
                 <el-table-column prop="joinedAt" label="加入时间" width="180">
                   <template #default="{ row }">
-                    {{ row.joinedAt?.split(' ')[0] }}
+                    {{ row.joinedAt?.split('T')[0] }}
                   </template>
                 </el-table-column>
                 <el-table-column label="操作" width="100">
