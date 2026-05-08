@@ -91,9 +91,7 @@ function logout() {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    userStore.logout().then(() => {
-      location.href = '/login'
-    })
+    userStore.logout()
   }).catch(() => { })
 }
 

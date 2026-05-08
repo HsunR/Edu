@@ -305,7 +305,7 @@ const LoginCode = async () => {
         loginType: loginForm.loginType,
         mobile: loginForm.mobile,
         email: loginForm.email
-      })
+      }, { showError: false })
       ElMessage.success('验证码已发送')
       startLoginCountdown()
     } catch (error) {
@@ -322,7 +322,7 @@ const RegisterCode = async () => {
         registerType: registerForm.registerType,
         mobile: registerForm.mobile,
         email: registerForm.email
-      })
+      }, { showError: false })
       ElMessage.success('验证码已发送')
       startRegisterCountdown()
     } catch (error) {
@@ -340,7 +340,7 @@ const handleLogin = () => {
     }
     loading.value = true
     try {
-      await userStore.login(loginForm)
+      await userStore.login(loginForm, { showError: false })
       const redirect = route.query.redirect || '/'
       router.push(redirect)
     } catch (error) {
@@ -359,7 +359,7 @@ const handleRegister = () => {
     }
     loading.value = true
     try {
-      await registerApi(registerForm)
+      await registerApi(registerForm, { showError: false })
       ElMessage.success('注册成功，请登录')
       isLoginVisible.value = true
       resetForm()

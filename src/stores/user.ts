@@ -4,6 +4,7 @@ import { login as loginApi, logout as logoutApi } from '@/api/user/auth'
 import { getUserInfo, updateUserInfo as updateUserInfoApi, updateAvatar as updateAvatarApi } from '@/api/user/user'
 import { getToken, setToken, removeToken, getRefreshToken, setRefreshToken, removeRefreshToken } from '@/utils/auth'
 import type { LoginRequest, UserDetailVO, UserUpdateRequest } from '@/api/user/types'
+import type { AxiosRequestConfig } from 'axios'
 import { UserType } from '@/types/enums'
 
 export const useUserStore = defineStore('user', () => {
@@ -17,8 +18,8 @@ export const useUserStore = defineStore('user', () => {
   const isAdmin = computed(() => userType.value === UserType.Admin)
   const isLoggedIn = computed(() => !!token.value)
 
-  async function login(data: LoginRequest) {
-    const res = await loginApi(data)
+  async function login(data: LoginRequest, config?: AxiosRequestConfig) {
+    const res = await loginApi(data, config)
     token.value = res.accessToken
     refreshToken.value = res.refreshToken
     setToken(res.accessToken)
@@ -52,6 +53,10 @@ export const useUserStore = defineStore('user', () => {
 
       const { usePermissionStore } = await import('@/stores/permission')
       usePermissionStore().resetRoutes()
+
+      // 统一跳转到登录页
+      const router = (await import('@/router')).default
+      router.push('/login')
     }
   }
 

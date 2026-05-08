@@ -69,11 +69,15 @@ service.interceptors.response.use(
     }
     
     const res = response.data
+    const config = response.config as AxiosRequestConfig & { showError?: boolean }
     
     if (res && typeof res === 'object' && 'code' in res && 'data' in res) {
       const { code, data, message } = res
       
       if (code !== ErrorCode.SUCCESS) {
+        // 默认显示错误消息，但可以通过 config.showError = false 禁用
+        const shouldShowError = config.showError !== false
+        
         switch (code) {
           case ErrorCode.NOT_LOGIN_ERROR:
             if (!reloginShown) {
@@ -94,25 +98,25 @@ service.interceptors.response.use(
             }
             break
           case ErrorCode.NO_AUTH_ERROR:
-            ElMessage.error(message || '无权限访问')
+            shouldShowError && ElMessage.error(message || '无权限访问')
             break
           case ErrorCode.FORBIDDEN_ERROR:
-            ElMessage.error(message || '禁止访问')
+            shouldShowError && ElMessage.error(message || '禁止访问')
             break
           case ErrorCode.NOT_FOUND_ERROR:
-            ElMessage.error(message || '请求数据不存在')
+            shouldShowError && ElMessage.error(message || '请求数据不存在')
             break
           case ErrorCode.PARAMS_ERROR:
-            ElMessage.error(message || '请求参数错误')
+            shouldShowError && ElMessage.error(message || '请求参数错误')
             break
           case ErrorCode.SYSTEM_ERROR:
-            ElMessage.error(message || '系统内部异常')
+            shouldShowError && ElMessage.error(message || '系统内部异常')
             break
           case ErrorCode.OPERATION_ERROR:
-            ElMessage.error(message || '操作失败')
+            shouldShowError && ElMessage.error(message || '操作失败')
             break
           default:
-            ElMessage.error(message || '请求失败')
+            shouldShowError && ElMessage.error(message || '请求失败')
         }
         return Promise.reject(new Error(message || '请求失败'))
       }
@@ -124,15 +128,18 @@ service.interceptors.response.use(
   },
   async (error) => {
     const { response, config } = error
+    const shouldShowError = (config as any).showError !== false
 
     if (!response) {
       const msg = error.message
-      if (msg === 'Network Error') {
-        ElMessage.error('后端接口连接异常')
-      } else if (msg.includes('timeout')) {
-        ElMessage.error('系统接口请求超时')
-      } else {
-        ElMessage.error(msg)
+      if (shouldShowError) {
+        if (msg === 'Network Error') {
+          ElMessage.error('后端接口连接异常')
+        } else if (msg.includes('timeout')) {
+          ElMessage.error('系统接口请求超时')
+        } else {
+          ElMessage.error(msg)
+        }
       }
       return Promise.reject(error)
     }
@@ -203,7 +210,7 @@ service.interceptors.response.use(
 
     const message = statusMessages[response.status]
       || `系统接口${String(response.status)}异常`
-    ElMessage.error(message)
+    shouldShowError && ElMessage.error(message)
 
     return Promise.reject(error)
   }
@@ -213,6 +220,7 @@ declare module 'axios' {
   interface AxiosRequestConfig {
     _retry?: boolean
     noToken?: boolean
+    showError?: boolean
   }
 }
 

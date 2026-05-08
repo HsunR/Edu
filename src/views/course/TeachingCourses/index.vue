@@ -20,6 +20,8 @@ const pageSize = ref(12)
 const dialogFormVisible = ref(false)
 const isEdit = ref(false)
 const courseFormRef = ref<FormInstance>()
+const uploadRef = ref()
+const uploadKey = ref(0)
 const editingCourseId = ref<string | null>(null)
 
 const CourseForm = reactive<CourseCreateRequest>({
@@ -29,6 +31,41 @@ const CourseForm = reactive<CourseCreateRequest>({
   categoryId: undefined,
   isPublic: undefined
 })
+
+const DRAFT_STORAGE_KEY = 'course_create_draft'
+
+function saveDraft() {
+  const draft = {
+    courseName: CourseForm.courseName,
+    description: CourseForm.description,
+    coverUrl: CourseForm.coverUrl,
+    categoryId: CourseForm.categoryId,
+    isPublic: CourseForm.isPublic,
+    imageUrl: imageUrl.value
+  }
+  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
+}
+
+function restoreDraft() {
+  const draftStr = localStorage.getItem(DRAFT_STORAGE_KEY)
+  if (!draftStr) return false
+  try {
+    const draft = JSON.parse(draftStr)
+    CourseForm.courseName = draft.courseName || ''
+    CourseForm.description = draft.description || ''
+    CourseForm.coverUrl = draft.coverUrl || ''
+    CourseForm.categoryId = draft.categoryId
+    CourseForm.isPublic = draft.isPublic
+    imageUrl.value = draft.imageUrl || ''
+    return true
+  } catch {
+    return false
+  }
+}
+
+function clearDraft() {
+  localStorage.removeItem(DRAFT_STORAGE_KEY)
+}
 
 const formRules = reactive<FormRules>({
   courseName: [{ required: true, message: '请输入课程名称', trigger: 'blur' }]
@@ -60,7 +97,10 @@ function addCourse() {
   isEdit.value = false
   editingCourseId.value = null
   dialogFormVisible.value = true
-  resetFormFields()
+  const hasDraft = restoreDraft()
+  if (!hasDraft) {
+    resetFormFields()
+  }
 }
 
 async function editCourse(course: CourseVO) {
@@ -162,11 +202,24 @@ function handleRemoveCover() {
   selectedFile.value = null
   uploadStatus.value = 'idle'
   errorMessage.value = ''
+  uploadKey.value++
 }
 
 function handleCancel() {
   dialogFormVisible.value = false
-  resetFormFields()
+  if (!isEdit.value) {
+    saveDraft()
+  } else {
+    resetFormFields()
+  }
+}
+
+function handleDialogClose() {
+  if (!isEdit.value) {
+    saveDraft()
+  } else {
+    resetFormFields()
+  }
 }
 
 function resetFormFields() {
@@ -179,6 +232,7 @@ function resetFormFields() {
   selectedFile.value = null
   uploadStatus.value = 'idle'
   errorMessage.value = ''
+  uploadKey.value++
 }
 
 async function handleSubmit() {
@@ -199,6 +253,7 @@ async function handleSubmit() {
       } else {
         await createCourse(CourseForm as CourseCreateRequest)
         ElMessage.success('创建成功')
+        clearDraft()
       }
       dialogFormVisible.value = false
       resetFormFields()
@@ -248,7 +303,7 @@ onMounted(async () => {
       v-model="dialogFormVisible"
       :title="isEdit ? '编辑课程' : '新增课程'"
       width="600px"
-      @close="resetFormFields"
+      @close="handleDialogClose"
     >
       <el-form ref="courseFormRef" :model="CourseForm" :rules="formRules" label-width="100px">
         <el-form-item label="课程名称" prop="courseName">
@@ -256,6 +311,8 @@ onMounted(async () => {
         </el-form-item>
         <el-form-item label="课程封面" prop="coverUrl">
           <el-upload
+            ref="uploadRef"
+            :key="uploadKey"
             class="avatar-uploader"
             action=""
             :auto-upload="false"
