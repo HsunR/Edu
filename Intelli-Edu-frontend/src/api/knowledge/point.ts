@@ -1,0 +1,50 @@
+import request from '@/api/request'
+import type { KnowledgePointVO, KnowledgeTreeVO, PointCreateRequest, PointUpdateRequest, QuestionBindRequest, SectionBindRequest } from './types'
+
+export function createPoint(data: PointCreateRequest) {
+  return request.post<any, KnowledgePointVO>('/api/knowledge/points', data)
+}
+
+export function updatePoint(pointId: string, data: PointUpdateRequest) {
+  return request.put<any, KnowledgePointVO>(`/api/knowledge/points/${pointId}`, data)
+}
+
+export function deletePoint(pointId: string) {
+  return request.delete(`/api/knowledge/points/${pointId}`)
+}
+
+export function getKnowledgeTree(courseId: string) {
+  return request.get<any, KnowledgeTreeVO[]>('/api/knowledge/points/tree', { params: { courseId } })
+}
+
+export function getPointQuestions(pointId: string) {
+  return request.get<any, string[]>(`/api/knowledge/points/${pointId}/questions`)
+}
+
+export function bindQuestions(pointId: string, data: QuestionBindRequest) {
+  return request.post(`/api/knowledge/points/${pointId}/questions`, data)
+}
+
+export function unbindQuestion(pointId: string, questionId: string) {
+  return request.delete(`/api/knowledge/points/${pointId}/questions/${questionId}`)
+}
+
+export function getPointSections(pointId: string) {
+  return request.get<any, string[]>(`/api/knowledge/points/${pointId}/sections`)
+}
+
+export function bindSections(pointId: string, data: SectionBindRequest) {
+  return request.post(`/api/knowledge/points/${pointId}/sections`, data)
+}
+
+export function unbindSection(pointId: string, sectionId: string) {
+  return request.delete(`/api/knowledge/points/${pointId}/sections/${sectionId}`)
+}
+
+export function getQuestionPoints(questionId: string) {
+  return request.get<any, KnowledgePointVO[]>(`/api/knowledge/questions/${questionId}/points`)
+}
+
+export function getSectionPoints(sectionId: string) {
+  return request.get<any, KnowledgePointVO[]>(`/api/knowledge/sections/${sectionId}/points`)
+}

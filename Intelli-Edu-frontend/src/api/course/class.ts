@@ -1,0 +1,31 @@
+import request from '@/api/request'
+import type { PageResult } from '@/types/api'
+import type { ClassVO, ClassCreateRequest, ClassUpdateRequest, JoinClassRequest, ClassMemberVO } from './types'
+
+export function createClass(data: ClassCreateRequest) {
+  return request.post<ClassVO>('/api/course/classes', data)
+}
+
+export function updateClass(classId: string, data: ClassUpdateRequest) {
+  return request.put<ClassVO>(`/api/course/classes/${classId}`, data)
+}
+
+export function getClassMembers(classId: string, params?: { current?: number; pageSize?: number }) {
+  return request.get<PageResult<ClassMemberVO>>(`/api/course/classes/${classId}/members`, { params })
+}
+
+export function removeMember(classId: string, memberId: string) {
+  return request.delete(`/api/course/classes/${classId}/members/${memberId}`)
+}
+
+export function quitClass(classId: string) {
+  return request.post(`/api/course/classes/${classId}/quit`)
+}
+
+export function joinClass(data: JoinClassRequest) {
+  return request.post<ClassVO>('/api/course/classes/join', data)
+}
+
+export function getMyClasses() {
+  return request.get<ClassVO[]>('/api/course/classes/my')
+}

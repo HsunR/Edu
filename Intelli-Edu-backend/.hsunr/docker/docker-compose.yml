@@ -1,0 +1,94 @@
+version: "3.8"
+
+services:
+  gateway:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.gateway
+    container_name: intelli-edu-gateway
+    ports:
+      - "8890:8890"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  user:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.user
+    container_name: intelli-edu-user
+    ports:
+      - "8891:8891"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  resource:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.resource
+    container_name: intelli-edu-resource
+    ports:
+      - "8892:8892"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  course:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.course
+    container_name: intelli-edu-course
+    ports:
+      - "8893:8893"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  exam:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.exam
+    container_name: intelli-edu-exam
+    ports:
+      - "8894:8894"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  knowledge:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.knowledge
+    container_name: intelli-edu-knowledge
+    ports:
+      - "8895:8895"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  learning:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.learning
+    container_name: intelli-edu-learning
+    ports:
+      - "8896:8896"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  ai:
+    build:
+      context: ../..
+      dockerfile: .hsunr/docker/Dockerfile.ai
+    container_name: intelli-edu-ai
+    ports:
+      - "8897:8897"
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+networks:
+  intelli-edu-net:
+    driver: bridge
