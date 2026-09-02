@@ -21,6 +21,12 @@
 
     <dependencies>
 
+        <!-- Database schema migrations -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
         <!--        SpringCloud -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -95,6 +101,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <skip>false</skip>
+                    <mainClass>com.gpnu.knowledge.IntelliEduKnowledgeApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gpnu.learning.mapper.LpMasteryMapper">
+
+    <!-- 教师端班级掌握度：与学生端共用 lp_mastery，仅聚合维度不同 -->
+    <select id="statClassMastery" resultType="com.gpnu.learning.model.vo.ClassMasteryPointVO">
+        SELECT point_id AS pointId,
+               ROUND(AVG(mastery_level), 1) AS avgMasteryLevel,
+               COUNT(DISTINCT student_id) AS studentCount,
+               SUM(CASE WHEN mastery_level &lt; #{threshold} THEN 1 ELSE 0 END) AS weakStudentCount
+        FROM lp_mastery
+        WHERE class_id = #{classId}
+          AND is_deleted = 0
+        GROUP BY point_id
+        ORDER BY avgMasteryLevel ASC, point_id ASC
+    </select>
+
+</mapper>

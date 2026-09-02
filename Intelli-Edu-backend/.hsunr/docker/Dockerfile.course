@@ -1,5 +1,0 @@
-FROM eclipse-temurin:21-jre
-WORKDIR /app
-COPY Intelli-Edu-course/target/Intelli-Edu-course-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8893
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]

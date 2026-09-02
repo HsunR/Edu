@@ -1,0 +1,5 @@
+# Local-only service credentials
+Intelli-Edu-backend/.hsunr/docker/.env
+
+# Local diagnostics
+*.log

@@ -1,0 +1,54 @@
+FROM maven:3.9.11-eclipse-temurin-21 AS builder
+WORKDIR /build
+COPY . .
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -DskipTests package
+
+FROM eclipse-temurin:21-jre AS gateway
+WORKDIR /app
+COPY --from=builder /build/Intelli-Edu-gateway/target/Intelli-Edu-gateway-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8890
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+
+FROM eclipse-temurin:21-jre AS user
+WORKDIR /app
+COPY --from=builder /build/Intelli-Edu-user/target/Intelli-Edu-user-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8891
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+
+FROM eclipse-temurin:21-jre AS resource
+WORKDIR /app
+COPY --from=builder /build/Intelli-Edu-resource/target/Intelli-Edu-resource-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8892
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+
+FROM eclipse-temurin:21-jre AS course
+WORKDIR /app
+COPY --from=builder /build/Intelli-Edu-course/target/Intelli-Edu-course-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8893
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+
+FROM eclipse-temurin:21-jre AS exam
+WORKDIR /app
+COPY --from=builder /build/Intelli-Edu-exam/target/Intelli-Edu-exam-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8894
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+
+FROM eclipse-temurin:21-jre AS knowledge
+WORKDIR /app
+COPY --from=builder /build/Intelli-Edu-Knowledge/target/Intelli-Edu-knowledge-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8895
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+
+FROM eclipse-temurin:21-jre AS learning
+WORKDIR /app
+COPY --from=builder /build/Intelli-Edu-learning/target/Intelli-Edu-learning-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8896
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+
+FROM eclipse-temurin:21-jre AS ai
+WORKDIR /app/Intelli-Edu-Ai
+RUN mkdir -p docs
+COPY --from=builder /build/Intelli-Edu-Ai/target/Intelli-Edu-ai-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]

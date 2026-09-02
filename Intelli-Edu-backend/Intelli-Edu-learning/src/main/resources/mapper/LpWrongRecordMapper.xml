@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gpnu.learning.mapper.LpWrongRecordMapper">
+
+    <select id="statByQuestionType" resultType="com.gpnu.learning.model.vo.WrongTypeStatVO">
+        SELECT question_type AS questionType,
+               COUNT(DISTINCT question_id) AS wrongQuestionCount,
+               COALESCE(SUM(wrong_count), 0) AS totalWrongTimes
+        FROM lp_wrong_record
+        WHERE student_id = #{studentId}
+          AND is_deleted = 0
+        <if test="classId != null">
+            AND class_id = #{classId}
+        </if>
+        <if test="courseId != null">
+            AND course_id = #{courseId}
+        </if>
+        GROUP BY question_type
+        ORDER BY totalWrongTimes DESC
+    </select>
+
+    <select id="statByKnowledgePoint" resultType="com.gpnu.learning.model.vo.WrongPointStatVO">
+        SELECT wp.point_id AS pointId,
+               COUNT(DISTINCT wr.question_id) AS wrongQuestionCount,
+               COALESCE(SUM(wr.wrong_count), 0) AS totalWrongTimes
+        FROM lp_wrong_record wr
+                 INNER JOIN lp_wrong_point wp ON wp.wrong_id = wr.wrong_id AND wp.is_deleted = 0
+        WHERE wr.student_id = #{studentId}
+          AND wr.is_deleted = 0
+        <if test="classId != null">
+            AND wr.class_id = #{classId}
+        </if>
+        <if test="courseId != null">
+            AND wr.course_id = #{courseId}
+        </if>
+        GROUP BY wp.point_id
+        ORDER BY totalWrongTimes DESC
+    </select>
+
+    <select id="statFrequentQuestions" resultType="com.gpnu.learning.model.vo.FrequentWrongQuestionVO">
+        SELECT question_id AS questionId,
+               MAX(question_type) AS questionType,
+               COUNT(DISTINCT student_id) AS wrongStudentCount,
+               COALESCE(SUM(wrong_count), 0) AS totalWrongTimes
+        FROM lp_wrong_record
+        WHERE class_id = #{classId}
+          AND is_deleted = 0
+        GROUP BY question_id
+        ORDER BY totalWrongTimes DESC, wrongStudentCount DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="statClassWrongByPoint" resultType="com.gpnu.learning.model.vo.WrongPointStatVO">
+        SELECT wp.point_id AS pointId,
+               COUNT(DISTINCT wr.question_id) AS wrongQuestionCount,
+               COALESCE(SUM(wr.wrong_count), 0) AS totalWrongTimes
+        FROM lp_wrong_record wr
+                 INNER JOIN lp_wrong_point wp ON wp.wrong_id = wr.wrong_id AND wp.is_deleted = 0
+        WHERE wr.class_id = #{classId}
+          AND wr.is_deleted = 0
+        GROUP BY wp.point_id
+        ORDER BY totalWrongTimes DESC
+    </select>
+
+    <select id="listWrongStudentsByQuestion" resultType="com.gpnu.learning.model.vo.WrongStudentBriefVO">
+        SELECT student_id AS studentId,
+               wrong_count AS wrongCount,
+               wrong_type AS wrongType,
+               is_resolved AS isResolved,
+               last_wrong_at AS lastWrongAt
+        FROM lp_wrong_record
+        WHERE class_id = #{classId}
+          AND question_id = #{questionId}
+          AND is_deleted = 0
+        ORDER BY wrong_count DESC, last_wrong_at DESC
+    </select>
+
+    <select id="statWrongTypeByQuestion" resultType="com.gpnu.learning.model.vo.WrongTypeDistVO">
+        SELECT COALESCE(wrong_type, 'UNKNOWN') AS wrongType,
+               COUNT(*) AS count
+        FROM lp_wrong_record
+        WHERE class_id = #{classId}
+          AND question_id = #{questionId}
+          AND is_deleted = 0
+        GROUP BY wrong_type
+        ORDER BY count DESC
+    </select>
+
+</mapper>

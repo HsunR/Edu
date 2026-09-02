@@ -1,0 +1,8 @@
+mybatis-plus:
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+  global-config:
+    field-strategy: ignored
+    db-config:
+      logic-delete-field: deleted
+      id-type: assign_id

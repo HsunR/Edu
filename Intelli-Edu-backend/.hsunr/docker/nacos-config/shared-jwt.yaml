@@ -1,0 +1,4 @@
+jwt:
+  secret: ${JWT_SECRET:SW50ZWxsaUVkdUxvY2FsRGV2U2VjcmV0MjAyNg==}
+  access-token-expiration-ms: 3600000
+  refresh-token-expiration-days: 7

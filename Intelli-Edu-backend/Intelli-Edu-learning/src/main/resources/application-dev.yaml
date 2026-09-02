@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: Intelli-Edu-learning
+  cloud:
+    nacos:
+      config: &nacos
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:Intelli-Edu-backend}
+        group: DEFAULT_GROUP
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+      discovery: *nacos
+  config:
+    import:
+      - optional:nacos:shared-redis.yaml?group=DEFAULT_GROUP&refresh=true
+      - optional:nacos:shared-mybatis.yaml?group=DEFAULT_GROUP&refresh=true
+      - optional:nacos:shared-postgres.yaml?group=DEFAULT_GROUP&refresh=true
+      - optional:nacos:shared-jwt.yaml?group=DEFAULT_GROUP&refresh=true
+      - optional:nacos:shared-log.yaml?group=DEFAULT_GROUP&refresh=true
+      - optional:nacos:shared-mq.yaml?group=DEFAULT_GROUP&refresh=true
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml?group=DEFAULT_GROUP&refresh=true
+
+server:
+  port: 8896
+  servlet:
+    context-path: /api/learning

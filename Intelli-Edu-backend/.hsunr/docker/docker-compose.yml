@@ -1,10 +1,198 @@
-version: "3.8"
+x-backend-service: &backend-service
+  environment:
+    SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+    SPRING_CLOUD_NACOS_CONFIG_NAMESPACE: Intelli-Edu-backend
+    SPRING_CLOUD_NACOS_CONFIG_USERNAME: nacos
+    SPRING_CLOUD_NACOS_CONFIG_PASSWORD: nacos
+    SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+    SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: Intelli-Edu-backend
+    SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: nacos
+    SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: nacos
+    SPNU_REDIS_HOST: redis
+    SPNU_REDIS_PORT: "6379"
+    SPNU_REDIS_PASSWORD: intelli-edu-dev
+    SPRING_DATA_REDIS_HOST: redis
+    SPRING_DATA_REDIS_PORT: "6379"
+    SPRING_DATA_REDIS_PASSWORD: intelli-edu-dev
+    SPNU_JDBC_HOST: postgres
+    SPNU_JDBC_PORT: "5432"
+    SPNU_JDBC_USERNAME: intelli_edu
+    SPNU_JDBC_PASSWORD: intelli-edu-dev
+    SPNU_MQ_HOST: rabbitmq
+    SPNU_MQ_PORT: "5672"
+    SPNU_MQ_USERNAME: rabbitmq
+    SPNU_MQ_PASSWORD: intelli-edu-dev
+    SPNU_MQ_VHOST: /Intelli-Edu
+    SPRING_RABBITMQ_HOST: rabbitmq
+    SPRING_RABBITMQ_PORT: "5672"
+    SPRING_RABBITMQ_USERNAME: rabbitmq
+    SPRING_RABBITMQ_PASSWORD: intelli-edu-dev
+    SPRING_RABBITMQ_VIRTUAL_HOST: /Intelli-Edu
+    DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-local-disabled}
+    DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-local-disabled}
+    SEARCH_API_KEY: ${SEARCH_API_KEY:-local-disabled}
+    MAIL_USERNAME: ${MAIL_USERNAME:-local@example.invalid}
+    MAIL_PASSWORD: ${MAIL_PASSWORD:-local-disabled}
+    TENCENT_CLOUD_SECRET_ID: ${TENCENT_CLOUD_SECRET_ID:-local-disabled}
+    TENCENT_CLOUD_SECRET_KEY: ${TENCENT_CLOUD_SECRET_KEY:-local-disabled}
+    TENCENT_SMS_APP_ID: ${TENCENT_SMS_APP_ID:-0}
+    TENCENT_SMS_SIGN_NAME: ${TENCENT_SMS_SIGN_NAME:-local-disabled}
+    TENCENT_SMS_TEMPLATE_ID: ${TENCENT_SMS_TEMPLATE_ID:-0}
+    TENCENT_COS_HOST: ${TENCENT_COS_HOST:-http://localhost:9000}
+    TENCENT_COS_BUCKET: ${TENCENT_COS_BUCKET:-local-disabled}
+    TENCENT_VOD_APP_ID: ${TENCENT_VOD_APP_ID:-0}
+  depends_on:
+    nacos-init:
+      condition: service_completed_successfully
+    redis:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
 
 services:
+  nacos:
+    image: nacos/nacos-server:v2.4.3
+    container_name: intelli-edu-nacos
+    environment:
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      NACOS_AUTH_ENABLE: "false"
+    ports:
+      - "127.0.0.1:8848:8848"
+    volumes:
+      - nacos-data:/home/nacos/data
+      - nacos-logs:/home/nacos/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8848/nacos/v1/console/health/readiness || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 30s
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  nacos-init:
+    image: curlimages/curl:8.10.1
+    container_name: intelli-edu-nacos-init
+    depends_on:
+      nacos:
+        condition: service_healthy
+    volumes:
+      - ./nacos-config:/import:ro
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        curl -fsS -X POST http://nacos:8848/nacos/v2/console/namespace \
+          --data-urlencode 'namespaceId=Intelli-Edu-backend' \
+          --data-urlencode 'namespaceName=Intelli-Edu-backend' \
+          --data-urlencode 'namespaceDesc=Intelli-Edu local development' >/dev/null 2>&1 || true
+        for config in /import/*.yaml; do
+          data_id=$$(basename "$$config")
+          curl -fsS -X POST http://nacos:8848/nacos/v1/cs/configs \
+            --data-urlencode "dataId=$$data_id" \
+            --data-urlencode 'group=DEFAULT_GROUP' \
+            --data-urlencode 'tenant=Intelli-Edu-backend' \
+            --data-urlencode "content@$$config" \
+            --data-urlencode 'type=yaml' >/dev/null
+        done
+        for attempt in 1 2 3 4 5 6 7 8 9 10; do
+          if curl -fsS 'http://nacos:8848/nacos/v1/cs/configs?dataId=shared-postgres.yaml&group=DEFAULT_GROUP&tenant=Intelli-Edu-backend' >/dev/null; then
+            echo 'Nacos namespace and configurations initialized successfully.'
+            exit 0
+          fi
+          sleep 2
+        done
+        echo 'Nacos configuration verification failed.' >&2
+        exit 1
+    networks:
+      - intelli-edu-net
+    restart: "no"
+
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: intelli-edu-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: intelli_edu
+      POSTGRES_PASSWORD: intelli-edu-dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intelli_edu -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: intelli-edu-redis
+    command: ["redis-server", "--requirepass", "intelli-edu-dev"]
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "intelli-edu-dev", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: intelli-edu-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: intelli-edu-dev
+      RABBITMQ_DEFAULT_VHOST: /Intelli-Edu
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../../../Intelli-Edu-frontend
+      dockerfile: Dockerfile.dev
+    container_name: intelli-edu-frontend
+    environment:
+      VITE_PROXY_TARGET: http://gateway:8890
+      VITE_OPEN_BROWSER: "false"
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../../../Intelli-Edu-frontend:/app
+      - frontend-node-modules:/app/node_modules
+    depends_on:
+      - gateway
+    networks:
+      - intelli-edu-net
+    restart: unless-stopped
+
   gateway:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.gateway
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: gateway
     container_name: intelli-edu-gateway
     ports:
       - "8890:8890"
@@ -13,9 +201,11 @@ services:
     restart: unless-stopped
 
   user:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.user
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: user
     container_name: intelli-edu-user
     ports:
       - "8891:8891"
@@ -24,9 +214,11 @@ services:
     restart: unless-stopped
 
   resource:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.resource
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: resource
     container_name: intelli-edu-resource
     ports:
       - "8892:8892"
@@ -35,9 +227,11 @@ services:
     restart: unless-stopped
 
   course:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.course
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: course
     container_name: intelli-edu-course
     ports:
       - "8893:8893"
@@ -46,9 +240,11 @@ services:
     restart: unless-stopped
 
   exam:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.exam
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: exam
     container_name: intelli-edu-exam
     ports:
       - "8894:8894"
@@ -57,9 +253,11 @@ services:
     restart: unless-stopped
 
   knowledge:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.knowledge
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: knowledge
     container_name: intelli-edu-knowledge
     ports:
       - "8895:8895"
@@ -68,9 +266,11 @@ services:
     restart: unless-stopped
 
   learning:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.learning
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: learning
     container_name: intelli-edu-learning
     ports:
       - "8896:8896"
@@ -79,12 +279,14 @@ services:
     restart: unless-stopped
 
   ai:
+    <<: *backend-service
     build:
       context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.ai
+      dockerfile: .hsunr/docker/Dockerfile.backend
+      target: ai
     container_name: intelli-edu-ai
     ports:
-      - "8897:8897"
+      - "8897:8081"
     networks:
       - intelli-edu-net
     restart: unless-stopped
@@ -92,3 +294,9 @@ services:
 networks:
   intelli-edu-net:
     driver: bridge
+
+volumes:
+  frontend-node-modules:
+  nacos-data:
+  nacos-logs:
+  postgres-data:

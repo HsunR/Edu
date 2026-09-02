@@ -22,6 +22,7 @@
         <module>Intelli-Edu-api</module>
         <module>Intelli-Edu-auth</module>
         <module>Intelli-Edu-Knowledge</module>
+        <module>Intelli-Edu-learning</module>
     </modules>
 
     <properties>

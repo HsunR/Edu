@@ -1,0 +1,68 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: '*'
+            allowed-methods: '*'
+            allowed-headers: '*'
+      routes:
+        - id: Intelli-Edu-Ai
+          uri: lb://Intelli-Edu-Ai
+          predicates:
+            - Path=/api/ai/**
+        - id: Intelli-Edu-user
+          uri: lb://Intelli-Edu-user
+          predicates:
+            - Path=/api/user/**
+        - id: Intelli-Edu-resource
+          uri: lb://Intelli-Edu-resource
+          predicates:
+            - Path=/api/resource/**
+        - id: Intelli-Edu-course
+          uri: lb://Intelli-Edu-course
+          predicates:
+            - Path=/api/course/**
+        - id: Intelli-Edu-exam
+          uri: lb://Intelli-Edu-exam
+          predicates:
+            - Path=/api/exam/**
+        - id: Intelli-Edu-knowledge
+          uri: lb://Intelli-Edu-knowledge
+          predicates:
+            - Path=/api/knowledge/**
+        - id: Intelli-Edu-learning
+          uri: lb://Intelli-Edu-learning
+          predicates:
+            - Path=/api/learning/**
+
+knife4j:
+  gateway:
+    enabled: true
+    strategy: discover
+    discover:
+      enabled: true
+      version: openapi3
+      excluded-services:
+        - Intelli-Edu-gateway
+
+auth:
+  gateway:
+    enabled: true
+    ignore-paths:
+      - /api/user/auth/login
+      - /api/user/auth/register
+      - /api/user/auth/register/send-code
+      - /api/user/auth/login/send-code
+      - /api/user/auth/refresh-token
+      - /v2/api-docs
+      - /v3/api-docs/**
+      - /**/v3/api-docs/**
+      - /**/doc.html
+      - /swagger-resources/**
+      - /swagger-ui.html
+      - /swagger-ui/**
+      - /webjars/**
+      - /favicon.ico
+    skip-origin-paths: []

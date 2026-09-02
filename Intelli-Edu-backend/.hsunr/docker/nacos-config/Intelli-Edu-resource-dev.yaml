@@ -1,0 +1,27 @@
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 1
+    clean-disabled: true
+
+cos:
+  client:
+    host: ${TENCENT_COS_HOST:http://localhost:9000}
+    secretId: ${TENCENT_CLOUD_SECRET_ID:local-disabled}
+    secretKey: ${TENCENT_CLOUD_SECRET_KEY:local-disabled}
+    region: ap-guangzhou
+    bucket: ${TENCENT_COS_BUCKET:local-disabled}
+
+vod:
+  client:
+    secretId: ${TENCENT_CLOUD_SECRET_ID:local-disabled}
+    secretKey: ${TENCENT_CLOUD_SECRET_KEY:local-disabled}
+    region: ap-guangzhou
+    appId: ${TENCENT_VOD_APP_ID:0}
+    vodDomain: vod.ap-guangzhou.myqcloud.com
+
+spnu:
+  jdbc:
+    database: intelli_edu_resource

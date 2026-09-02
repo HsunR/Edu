@@ -70,10 +70,10 @@ export default defineConfig(({ mode, command }) => {
     server: {
       port: 5173,
       host: true,
-      open: true,
+      open: env.VITE_OPEN_BROWSER !== 'false',
       proxy: {
         '/api': {
-          target: 'http://localhost:8890',
+          target: env.VITE_PROXY_TARGET || 'http://localhost:8890',
           changeOrigin: true,
         },
       },

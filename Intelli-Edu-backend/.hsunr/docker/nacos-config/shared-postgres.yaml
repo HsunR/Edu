@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${spnu.jdbc.host:postgres}:${spnu.jdbc.port:5432}/${spnu.jdbc.database}?currentSchema=public&stringtype=unspecified
+    username: ${spnu.jdbc.username:intelli_edu}
+    password: ${spnu.jdbc.password:intelli-edu-dev}

@@ -1,0 +1,15 @@
+spring:
+  rabbitmq:
+    host: ${spnu.mq.host:rabbitmq}
+    port: ${spnu.mq.port:5672}
+    virtual-host: ${spnu.mq.vhost:/Intelli-Edu}
+    username: ${spnu.mq.username:rabbitmq}
+    password: ${spnu.mq.password:intelli-edu-dev}
+    listener:
+      simple:
+        retry:
+          enabled: ${spnu.mq.listener.retry.enable:true}
+          initial-interval: ${spnu.mq.listener.retry.interval:1000ms}
+          multiplier: ${spnu.mq.listener.retry.multiplier:2}
+          max-attempts: ${spnu.mq.listener.retry.max-attempts:3}
+          stateless: ${spnu.mq.listener.retry.stateless:true}
