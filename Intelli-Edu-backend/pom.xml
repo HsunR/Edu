@@ -14,7 +14,6 @@
     <modules>
         <module>Intelli-Edu-common</module>
         <module>Intelli-Edu-gateway</module>
-        <module>Intelli-Edu-Ai</module>
         <module>Intelli-Edu-user</module>
         <module>Intelli-Edu-resource</module>
         <module>Intelli-Edu-course</module>
@@ -35,8 +34,6 @@
         <spring-boot-test.version>3.2.0</spring-boot-test.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
-        <spring-ai.version>1.0.0</spring-ai.version>
-        <spring-ai-alibaba.version>1.0.0.2</spring-ai-alibaba.version>
         <spring-openfeign.version>4.1.1</spring-openfeign.version>
         <dubbo.version>3.3.3</dubbo.version>
         <postgresql.version>42.7.8</postgresql.version>
@@ -96,83 +93,6 @@
                 <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
                 <version>${spring-cloud-alibaba.version}</version>
             </dependency>
-
-            <!-- AI  Begin-->
-
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.alibaba.cloud.ai</groupId>
-                <artifactId>spring-ai-alibaba-bom</artifactId>
-                <version>${spring-ai-alibaba.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-<!--            redis向量数据库Begin-->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-autoconfigure-vector-store-redis</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-starter-vector-store-redis</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-advisors-vector-store</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-<!--这个暂时保留-->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-redis-store</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-<!--            redis向量数据库依赖END-->
-
-
-
-
-<!--ETL环境中的抽取环境依赖Begin-->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-markdown-document-reader</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-            <!--        PDF文档读取器-->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-pdf-document-reader</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-            <!--        TIKA-->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-tika-document-reader</artifactId>
-                <version>${spring-ai.version}</version>
-            </dependency>
-
-<!--ETL环境中的抽取环境依赖End-->
-
-
-            <!-- AI  End-->
-
-
 
             <!-- Spring Boot Starters -->
             <dependency>

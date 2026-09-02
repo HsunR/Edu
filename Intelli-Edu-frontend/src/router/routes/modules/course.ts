@@ -34,12 +34,6 @@ export const courseRoutes: RouteRecordRaw[] = [
         meta: { title: '学习课程详情', hidden: true, roles: [UserType.Student, UserType.Teacher, UserType.Admin] },
         children: [
           {
-            path: 'ai-assistant',
-            component: () => import('@/views/course/LearningCourses/AITeachingAssistant/AITeachingAssistantIndex.vue'),
-            name: 'LearningAIAssistant',
-            meta: { title: 'AI助教', hidden: true, activeMenu: '/course/learning', roles: [UserType.Student, UserType.Teacher, UserType.Admin] },
-          },
-          {
             path: 'chapters',
             component: () => import('@/views/course/LearningCourses/ChapterStudy/ChapterStudyIndex.vue'),
             name: 'LearningChapters',

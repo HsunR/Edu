@@ -1,7 +1,6 @@
 -- Docker bootstrap only: create empty databases. Service-owned schemas are
 -- created and evolved by Flyway migrations packaged with each service.
 CREATE DATABASE intelli_edu;
-CREATE DATABASE intelli_edu_ai;
 CREATE DATABASE intelli_edu_course;
 CREATE DATABASE intelli_edu_exam;
 CREATE DATABASE intelli_edu_knowledge;

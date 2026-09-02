@@ -28,9 +28,6 @@ x-backend-service: &backend-service
     SPRING_RABBITMQ_USERNAME: rabbitmq
     SPRING_RABBITMQ_PASSWORD: intelli-edu-dev
     SPRING_RABBITMQ_VIRTUAL_HOST: /Intelli-Edu
-    DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-local-disabled}
-    DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-local-disabled}
-    SEARCH_API_KEY: ${SEARCH_API_KEY:-local-disabled}
     MAIL_USERNAME: ${MAIL_USERNAME:-local@example.invalid}
     MAIL_PASSWORD: ${MAIL_PASSWORD:-local-disabled}
     TENCENT_CLOUD_SECRET_ID: ${TENCENT_CLOUD_SECRET_ID:-local-disabled}
@@ -274,19 +271,6 @@ services:
     container_name: intelli-edu-learning
     ports:
       - "8896:8896"
-    networks:
-      - intelli-edu-net
-    restart: unless-stopped
-
-  ai:
-    <<: *backend-service
-    build:
-      context: ../..
-      dockerfile: .hsunr/docker/Dockerfile.backend
-      target: ai
-    container_name: intelli-edu-ai
-    ports:
-      - "8897:8081"
     networks:
       - intelli-edu-net
     restart: unless-stopped

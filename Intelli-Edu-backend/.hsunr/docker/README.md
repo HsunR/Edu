@@ -1,6 +1,6 @@
 # Intelli-Edu 本地 Docker 环境
 
-该目录是项目本地化运行的唯一入口。除 COS/VOD、AI、短信和邮件等可选云功能外，前端、全部后端微服务以及基础设施均由 Docker Compose 启动。
+该目录是项目本地化运行的唯一入口。除 COS/VOD、短信和邮件等可选云功能外，前端、全部后端微服务以及基础设施均由 Docker Compose 启动。
 
 ## 环境要求
 
@@ -90,7 +90,6 @@ Nacos 配置使用可审查的文本文件，不再依赖包含远程密钥的�
 | exam | 8894 |
 | knowledge | 8895 |
 | learning | 8896 |
-| AI | 8897（容器内 8081） |
 | PostgreSQL | localhost:5433 |
 | Redis | localhost:6380 |
 | RabbitMQ AMQP | localhost:5672 |
@@ -118,7 +117,6 @@ Nacos 关闭鉴权且只绑定 `127.0.0.1`，仅用于本地开发。
 
 当前可运行服务各自拥有一个独立迁移目录：
 
-- `Intelli-Edu-Ai` → `intelli_edu_ai`
 - `Intelli-Edu-user` → `intelli_edu_user`
 - `Intelli-Edu-resource` → `intelli_edu_resource`
 - `Intelli-Edu-course` → `intelli_edu_course`
@@ -140,7 +138,6 @@ Copy-Item .env.example .env
 
 `.env` 已被 Git 忽略。支持的变量包括：
 
-- DeepSeek、DashScope、搜索 API
 - 腾讯云 COS、VOD、短信
 - SMTP 邮件
 

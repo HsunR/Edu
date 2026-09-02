@@ -8,10 +8,6 @@ spring:
             allowed-methods: '*'
             allowed-headers: '*'
       routes:
-        - id: Intelli-Edu-Ai
-          uri: lb://Intelli-Edu-Ai
-          predicates:
-            - Path=/api/ai/**
         - id: Intelli-Edu-user
           uri: lb://Intelli-Edu-user
           predicates:

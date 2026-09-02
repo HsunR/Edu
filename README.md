@@ -33,4 +33,4 @@ Intelli-Edu/
 
 ## 外部功能
 
-核心服务启动不要求云密钥。对象存储与视频点播、AI 模型、短信和邮件仍是可选远程能力；没有配置时，对应功能不可用，但不影响本地基础设施和核心微服务启动。变量模板见 `Intelli-Edu-backend/.hsunr/docker/.env.example`。
+核心服务启动不要求云密钥。对象存储与视频点播、短信和邮件仍是可选远程能力；没有配置时，对应功能不可用，但不影响本地基础设施和核心微服务启动。变量模板见 `Intelli-Edu-backend/.hsunr/docker/.env.example`。
