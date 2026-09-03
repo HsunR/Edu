@@ -10,37 +10,30 @@ import com.gpnu.api.dto.resource.ResourceSimpleDTO;
 import com.gpnu.common.exception.BusinessException;
 import com.gpnu.common.exception.ErrorCode;
 import com.gpnu.common.exception.ThrowUtils;
-import com.gpnu.common.service.RedisService;
 import com.gpnu.resource.constants.ResourceConstants;
-import com.gpnu.resource.manager.CosManager;
-import com.gpnu.resource.manager.TencentCloudVodManager;
+import com.gpnu.resource.manager.MinioManager;
 import com.gpnu.resource.mapper.RsResourceMapper;
 import com.gpnu.resource.mapper.RsVideoMetaMapper;
 import com.gpnu.resource.model.dto.PresignRequest;
 import com.gpnu.resource.model.dto.ResourceQueryRequest;
 import com.gpnu.resource.model.dto.UploadConfirmRequest;
-import com.gpnu.resource.model.dto.VideoConfirmRequest;
 import com.gpnu.resource.model.entity.RsResource;
 import com.gpnu.resource.model.entity.RsVideoMeta;
 import com.gpnu.resource.model.enums.ResourceType;
 import com.gpnu.resource.model.enums.UploadStatus;
 import com.gpnu.resource.model.vo.*;
 import com.gpnu.resource.service.IRsResourceService;
-import com.qcloud.cos.model.ObjectMetadata;
-import com.tencentcloudapi.vod.v20180717.models.ApplyUploadResponse;
-import com.tencentcloudapi.vod.v20180717.models.CommitUploadResponse;
+import io.minio.StatObjectResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -48,23 +41,16 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
         implements IRsResourceService {
 
     @Resource
-    private CosManager cosManager;
-
-
-    @Resource
-    private TencentCloudVodManager tencentCloudVodManager;
+    private MinioManager minioManager;
 
     @Resource
     private RsVideoMetaMapper videoMetaMapper;
-
-    @Resource
-    private RedisService redisService;
 
     // ==================== 预签名 ====================
 
     @Override
     @Transactional
-    public PresignedUrlVO generateCosPresignedUrl(Long userId, PresignRequest request, ResourceType resourceType) {
+    public PresignedUrlVO generatePresignedUrl(Long userId, PresignRequest request, ResourceType resourceType) {
         // 1. 校验文件格式
         String fileName = request.getFileName();
         String fileFormat = FileUtil.getSuffix(fileName).toLowerCase();
@@ -75,145 +61,62 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不合法");
         }
 
-        // 2. 生成 COS key
+        // 2. 生成 MinIO object key
         String storageKey = buildStorageKey(resourceType, fileFormat);
 
-        // 3. 生成预签名 URL
-        String contentType = ResourceType.getContentType(fileFormat);
-        URL presignedUrl = cosManager.generatePresignedUploadUrl(
-                storageKey, ResourceConstants.COS_PRESIGN_EXPIRY_MINUTES, contentType);
+        // 3. 生成浏览器可用的预签名 URL
+        String presignedUrl = minioManager.generatePresignedUploadUrl(storageKey);
 
         // 4. 预创建资源记录（upload_status=待确认）
         RsResource resource = new RsResource();
         resource.setResourceName(fileName);
         resource.setResourceType(resourceType);
         resource.setFileFormat(fileFormat);
+        resource.setFileSize(request.getFileSize());
         resource.setStorageKey(storageKey);
         resource.setUploaderId(userId);
         resource.setUploadStatus(UploadStatus.PENDING);
         baseMapper.insert(resource);
 
+        if (ResourceType.VIDEO.equals(resourceType)) {
+            RsVideoMeta videoMeta = new RsVideoMeta();
+            videoMeta.setResourceId(resource.getResourceId());
+            videoMetaMapper.insert(videoMeta);
+        }
+
         // 5. 构建返回
-        String accessUrl = cosManager.getFileAccessUrl(storageKey);
+        String accessUrl = minioManager.getFileAccessUrl(storageKey);
 
         PresignedUrlVO vo = new PresignedUrlVO();
         vo.setResourceId(resource.getResourceId());
-        vo.setUploadUrl(presignedUrl.toString());
+        vo.setUploadUrl(presignedUrl);
         vo.setStorageKey(storageKey);
         vo.setAccessUrl(accessUrl);
-        vo.setExpiresIn(ResourceConstants.COS_PRESIGN_EXPIRY_MINUTES * 60L);
+        vo.setExpiresIn(minioManager.getPresignExpirySeconds());
 
-        log.info("Generated COS presigned URL for user={}, resource={}, key={}",
+        log.info("Generated MinIO presigned URL for user={}, resource={}, key={}",
                 userId, resource.getResourceId(), storageKey);
-        return vo;
-    }
-
-    @Override
-    @Transactional
-    public VodPresignedUrlVO generateVodPresignedUrl(Long userId, PresignRequest request) {
-        // 1. 校验文件格式
-        String fileName = request.getFileName();
-        String fileFormat = FileUtil.getSuffix(fileName).toLowerCase();
-        validateFileFormat(fileFormat, ResourceType.VIDEO);
-
-        long maxSize = ResourceConstants.getMaxSize(ResourceType.VIDEO.getCode());
-        if (request.getFileSize() == null || request.getFileSize() <= 0 || request.getFileSize() > maxSize) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不合法");
-        }
-
-        // 2. 调腾讯云申请上传
-        ApplyUploadResponse applyResponse = tencentCloudVodManager.applyVodUpload(
-                fileName, fileFormat, null, null, null, null, null);
-
-        // 3. 预创建资源记录
-        RsResource resource = new RsResource();
-        resource.setResourceName(fileName);
-        resource.setResourceType(ResourceType.VIDEO);
-        resource.setFileFormat(fileFormat);
-        resource.setUploaderId(userId);
-        resource.setUploadStatus(UploadStatus.PENDING);
-        baseMapper.insert(resource);
-
-        // 4. 预创建视频元数据记录
-        RsVideoMeta videoMeta = new RsVideoMeta();
-        videoMeta.setResourceId(resource.getResourceId());
-        videoMetaMapper.insert(videoMeta);
-
-        // 5. sessionKey 存 Redis
-        String redisKey = ResourceConstants.VOD_SESSION_PREFIX + resource.getResourceId();
-        redisService.setCacheObject(redisKey, applyResponse.getVodSessionKey(),
-                ResourceConstants.VOD_SESSION_EXPIRE_SECONDS, TimeUnit.SECONDS);
-
-        // 6. 构建返回
-        VodPresignedUrlVO vo = new VodPresignedUrlVO();
-        vo.setResourceId(resource.getResourceId());
-        vo.setVodSessionKey(applyResponse.getVodSessionKey());
-        // MediaStoragePath 是上传地址
-        if (applyResponse.getMediaStoragePath() != null) {
-            vo.setMediaUploadUrls(List.of(applyResponse.getMediaStoragePath()));
-        }
-        if (applyResponse.getCoverStoragePath() != null) {
-            vo.setCoverUploadUrl(applyResponse.getCoverStoragePath());
-        }
-        vo.setExpiresIn(ResourceConstants.VOD_SESSION_EXPIRE_SECONDS);
-
-        log.info("Generated VOD presigned URL for user={}, resource={}", userId, resource.getResourceId());
         return vo;
     }
 
     // ==================== 确认上传 ====================
 
     @Override
-    @Transactional
-    public ResourceVO confirmCosUpload(Long userId,UploadConfirmRequest request) {
-        // 1. 查询资源记录
-        RsResource resource = getResourceOrThrow(request.getResourceId());
-        if (!UploadStatus.PENDING.equals(resource.getUploadStatus())) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "该资源不处于待确认状态");
-        }
-
-        if (!resource.getUploaderId().equals(userId)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权确认他人的资源");
-        }
-
-        // 2. 从 COS 查实际文件大小并校验
-        ObjectMetadata metadata;
-        try {
-            metadata = cosManager.getObjectMetadata(resource.getStorageKey());
-        } catch (Exception e) {
-            log.error("Failed to get COS object metadata, key={}", resource.getStorageKey(), e);
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "文件未上传成功，请重试");
-        }
-
-        long actualSize = metadata.getContentLength();
-        long maxSize = ResourceConstants.getMaxSize(resource.getResourceType().getCode());
-        if (actualSize > maxSize) {
-            // 超限：删除 COS 文件，标记失败
-            cosManager.deleteObject(resource.getStorageKey());
-            resource.setUploadStatus(UploadStatus.FAILED);
-            baseMapper.updateById(resource);
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,
-                    "文件大小超过限制，最大允许 " + (maxSize / 1024 / 1024) + "MB");
-        }
-
-        // 3. 更新资源记录（带乐观锁，防止并发重复确认）
-        resource.setFileSize(actualSize);
-        resource.setAccessUrl(cosManager.getFileAccessUrl(resource.getStorageKey()));
-        resource.setUploadStatus(UploadStatus.SUCCESS);
-        int affected = baseMapper.updateById(resource);
-        if (affected == 0) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "资源状态已变更，请勿重复确认");
-        }
-
-        log.info("COS upload confirmed, resource={}, size={}", resource.getResourceId(), actualSize);
+    public ResourceVO confirmUpload(Long userId, UploadConfirmRequest request) {
+        RsResource resource = confirmUploadInternal(userId, request.getResourceId(), false);
         return buildResourceVO(resource);
     }
 
     @Override
-    @Transactional
-    public ResourceDetailVO confirmVodUpload(Long userId,VideoConfirmRequest request) {
+    public ResourceDetailVO confirmVideoUpload(Long userId, UploadConfirmRequest request) {
+        RsResource resource = confirmUploadInternal(userId, request.getResourceId(), true);
+        RsVideoMeta videoMeta = videoMetaMapper.selectById(resource.getResourceId());
+        return buildResourceDetailVO(resource, videoMeta);
+    }
+
+    private RsResource confirmUploadInternal(Long userId, Long resourceId, boolean videoExpected) {
         // 1. 查询资源记录
-        RsResource resource = getResourceOrThrow(request.getResourceId());
+        RsResource resource = getResourceOrThrow(resourceId);
         if (!UploadStatus.PENDING.equals(resource.getUploadStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "该资源不处于待确认状态");
         }
@@ -222,37 +125,34 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权确认他人的资源");
         }
 
-        // 2. 从 Redis 获取 sessionKey
-        String redisKey = ResourceConstants.VOD_SESSION_PREFIX + request.getResourceId();
-        String vodSessionKey = redisService.getCacheObject(redisKey);
-        if (vodSessionKey == null) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "上传会话已过期，请重新上传");
+        if (videoExpected != ResourceType.VIDEO.equals(resource.getResourceType())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "资源类型与确认接口不匹配");
         }
 
-        // 3. 调腾讯云确认上传
-        CommitUploadResponse commitResponse = tencentCloudVodManager.commitVodUpload(vodSessionKey);
+        // 2. 从 MinIO 查实际文件大小并校验
+        StatObjectResponse metadata = minioManager.getObjectMetadata(resource.getStorageKey());
 
-        // 4. 更新资源记录（带乐观锁，防止并发重复确认）
-        resource.setAccessUrl(commitResponse.getMediaUrl());
-        resource.setStorageKey(commitResponse.getFileId());
+        long actualSize = metadata.size();
+        long maxSize = ResourceConstants.getMaxSize(resource.getResourceType().getCode());
+        if (actualSize <= 0 || actualSize > maxSize || !Long.valueOf(actualSize).equals(resource.getFileSize())) {
+            minioManager.deleteObject(resource.getStorageKey());
+            resource.setUploadStatus(UploadStatus.FAILED);
+            baseMapper.updateById(resource);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,
+                    "上传文件大小与申请信息不一致或超过限制");
+        }
+
+        // 3. 更新资源记录（带乐观锁，防止并发重复确认）
+        resource.setFileSize(actualSize);
+        resource.setAccessUrl(minioManager.getFileAccessUrl(resource.getStorageKey()));
         resource.setUploadStatus(UploadStatus.SUCCESS);
         int affected = baseMapper.updateById(resource);
         if (affected == 0) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "资源状态已变更，请勿重复确认");
         }
 
-        // 5. 更新视频元数据
-        RsVideoMeta videoMeta = videoMetaMapper.selectById(request.getResourceId());
-        if (videoMeta != null) {
-            videoMeta.setVodFileId(commitResponse.getFileId());
-            videoMetaMapper.updateById(videoMeta);
-        }
-
-        // 6. 用完删除
-        redisService.deleteObject(redisKey);
-
-        log.info("VOD upload confirmed, resource={}, fileId={}", resource.getResourceId(), commitResponse.getFileId());
-        return buildResourceDetailVO(resource, videoMeta);
+        log.info("MinIO upload confirmed, resource={}, size={}", resource.getResourceId(), actualSize);
+        return resource;
     }
 
     // ==================== 查询 ====================
@@ -318,19 +218,13 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权删除他人的资源");
         }
 
-        // 1. 删除云存储文件
+        // 1. 删除对象存储文件
         if (UploadStatus.SUCCESS.equals(resource.getUploadStatus())
                 && resource.getStorageKey() != null) {
             try {
-                if (ResourceType.VIDEO.getCode() == resource.getResourceType().getCode()) {
-                    // 视频：调 VOD 删除
-                    tencentCloudVodManager.deleteVodMedia(resource.getStorageKey());
-                } else {
-                    // 图片/文档：调 COS 删除
-                    cosManager.deleteObject(resource.getStorageKey());
-                }
+                minioManager.deleteObject(resource.getStorageKey());
             } catch (Exception e) {
-                log.warn("Failed to delete cloud storage, resource={}, key={}, will proceed with db deletion",
+                log.warn("Failed to delete MinIO object, resource={}, key={}, will proceed with db deletion",
                         resourceId, resource.getStorageKey(), e);
 
             }
@@ -343,9 +237,6 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
         if (ResourceType.VIDEO.getCode() == resource.getResourceType().getCode()) {
             videoMetaMapper.deleteById(resourceId);
         }
-
-        // 4. 清理可能残留的 Redis session key
-        redisService.deleteObject(ResourceConstants.VOD_SESSION_PREFIX + resourceId);
 
         log.info("Resource deleted, userId={}, resourceId={}", userId, resourceId);
     }
@@ -481,7 +372,7 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
     }
 
     /**
-     * 生成 COS 存储 key
+     * 生成 MinIO 对象键
      * 格式：{类型目录}/{日期}_{16位随机串}.{后缀}
      * 示例：images/20260417_a3f8b2c1d9e4f7g6.png
      */
@@ -525,10 +416,10 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
     private void cleanSingleExpiredUploadResource(RsResource resource) {
         Long resourceId = resource.getResourceId();
 
+        cleanExpiredMinioResource(resource);
+
         if (ResourceType.VIDEO.equals(resource.getResourceType())) {
-            cleanExpiredVodResource(resource);
-        } else {
-            cleanExpiredCosResource(resource);
+            videoMetaMapper.deleteById(resourceId);
         }
 
 
@@ -541,72 +432,23 @@ public class ResourceServiceImpl extends ServiceImpl<RsResourceMapper, RsResourc
                 resourceId, resource.getResourceType());
     }
 
-    private void cleanExpiredCosResource(RsResource resource) {
+    private void cleanExpiredMinioResource(RsResource resource) {
         String storageKey = resource.getStorageKey();
 
         if (storageKey == null || storageKey.isBlank()) {
-            log.info("Expired COS resource has empty storageKey, skip COS delete, resourceId={}",
+            log.info("Expired MinIO resource has empty storageKey, skip object delete, resourceId={}",
                     resource.getResourceId());
             return;
         }
 
         try {
-            cosManager.deleteObject(storageKey);
-            log.info("Deleted expired COS object, resourceId={}, storageKey={}",
+            minioManager.deleteObject(storageKey);
+            log.info("Deleted expired MinIO object, resourceId={}, storageKey={}",
                     resource.getResourceId(), storageKey);
         } catch (Exception e) {
 
-            log.warn("Failed to delete expired COS object, resourceId={}, storageKey={}",
+            log.warn("Failed to delete expired MinIO object, resourceId={}, storageKey={}",
                     resource.getResourceId(), storageKey, e);
-        }
-    }
-
-
-    private void cleanExpiredVodResource(RsResource resource) {
-        Long resourceId = resource.getResourceId();
-
-        // 1. 删除 Redis 中残留的 VOD 上传会话
-        String redisKey = ResourceConstants.VOD_SESSION_PREFIX + resourceId;
-        try {
-            redisService.deleteObject(redisKey);
-            log.info("Deleted expired VOD session key, resourceId={}, redisKey={}", resourceId, redisKey);
-        } catch (Exception e) {
-            log.warn("Failed to delete expired VOD session key, resourceId={}, redisKey={}",
-                    resourceId, redisKey, e);
-        }
-
-        // 2. 查询视频元数据
-        RsVideoMeta videoMeta = videoMetaMapper.selectById(resourceId);
-
-        /*
-         * 3. 删除 VOD 媒资。
-
-         */
-        String vodFileId = null;
-        if (videoMeta != null && videoMeta.getVodFileId() != null && !videoMeta.getVodFileId().isBlank()) {
-            vodFileId = videoMeta.getVodFileId();
-        } else if (resource.getStorageKey() != null && !resource.getStorageKey().isBlank()) {
-            vodFileId = resource.getStorageKey();
-        }
-
-        if (vodFileId != null && !vodFileId.isBlank()) {
-            try {
-                tencentCloudVodManager.deleteVodMedia(vodFileId);
-                log.info("Deleted expired VOD media, resourceId={}, vodFileId={}", resourceId, vodFileId);
-            } catch (Exception e) {
-                log.warn("Failed to delete expired VOD media, resourceId={}, vodFileId={}",
-                        resourceId, vodFileId, e);
-            }
-        } else {
-            log.info("Expired VOD resource has no vodFileId, skip VOD media delete, resourceId={}", resourceId);
-        }
-
-        // 4. 删除视频元数据
-        try {
-            int deleted = videoMetaMapper.deleteById(resourceId);
-            log.info("Deleted expired video meta, resourceId={}, deleted={}", resourceId, deleted);
-        } catch (Exception e) {
-            log.warn("Failed to delete expired video meta, resourceId={}", resourceId, e);
         }
     }
 

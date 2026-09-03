@@ -5,14 +5,12 @@ import com.gpnu.api.dto.resource.ResourceSimpleDTO;
 import com.gpnu.resource.model.dto.PresignRequest;
 import com.gpnu.resource.model.dto.ResourceQueryRequest;
 import com.gpnu.resource.model.dto.UploadConfirmRequest;
-import com.gpnu.resource.model.dto.VideoConfirmRequest;
 import com.gpnu.resource.model.entity.RsResource;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.gpnu.resource.model.enums.ResourceType;
 import com.gpnu.resource.model.vo.PresignedUrlVO;
 import com.gpnu.resource.model.vo.ResourceDetailVO;
 import com.gpnu.resource.model.vo.ResourceVO;
-import com.gpnu.resource.model.vo.VodPresignedUrlVO;
 
 import java.util.List;
 
@@ -25,13 +23,11 @@ import java.util.List;
  */
 public interface IRsResourceService extends IService<RsResource> {
 
-    public PresignedUrlVO generateCosPresignedUrl(Long userId, PresignRequest request, ResourceType resourceType);
+    PresignedUrlVO generatePresignedUrl(Long userId, PresignRequest request, ResourceType resourceType);
 
-    public VodPresignedUrlVO generateVodPresignedUrl(Long userId, PresignRequest request);
+    ResourceVO confirmUpload(Long userId, UploadConfirmRequest request);
 
-    public ResourceVO confirmCosUpload(Long userId,UploadConfirmRequest request);
-
-    public ResourceDetailVO confirmVodUpload(Long userId,VideoConfirmRequest request);
+    ResourceDetailVO confirmVideoUpload(Long userId, UploadConfirmRequest request);
 
     public ResourceDetailVO getResourceDetail(Long resourceId);
 

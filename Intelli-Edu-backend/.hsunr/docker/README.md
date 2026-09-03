@@ -1,6 +1,6 @@
 # Intelli-Edu 本地 Docker 环境
 
-该目录是项目本地化运行的唯一入口。除 COS/VOD、短信和邮件等可选云功能外，前端、全部后端微服务以及基础设施均由 Docker Compose 启动。
+该目录是项目本地化运行的唯一入口。除短信和邮件等可选云功能外，前端、全部后端微服务、MinIO 对象存储以及其他基础设施均由 Docker Compose 启动。
 
 ## 环境要求
 
@@ -8,7 +8,7 @@
 - 建议为 Docker 分配至少 8 GB 内存
 - 首次构建需要访问 Docker Hub 和 Maven Central
 
-宿主机不需要安装 Java、Maven、Node.js、PostgreSQL、Redis、RabbitMQ 或 Nacos。
+宿主机不需要安装 Java、Maven、Node.js、PostgreSQL、Redis、RabbitMQ、MinIO 或 Nacos。
 
 ## 一键启动
 
@@ -46,7 +46,7 @@ docker compose down --volumes
 docker compose up -d --build
 ```
 
-`down --volumes` 会删除本项目的本地 PostgreSQL、Nacos 和前端依赖卷，只应在确认不需要这些本地数据时使用。
+`down --volumes` 会删除本项目的本地 PostgreSQL、Nacos、MinIO 文件和前端依赖卷，只应在确认不需要这些本地数据时使用。
 
 ## 自动初始化
 
@@ -56,9 +56,10 @@ docker compose up -d --build
 2. `nacos-init` 创建 `Intelli-Edu-backend` 命名空间。
 3. `nacos-config/*.yaml` 逐项发布到 `DEFAULT_GROUP`。
 4. PostgreSQL 创建 10 个空业务数据库，并在 RAG 数据库启用 pgvector 扩展。
-5. Redis 和 RabbitMQ 创建本地开发实例。
-6. 多阶段 `Dockerfile.backend` 从源码统一编译全部后端模块。
-7. 各业务服务启动时由 Flyway 执行自身的版本化数据库迁移，再注册到本地 Nacos；前端将 `/api` 代理到网关。
+5. Redis、RabbitMQ 和 MinIO 创建本地开发实例。
+6. resource 服务自动创建 `intelli-edu-resources` 存储桶；MinIO 服务端配置浏览器跨域访问。
+7. 多阶段 `Dockerfile.backend` 从源码统一编译全部后端模块。
+8. 各业务服务启动时由 Flyway 执行自身的版本化数据库迁移，再注册到本地 Nacos；前端将 `/api` 代理到网关。
 
 Nacos 配置使用可审查的文本文件，不再依赖包含远程密钥的二进制导出包。每次重建 `nacos-init` 容器时会幂等覆盖同名配置。
 
@@ -94,12 +95,15 @@ Nacos 配置使用可审查的文本文件，不再依赖包含远程密钥的�
 | Redis | localhost:6380 |
 | RabbitMQ AMQP | localhost:5672 |
 | RabbitMQ 管理端 | <http://localhost:15672> |
+| MinIO S3 API | <http://localhost:9000> |
+| MinIO 控制台 | <http://localhost:9001> |
 
 本地开发账号：
 
 - PostgreSQL：`intelli_edu` / `intelli-edu-dev`
 - Redis 密码：`intelli-edu-dev`
 - RabbitMQ：`rabbitmq` / `intelli-edu-dev`
+- MinIO：`intelli-edu` / `intelli-edu-dev`
 
 Nacos 关闭鉴权且只绑定 `127.0.0.1`，仅用于本地开发。
 
@@ -128,7 +132,7 @@ Nacos 关闭鉴权且只绑定 `127.0.0.1`，仅用于本地开发。
 
 Flyway 会在服务启动时校验并执行未应用迁移。为兼容已有本地数据卷，非空且尚无 Flyway 记录的数据库会被标记为基线版本 `1`，不会重复执行初始建表；新建空库则自动执行 `V1`。应用侧禁用了 `clean`，重建数据库只能通过明确执行 `docker compose down --volumes` 完成。
 
-## 可选远程能力
+## 对象存储与可选远程能力
 
 复制变量模板后可按需填写：
 
@@ -136,12 +140,17 @@ Flyway 会在服务启动时校验并执行未应用迁移。为兼容已有本�
 Copy-Item .env.example .env
 ```
 
-`.env` 已被 Git 忽略。支持的变量包括：
+`.env` 已被 Git 忽略。resource 模块默认使用本地 MinIO，图片、文档和视频均通过预签名 URL 由浏览器直传。上传完成后，后端会查询 MinIO 对象并校验大小，再把资源标记为成功。
 
-- 腾讯云 COS、VOD、短信
+当前视频能力是“原文件存储与播放”，不包含转码、切片、截图或自适应码率；如生产环境需要这些能力，应另接媒体处理服务。
+
+支持的变量包括：
+
+- MinIO 地址、账号、桶名与跨域来源
+- 腾讯云短信
 - SMTP 邮件
 
-保留 `local-disabled` 默认值时，核心服务仍应启动，但调用相应云接口会失败。当前项目尚未实现本地对象存储与视频转码替代。
+短信和邮件保留 `local-disabled` 默认值时，核心服务仍应启动，但调用相应远程接口会失败。MinIO 默认桶采用公开只读策略，以兼容当前头像、课程封面和资源直链；生产环境应设置 `MINIO_PUBLIC_READ=false` 并增加受控下载接口或短期签名 URL。
 
 ## 验证与排错
 
@@ -175,4 +184,5 @@ docker compose config | Select-String 'nacos:8848'
 - PostgreSQL 初始化失败：检查 `postgres` 日志；修正后使用 `docker compose down --volumes` 重新初始化。
 - 后端构建失败：确认 Docker 可以访问 Maven Central，并查看 BuildKit 构建输出。
 - 前端依赖失败：确认 Docker 可以访问 npm registry。
-- 云功能报鉴权错误：在 `.env` 中填写对应密钥，或暂不调用该功能。
+- MinIO 上传失败：确认 `minio` 健康、浏览器访问的地址与 `MINIO_PUBLIC_ENDPOINT` 一致，并检查 `MINIO_ALLOWED_ORIGIN`。
+- 短信或邮件报鉴权错误：在 `.env` 中填写对应密钥，或暂不调用该功能。

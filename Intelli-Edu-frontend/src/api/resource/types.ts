@@ -46,19 +46,6 @@ export interface PresignedUrlVO {
   expiresIn: number
 }
 
-export interface VodPresignedUrlVO {
-  resourceId: string
-  vodSessionKey: string
-  mediaUploadUrls: string[]
-  coverUploadUrl: string
-  expiresIn: number
-}
-
 export interface UploadConfirmRequest {
   resourceId: string
-}
-
-export interface VideoConfirmRequest {
-  resourceId: string
-  vodSessionKey: string
 }

@@ -12,13 +12,13 @@ public class PresignedUrlVO implements Serializable {
     @Schema(description = "预创建的资源记录 ID",example = "12345")
     private Long resourceId;
 
-    @Schema(description = "预签名上传 URL",example = "https://bucket-name.cos.region.myqcloud.com/object-key?signature=xxx")
+    @Schema(description = "预签名上传 URL", example = "http://localhost:9000/intelli-edu-resources/object-key?signature=xxx")
     private String uploadUrl;
 
-    @Schema(description = "COS 存储键（前端上传时需要）",example = "object-key")
+    @Schema(description = "对象存储键", example = "video/2026/09/03/object-key.mp4")
     private String storageKey;
 
-    @Schema(description = "上传完成后的访问地址",example = "https://bucket-name.cos.region.myqcloud.com/object-key")
+    @Schema(description = "上传完成后的访问地址", example = "http://localhost:9000/intelli-edu-resources/object-key")
     private String accessUrl;
 
     @Schema(description = "预签名 URL 的过期时间（秒）",example = "3600")

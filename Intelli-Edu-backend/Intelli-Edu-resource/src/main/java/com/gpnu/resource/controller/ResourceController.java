@@ -5,12 +5,10 @@ import com.gpnu.auth.resource.context.UserContextHolder;
 import com.gpnu.resource.model.dto.PresignRequest;
 import com.gpnu.resource.model.dto.ResourceQueryRequest;
 import com.gpnu.resource.model.dto.UploadConfirmRequest;
-import com.gpnu.resource.model.dto.VideoConfirmRequest;
 import com.gpnu.resource.model.enums.ResourceType;
 import com.gpnu.resource.model.vo.PresignedUrlVO;
 import com.gpnu.resource.model.vo.ResourceDetailVO;
 import com.gpnu.resource.model.vo.ResourceVO;
-import com.gpnu.resource.model.vo.VodPresignedUrlVO;
 import com.gpnu.resource.service.IRsResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,21 +31,21 @@ public class ResourceController {
     @Operation(summary = "生成图片资源的预签名URL", description = "根据请求参数生成用于上传图片资源的预签名URL")
     public PresignedUrlVO presignImage(@RequestBody @Validated PresignRequest request) {
         Long userId = UserContextHolder.getUserId();
-        return resourceService.generateCosPresignedUrl(userId, request, ResourceType.IMAGE);
+        return resourceService.generatePresignedUrl(userId, request, ResourceType.IMAGE);
     }
 
     @PostMapping("/presign/document")
     @Operation(summary = "生成文档资源的预签名URL", description = "根据请求参数生成用于上传文档资源的预签名URL")
     public PresignedUrlVO presignDocument(@RequestBody @Validated PresignRequest request) {
         Long userId = UserContextHolder.getUserId();
-        return resourceService.generateCosPresignedUrl(userId, request, ResourceType.DOCUMENT);
+        return resourceService.generatePresignedUrl(userId, request, ResourceType.DOCUMENT);
     }
 
     @PostMapping("/presign/video")
     @Operation(summary = "生成视频资源的预签名URL", description = "根据请求参数生成用于上传视频资源的预签名URL")
-    public VodPresignedUrlVO presignVideo(@RequestBody @Validated PresignRequest request) {
+    public PresignedUrlVO presignVideo(@RequestBody @Validated PresignRequest request) {
         Long userId = UserContextHolder.getUserId();
-        return resourceService.generateVodPresignedUrl(userId, request);
+        return resourceService.generatePresignedUrl(userId, request, ResourceType.VIDEO);
     }
 
     // --- 确认上传 ---
@@ -56,14 +54,14 @@ public class ResourceController {
     @Operation(summary = "确认资源上传完成", description = "客户端上传完成后调用此接口，确认资源已成功上传并持久化相关信息")
     public ResourceVO confirmUpload(@RequestBody @Validated UploadConfirmRequest request) {
         Long userId = UserContextHolder.getUserId();
-        return resourceService.confirmCosUpload(userId,request);
+        return resourceService.confirmUpload(userId, request);
     }
 
     @PostMapping("/confirm/video")
     @Operation(summary = "确认视频资源上传完成", description = "客户端上传完成后调用此接口，确认视频资源已成功上传并持久化相关信息")
-    public ResourceDetailVO confirmVideoUpload(@RequestBody @Validated VideoConfirmRequest request) {
+    public ResourceDetailVO confirmVideoUpload(@RequestBody @Validated UploadConfirmRequest request) {
         Long userId = UserContextHolder.getUserId();
-        return resourceService.confirmVodUpload(userId,request);
+        return resourceService.confirmVideoUpload(userId, request);
     }
 
     // --- 查询/删除 ---

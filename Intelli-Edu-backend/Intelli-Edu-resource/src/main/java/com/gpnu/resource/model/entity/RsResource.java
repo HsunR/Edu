@@ -52,7 +52,7 @@ public class RsResource implements Serializable {
     private Long fileSize;
 
     /**
-     * COS key 或 VOD FileId
+     * MinIO 对象键
      */
     private String storageKey;
 

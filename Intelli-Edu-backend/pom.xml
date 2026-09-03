@@ -48,8 +48,7 @@
 
         <kaptcha.version>2.3.2</kaptcha.version>
         <tencentcloud.version>3.1.270</tencentcloud.version>
-        <vod.version>2.1.5</vod.version>
-        <cos.version>5.6.227</cos.version>
+        <minio.version>9.0.3</minio.version>
         <jakarta.validation.version>3.0.2</jakarta.validation.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
         <lombok.version>1.18.36</lombok.version>
@@ -265,17 +264,11 @@
                 <version>${tencentcloud.version}</version>
             </dependency>
 
-            <!--        腾讯云对象存储-->
+            <!--        MinIO 对象存储-->
             <dependency>
-                <groupId>com.qcloud</groupId>
-                <artifactId>cos_api</artifactId>
-                <version>${cos.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.qcloud</groupId>
-                <artifactId>vod_api</artifactId>
-                <version>${vod.version}</version>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
             </dependency>
 
             <dependency>

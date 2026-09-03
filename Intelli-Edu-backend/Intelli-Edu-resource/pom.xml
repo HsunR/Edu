@@ -61,27 +61,10 @@
         <!--        SpringCloud -->
 
 
-        <!--        腾讯云对象存储-->
+        <!--        MinIO 对象存储-->
         <dependency>
-            <groupId>com.qcloud</groupId>
-            <artifactId>cos_api</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-reload4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--        腾讯VOD视频点播-->
-        <dependency>
-            <groupId>com.qcloud</groupId>
-            <artifactId>vod_api</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-reload4j</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
         </dependency>
 
 

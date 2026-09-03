@@ -51,7 +51,7 @@ public class RsVideoMeta implements Serializable {
     private Integer transcodeStatus;
 
     /**
-     * 腾讯云 VOD FileId
+     * 旧版腾讯云 VOD FileId，MinIO 直传模式下为空
      */
     private String vodFileId;
 

@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { presignDocument, presignImage, presignVideo, confirmUpload, confirmVideoUpload } from '@/api/resource/resource'
-import type { ResourceVO, PresignedUrlVO, VodPresignedUrlVO } from '@/api/resource/types'
+import type { ResourceVO, PresignedUrlVO } from '@/api/resource/types'
 import { ResourceType } from '@/types/enums'
 import axios from 'axios'
 
@@ -57,7 +57,7 @@ async function handleUpload(options: any) {
   fileName.value = file.name
 
   try {
-    let presignResult: PresignedUrlVO | VodPresignedUrlVO
+    let presignResult: PresignedUrlVO
 
     if (props.resourceType === ResourceType.Video) {
       presignResult = await presignVideo({ fileName: file.name, fileSize: file.size })
@@ -69,40 +69,21 @@ async function handleUpload(options: any) {
 
     progress.value = 40
 
-    if (props.resourceType === ResourceType.Video) {
-      const vodResult = presignResult as VodPresignedUrlVO
-      if (vodResult.mediaUploadUrls?.length > 0) {
-        await axios.put(vodResult.mediaUploadUrls[0], file, {
-          headers: { 'Content-Type': file.type },
-          onUploadProgress: (e) => {
-            if (e.total) {
-              progress.value = 40 + Math.floor((e.loaded / e.total) * 40)
-            }
-          }
-        })
-      }
-      progress.value = 85
-      const result = await confirmVideoUpload({
-        resourceId: vodResult.resourceId,
-        vodSessionKey: vodResult.vodSessionKey
-      })
-      progress.value = 100
-      emit('success', result)
-    } else {
-      const docResult = presignResult as PresignedUrlVO
-      await axios.put(docResult.uploadUrl, file, {
-        headers: { 'Content-Type': file.type },
-        onUploadProgress: (e) => {
-          if (e.total) {
-            progress.value = 40 + Math.floor((e.loaded / e.total) * 40)
-          }
+    await axios.put(presignResult.uploadUrl, file, {
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      onUploadProgress: (e) => {
+        if (e.total) {
+          progress.value = 40 + Math.floor((e.loaded / e.total) * 40)
         }
-      })
-      progress.value = 85
-      const result = await confirmUpload({ resourceId: docResult.resourceId })
-      progress.value = 100
-      emit('success', result)
-    }
+      }
+    })
+
+    progress.value = 85
+    const result = props.resourceType === ResourceType.Video
+      ? await confirmVideoUpload({ resourceId: presignResult.resourceId })
+      : await confirmUpload({ resourceId: presignResult.resourceId })
+    progress.value = 100
+    emit('success', result)
   } catch (error) {
     const msg = error instanceof Error ? error.message : '上传失败'
     ElMessage.error(msg)

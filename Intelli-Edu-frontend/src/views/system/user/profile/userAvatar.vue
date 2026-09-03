@@ -128,8 +128,9 @@ function beforeUpload(file: File) {
 async function uploadImg() {
   cropper.value?.getCropBlob(async (data: Blob) => {
     try {
+      const uploadFileName = options.filename.replace(/\.[^.]+$/, '') + '.png'
       const presignResult = await presignImage({
-        fileName: options.filename,
+        fileName: uploadFileName,
         fileSize: data.size
       })
 
