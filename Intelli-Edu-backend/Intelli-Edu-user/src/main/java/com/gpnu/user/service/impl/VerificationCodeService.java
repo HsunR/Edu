@@ -47,7 +47,7 @@ public class VerificationCodeService {
     public void sendRegisterVerificationCode(@Validated({Default.class, SendRegisterCodeRequest.MobileGroup.class, SendRegisterCodeRequest.EmailGroup.class}) SendRegisterCodeRequest request) {
         String keyPrefix;
         String account;
-        Integer type =request.getRegisterType().getCode();
+        Integer type = request.getRegisterType().getCode();
         if (type == RegisterType.MOBILE_CODE.getCode()) { // 手机注册
             account = request.getMobile();
             keyPrefix = CaptchaConstants.REGISTER_CODE_PREFIX_MOBILE;

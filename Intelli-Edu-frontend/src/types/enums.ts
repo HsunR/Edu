@@ -13,9 +13,9 @@ export const LoginTypeLabels: Record<LoginType, string> = {
 }
 
 export enum RegisterType {
-  Mobile = '手机验证码注册',
-  Email = '邮箱验证码注册',
-  Wechat = '微信OpenID注册'
+  Mobile = 1,
+  Email = 2,
+  Wechat = 3
 }
 
 export const RegisterTypeLabels: Record<RegisterType, string> = {
