@@ -46,7 +46,7 @@ docker compose down --volumes
 docker compose up -d --build
 ```
 
-`down --volumes` 会删除本项目的本地 PostgreSQL、Nacos、MinIO 文件和前端依赖卷，只应在确认不需要这些本地数据时使用。
+`down --volumes` 会删除本项目的本地 PostgreSQL、Nacos 和前端依赖卷；MinIO 文件保存在本目录的 `data/minio/`，不会随该命令删除，需手动清理。
 
 ## 自动初始化
 
@@ -71,6 +71,7 @@ Nacos 配置使用可审查的文本文件，不再依赖包含远程密钥的�
 ├── .dockerignore            # 后端镜像构建上下文排除规则
 ├── docker-compose.yml       # 唯一服务编排文件
 ├── Dockerfile.backend       # 全部 Java 微服务的统一多阶段构建
+├── data/minio/              # MinIO 上传文件（本地运行时生成，已被 Git 忽略）
 ├── nacos-config/            # 可版本管理的本地 Nacos 配置
 ├── postgres-init/           # PostgreSQL 空库与扩展初始化脚本
 └── README.md
@@ -142,6 +143,8 @@ Copy-Item .env.example .env
 
 `.env` 已被 Git 忽略。resource 模块默认使用本地 MinIO，图片、文档和视频均通过预签名 URL 由浏览器直传。上传完成后，后端会查询 MinIO 对象并校验大小，再把资源标记为成功。
 
+MinIO 的对象文件直接保存在 `.hsunr/docker/data/minio/`，方便本地查看、备份或迁移；该目录已被 Git 忽略，上传的用户文件不会进入仓库。已有 Docker 数据卷会在首次切换时迁移到此目录。
+
 当前视频能力是“原文件存储与播放”，不包含转码、切片、截图或自适应码率；如生产环境需要这些能力，应另接媒体处理服务。
 
 支持的变量包括：
@@ -150,7 +153,7 @@ Copy-Item .env.example .env
 - 腾讯云短信
 - SMTP 邮件
 
-短信和邮件保留 `local-disabled` 默认值时，核心服务仍应启动，但调用相应远程接口会失败。MinIO 默认桶采用公开只读策略，以兼容当前头像、课程封面和资源直链；生产环境应设置 `MINIO_PUBLIC_READ=false` 并增加受控下载接口或短期签名 URL。
+短信和邮件保留 `local-disabled` 默认值时，核心服务仍应启动，但调用相应远程接口会失败。MinIO 默认桶采用公开只读策略，以兼容当前头像、课程封面和资源直链；若生产环境改为私有桶，需同时实现受控下载接口或短期 GET 签名 URL。
 
 ## 验证与排错
 

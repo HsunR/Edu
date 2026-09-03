@@ -2,12 +2,12 @@ x-backend-service: &backend-service
   environment:
     SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
     SPRING_CLOUD_NACOS_CONFIG_NAMESPACE: Intelli-Edu-backend
-    SPRING_CLOUD_NACOS_CONFIG_USERNAME: nacos
-    SPRING_CLOUD_NACOS_CONFIG_PASSWORD: nacos
+    SPRING_CLOUD_NACOS_CONFIG_USERNAME: ""
+    SPRING_CLOUD_NACOS_CONFIG_PASSWORD: ""
     SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
     SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: Intelli-Edu-backend
-    SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: nacos
-    SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: nacos
+    SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ""
+    SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ""
     SPNU_REDIS_HOST: redis
     SPNU_REDIS_PORT: "6379"
     SPNU_REDIS_PASSWORD: intelli-edu-dev
@@ -179,7 +179,7 @@ services:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     volumes:
-      - minio-data:/data
+      - ./data/minio:/data
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
       interval: 5s
@@ -320,4 +320,3 @@ volumes:
   nacos-data:
   nacos-logs:
   postgres-data:
-  minio-data:

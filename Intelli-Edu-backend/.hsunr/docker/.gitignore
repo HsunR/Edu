@@ -1,0 +1,2 @@
+# Runtime data must stay on the local machine and never be committed.
+data/
