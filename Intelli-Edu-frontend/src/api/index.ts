@@ -1,7 +1,0 @@
-export * as userApi from './user'
-export * as courseApi from './course'
-export * as examApi from './exam'
-export * as knowledgeApi from './knowledge'
-export * as resourceApi from './resource'
-export * as aiApi from './ai'
-export * as systemApi from './system'

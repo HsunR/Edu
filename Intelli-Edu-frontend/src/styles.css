@@ -1,0 +1,98 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', 'PingFang SC', 'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #15201b;
+  --color-canvas: #f5f6f1;
+  --color-lime: #d8ff62;
+  --color-leaf: #315c42;
+  --color-line: #dfe3da;
+  --shadow-card: 0 18px 50px rgba(39, 54, 45, 0.08);
+}
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+  html {
+    @apply bg-canvas text-ink antialiased;
+  }
+  body {
+    @apply m-0 min-w-80 bg-canvas;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply outline-none;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection {
+    @apply bg-lime text-ink;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-[#c9cec5];
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-[28px] border border-white/70 bg-white shadow-card;
+  }
+  .soft-card {
+    @apply rounded-3xl border bg-[#fafbf7];
+  }
+  .eyebrow {
+    @apply text-[11px] font-bold tracking-[0.18em] text-[#7a827c] uppercase;
+  }
+  .btn-primary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-leaf;
+  }
+  .btn-secondary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:-translate-y-0.5 hover:border-[#b8c1b5];
+  }
+  .icon-btn {
+    @apply grid size-10 cursor-pointer place-items-center rounded-full border bg-white text-[#647069] transition hover:border-[#b8c1b5] hover:text-ink;
+  }
+  .field {
+    @apply w-full rounded-2xl border bg-white px-4 py-3 text-sm transition placeholder:text-[#a3aaa5] focus:border-leaf focus:ring-4 focus:ring-leaf/10;
+  }
+  .pill {
+    @apply inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold;
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}

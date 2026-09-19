@@ -1,7 +1,0 @@
-export { useUserStore } from './user'
-export { useAppStore } from './app'
-export { useCourseStore } from './course'
-export { useExamStore } from './exam'
-export { usePermissionStore } from './permission'
-export { useSettingsStore } from './settings'
-export { useTagsViewStore } from './tagsView'
