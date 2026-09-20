@@ -2,7 +2,9 @@
 import { onMounted, ref } from 'vue'
 import { LogOut, Plus, Users } from 'lucide-vue-next'
 import { courseApi } from '@/api/services'
+import { useUiStore } from '@/stores/ui'
 import type { CourseClass } from '@/types'
+const ui = useUiStore()
 const classes = ref<CourseClass[]>([])
 const loading = ref(true)
 const error = ref('')
@@ -28,6 +30,7 @@ async function join() {
     showJoin.value = false
     inviteCode.value = ''
     await load()
+    ui.notify('已加入班级', 'success')
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加入失败'
   } finally {
@@ -35,10 +38,17 @@ async function join() {
   }
 }
 async function quit(item: CourseClass) {
-  if (!confirm(`确定退出“${item.className}”吗？`)) return
+  const confirmed = await ui.confirm({
+    title: '退出班级',
+    message: `确定退出“${item.className}”吗？退出后可能无法继续访问班级课程与考试。`,
+    confirmLabel: '确认退出',
+    danger: true,
+  })
+  if (!confirmed) return
   try {
     await courseApi.quit(item.classId)
     await load()
+    ui.notify('已退出班级', 'success')
   } catch (e) {
     error.value = e instanceof Error ? e.message : '退出失败'
   }
@@ -50,7 +60,7 @@ onMounted(load)
     <div class="flex items-end justify-between">
       <div>
         <h2 class="text-3xl font-black">我的班级</h2>
-        <p class="mt-2 text-sm text-[#7d857f]">来自班级服务的真实入班记录。</p>
+        <p class="mt-2 text-sm text-[#7d857f]">查看已加入的班级，进入课程或管理入班状态。</p>
       </div>
       <button class="btn-primary" @click="showJoin = true"><Plus :size="17" />加入班级</button>
     </div>
@@ -91,7 +101,14 @@ onMounted(load)
         <form class="card w-full max-w-md p-7" @submit.prevent="join">
           <h3 class="text-xl font-black">加入班级</h3>
           <p class="mt-2 text-sm text-[#7b847e]">请输入班级邀请码</p>
-          <input v-model="inviteCode" class="field mt-5" required placeholder="例如：A8K2Q6" />
+          <input
+            v-model.trim="inviteCode"
+            class="field mt-5 uppercase"
+            required
+            maxlength="20"
+            autocomplete="off"
+            placeholder="例如：A8K2Q6"
+          />
           <div class="mt-5 flex justify-end gap-2">
             <button type="button" class="btn-secondary" @click="showJoin = false">取消</button
             ><button class="btn-primary" :disabled="saving">

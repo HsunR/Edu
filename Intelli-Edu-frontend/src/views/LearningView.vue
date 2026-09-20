@@ -6,21 +6,27 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
-  LockKeyhole,
+  LoaderCircle,
   UserRound,
 } from 'lucide-vue-next'
 import { courseApi } from '@/api/services'
-import type { Course, SectionResource } from '@/types'
+import { useUiStore } from '@/stores/ui'
+import type { Course, EntityId, ResourceSummary, SectionResource } from '@/types'
 const route = useRoute()
+const ui = useUiStore()
 const course = ref<Course | null>(null)
 const loading = ref(true)
 const error = ref('')
-const openChapters = ref<number[]>([])
+const openChapters = ref<EntityId[]>([])
+const sectionLoading = ref<EntityId | null>(null)
 const sections = computed(() => course.value?.chapters?.flatMap((c) => c.sections || []) || [])
 async function load() {
   loading.value = true
+  error.value = ''
   try {
-    course.value = await courseApi.detail(Number(route.params.id))
+    const courseId = String(route.params.id || '')
+    if (!/^\d+$/.test(courseId)) throw new Error('无效的课程编号')
+    course.value = await courseApi.detail(courseId)
     openChapters.value = course.value.chapters?.map((c) => c.chapterId) || []
   } catch (e) {
     error.value = e instanceof Error ? e.message : '课程加载失败'
@@ -28,13 +34,30 @@ async function load() {
     loading.value = false
   }
 }
-function toggle(id: number) {
+function toggle(id: EntityId) {
   openChapters.value = openChapters.value.includes(id)
     ? openChapters.value.filter((x) => x !== id)
     : [...openChapters.value, id]
 }
 function resourceLabel(r: SectionResource) {
   return `${r.resourceType || '资源'} #${r.resourceId}`
+}
+function resourceIconLabel(resource: ResourceSummary) {
+  return ['', '视频', '文档', '图片'][resource.resourceType] || '资源'
+}
+async function loadSection(sectionId: EntityId) {
+  if (!course.value) return
+  const target = sections.value.find((section) => section.sectionId === sectionId)
+  if (!target || target.resourceDetails) return
+  sectionLoading.value = sectionId
+  try {
+    const detail = await courseApi.sectionDetail(sectionId)
+    target.resourceDetails = detail.resourceDetails || []
+  } catch (e) {
+    ui.notify(e instanceof Error ? e.message : '小节资源加载失败', 'error')
+  } finally {
+    sectionLoading.value = null
+  }
 }
 onMounted(load)
 </script>
@@ -69,8 +92,7 @@ onMounted(load)
     </section>
     <section class="grid gap-6 lg:grid-cols-[1fr_300px]">
       <div class="card p-6 sm:p-8">
-        <p class="eyebrow">CURRICULUM</p>
-        <h3 class="mt-2 text-2xl font-black">课程目录</h3>
+        <h3 class="text-2xl font-black">课程目录</h3>
         <div class="mt-6 space-y-3">
           <div
             v-for="(chapter, index) in course.chapters"
@@ -95,13 +117,44 @@ onMounted(load)
             </button>
             <div v-if="openChapters.includes(chapter.chapterId)" class="divide-y">
               <div v-for="section in chapter.sections" :key="section.sectionId" class="p-4">
-                <div class="flex items-center gap-2 text-sm font-bold">
+                <button
+                  class="flex w-full items-center gap-2 text-left text-sm font-bold"
+                  :disabled="sectionLoading === section.sectionId"
+                  @click="loadSection(section.sectionId)"
+                >
                   <FileText :size="16" class="text-leaf" />{{ section.title
                   }}<span v-if="section.isFree" class="pill ml-auto bg-[#eaf2dd] py-1 text-leaf"
                     >免费</span
-                  ><LockKeyhole v-else :size="13" class="ml-auto text-[#9ba29d]" />
+                  ><LoaderCircle
+                    v-if="sectionLoading === section.sectionId"
+                    :size="14"
+                    class="ml-auto animate-spin text-[#9ba29d]"
+                  /><span v-else-if="!section.isFree" class="ml-auto text-[11px] text-[#8b938d]"
+                    >登录后查看</span
+                  >
+                </button>
+                <div v-if="section.resourceDetails?.length" class="mt-3 ml-6 grid gap-2">
+                  <component
+                    v-for="resource in section.resourceDetails"
+                    :key="resource.resourceId"
+                    :is="resource.accessUrl ? 'a' : 'span'"
+                    :href="resource.accessUrl"
+                    :target="resource.accessUrl ? '_blank' : undefined"
+                    rel="noopener noreferrer"
+                    :class="[
+                      'flex items-center gap-2 rounded-xl bg-[#f1f3ee] px-3 py-2 text-xs font-semibold text-[#68716b]',
+                      resource.accessUrl ? 'hover:text-ink' : 'cursor-not-allowed opacity-60',
+                    ]"
+                  >
+                    <span class="pill bg-white py-1">{{ resourceIconLabel(resource) }}</span>
+                    <span class="min-w-0 flex-1 truncate">{{ resource.resourceName }}</span>
+                    <ExternalLink :size="13" />
+                  </component>
                 </div>
-                <div v-if="section.resources?.length" class="mt-3 ml-6 flex flex-wrap gap-2">
+                <div
+                  v-else-if="!section.resourceDetails && section.resources?.length"
+                  class="mt-3 ml-6 flex flex-wrap gap-2"
+                >
                   <span
                     v-for="r in section.resources"
                     :key="r.id"
@@ -109,6 +162,12 @@ onMounted(load)
                     >{{ resourceLabel(r) }}</span
                   >
                 </div>
+                <p
+                  v-else-if="section.resourceDetails && !section.resourceDetails.length"
+                  class="mt-3 ml-6 text-xs text-[#8b938d]"
+                >
+                  本节暂无可访问资源
+                </p>
               </div>
               <p v-if="!chapter.sections?.length" class="p-5 text-sm text-[#8b938d]">
                 本章暂无小节

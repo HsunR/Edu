@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowRight, Eye, EyeOff, ShieldCheck } from 'lucide-vue-next'
 import BrandMark from '@/components/BrandMark.vue'
@@ -23,6 +23,9 @@ const showPassword = ref(false)
 const loading = ref(false)
 const error = ref('')
 const notice = ref('')
+const sendingCode = ref(false)
+const cooldown = ref(0)
+let cooldownTimer: number | undefined
 const form = ref({
   username: '',
   password: '',
@@ -40,6 +43,8 @@ const accountLabel = computed(() => (method.value === 2 ? '邮箱' : '用户名'
 function selectMode(nextMode: 'login' | 'register') {
   mode.value = nextMode
   method.value = nextMode === 'login' ? 4 : 2
+  error.value = ''
+  notice.value = ''
 }
 
 function selectMethod(nextMethod: 2 | 4) {
@@ -48,6 +53,12 @@ function selectMethod(nextMethod: 2 | 4) {
 
 async function sendCode() {
   error.value = ''
+  notice.value = ''
+  if (!/^\S+@\S+\.\S+$/.test(form.value.email)) {
+    error.value = '请输入有效的邮箱地址'
+    return
+  }
+  sendingCode.value = true
   try {
     if (mode.value === 'login')
       await authApi.sendLoginCode({
@@ -60,8 +71,16 @@ async function sendCode() {
         email: form.value.email,
       })
     notice.value = '验证码已发送'
+    cooldown.value = 60
+    window.clearInterval(cooldownTimer)
+    cooldownTimer = window.setInterval(() => {
+      cooldown.value--
+      if (cooldown.value <= 0) window.clearInterval(cooldownTimer)
+    }, 1000)
   } catch (e) {
     error.value = e instanceof Error ? e.message : '发送失败'
+  } finally {
+    sendingCode.value = false
   }
 }
 async function submit() {
@@ -76,7 +95,8 @@ async function submit() {
         email: form.value.email,
         code: form.value.code,
       })
-      await router.push(String(route.query.redirect || '/'))
+      const redirect = String(route.query.redirect || '/')
+      await router.push(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/')
     } else {
       await authApi.register({
         registerType: 2,
@@ -99,6 +119,7 @@ async function submit() {
     loading.value = false
   }
 }
+onBeforeUnmount(() => window.clearInterval(cooldownTimer))
 </script>
 <template>
   <div class="grid min-h-screen bg-[#f4f5ef] lg:grid-cols-[1.05fr_.95fr]">
@@ -110,18 +131,17 @@ async function submit() {
       <div class="relative z-10 my-auto max-w-xl">
         <p class="eyebrow text-lime">INTELLI EDU</p>
         <h1 class="mt-6 text-6xl font-black leading-[1.08] tracking-[-0.055em]">
-          连接真实服务的<br /><span class="text-lime">智慧学习空间。</span>
+          让教学更清晰，<br /><span class="text-lime">让学习更专注。</span>
         </h1>
         <p class="mt-7 max-w-md leading-7 text-white/60">
-          课程、班级、考试、资源与学情数据，均由 Intelli Edu 微服务提供。
+          从课程学习到在线考试，所有学习进度尽在一个空间。
         </p>
       </div>
     </section>
     <section class="flex items-center justify-center p-6 sm:p-10">
       <div class="w-full max-w-md">
         <BrandMark class="mb-10 lg:hidden" />
-        <p class="eyebrow">ACCOUNT</p>
-        <h2 class="mt-3 text-4xl font-black">
+        <h2 class="text-4xl font-black">
           {{ mode === 'login' ? '登录平台' : '注册学生账号' }}
         </h2>
         <div class="mt-7 flex rounded-2xl bg-[#e9ebe5] p-1">
@@ -189,17 +209,23 @@ async function submit() {
             <input v-model="form.code" class="field" placeholder="验证码" required /><button
               type="button"
               class="btn-secondary shrink-0"
+              :disabled="sendingCode || cooldown > 0"
               @click="sendCode"
             >
-              获取验证码
+              {{ sendingCode ? '发送中…' : cooldown > 0 ? `${cooldown}s 后重试` : '获取验证码' }}
             </button>
           </div>
-          <span class="relative block"
+          <span v-if="method === 4 || mode === 'register'" class="relative block"
             ><input
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
               class="field pr-12"
               placeholder="密码"
+              minlength="6"
+              maxlength="20"
+              pattern="(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&amp;*()_+...]).{6,20}"
+              title="需包含字母、数字和特殊字符，长度 6–20 位"
+              :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
               required /><button
               type="button"
               class="absolute right-4 top-1/2 -translate-y-1/2"
@@ -218,7 +244,7 @@ async function submit() {
           </button>
         </form>
         <p class="mt-5 flex items-center justify-center gap-2 text-xs text-[#8a928c]">
-          <ShieldCheck :size="15" />请求通过 /api/user 服务处理
+          <ShieldCheck :size="15" />课程学习 · 在线考试 · 学情分析
         </p>
       </div>
     </section>

@@ -23,25 +23,37 @@ const secondCard = computed(() =>
       : { l: '平台用户', v: secondTotal.value, i: Users, to: '/users' },
 )
 onMounted(async () => {
-  try {
-    const [courseResult, examResult, resourceResult] = await Promise.all([
-      courseApi.list({ current: 1, pageSize: 3, status: 1 }),
-      examApi.list({ current: 1, pageSize: 5 }),
-      resourceApi.list({ current: 1, pageSize: 5 }),
-    ])
-    courses.value = courseResult.records
-    courseTotal.value = courseResult.total
-    exams.value = examResult.records
-    examTotal.value = examResult.total
-    resources.value = resourceResult.records
-    resourceTotal.value = resourceResult.total
-    if (session.role === 'Student') classes.value = await courseApi.mine()
-    else if (session.role === 'Teacher')
-      secondTotal.value = (await courseApi.teaching({ current: 1, pageSize: 1 })).total
-    else secondTotal.value = (await userApi.list({ current: 1, pageSize: 1 })).total
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : '数据加载失败'
+  const secondaryRequest =
+    session.role === 'Student'
+      ? courseApi.mine()
+      : session.role === 'Teacher'
+        ? courseApi.teaching({ current: 1, pageSize: 1 })
+        : userApi.list({ current: 1, pageSize: 1 })
+  const results = await Promise.allSettled([
+    courseApi.list({ current: 1, pageSize: 3, status: 1 }),
+    examApi.list({ current: 1, pageSize: 5 }),
+    resourceApi.list({ current: 1, pageSize: 5 }),
+    secondaryRequest,
+  ])
+  const [courseResult, examResult, resourceResult, secondaryResult] = results
+  if (courseResult.status === 'fulfilled') {
+    courses.value = courseResult.value.records
+    courseTotal.value = courseResult.value.total
   }
+  if (examResult.status === 'fulfilled') {
+    exams.value = examResult.value.records
+    examTotal.value = examResult.value.total
+  }
+  if (resourceResult.status === 'fulfilled') {
+    resources.value = resourceResult.value.records
+    resourceTotal.value = resourceResult.value.total
+  }
+  if (secondaryResult.status === 'fulfilled') {
+    if (session.role === 'Student') classes.value = secondaryResult.value as CourseClass[]
+    else secondTotal.value = (secondaryResult.value as { total: number }).total
+  }
+  const failed = results.filter((result) => result.status === 'rejected')
+  if (failed.length) error.value = `有 ${failed.length} 项数据暂时无法加载，其余内容仍可使用。`
 })
 </script>
 <template>
@@ -49,7 +61,7 @@ onMounted(async () => {
     <section class="rounded-[34px] bg-ink p-8 text-white sm:p-10">
       <p class="eyebrow text-lime">{{ session.roleLabel }}工作台</p>
       <h2 class="mt-4 text-4xl font-black sm:text-5xl">{{ greeting }}</h2>
-      <p class="mt-3 text-sm text-white/55">这里仅展示当前后端能够提供的数据。</p>
+      <p class="mt-3 text-sm text-white/55">集中查看你的课程、考试安排与学习资源。</p>
     </section>
     <p v-if="error" class="rounded-2xl bg-red-50 p-4 text-sm text-red-600">{{ error }}</p>
     <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">

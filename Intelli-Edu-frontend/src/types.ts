@@ -1,4 +1,6 @@
 export type UserRole = 'Student' | 'Teacher' | 'Admin'
+/** 后端使用 19 位雪花 ID。网络层会将其无损解析为字符串。 */
+export type EntityId = string | number
 
 export interface PageResult<T> {
   records: T[]
@@ -20,56 +22,66 @@ export interface TeacherProfile {
   bio?: string
 }
 export interface User {
-  userId: number
+  userId: EntityId
   name: string
   userType: UserRole
-  sex?: number
+  /** 后端查询返回中文枚举，更新接口接收数字 code。 */
+  sex?: number | '未知' | '男' | '女'
   avatarUrl?: string
   personalSignature?: string
   school?: string
   email?: string
   mobile?: string
-  status?: number
+  status?: number | '正常' | '禁止'
   studentProfile?: StudentProfile
   teacherProfile?: TeacherProfile
 }
 export interface LoginResult {
-  userId: number
+  userId: EntityId
   userType: UserRole
   accessToken: string
   refreshToken: string
 }
 
 export interface SectionResource {
-  id: number
-  resourceId: number
+  id: EntityId
+  resourceId: EntityId
   resourceType: string
   orderIndex: number
 }
+export interface ResourceSummary {
+  resourceId: EntityId
+  resourceName: string
+  resourceType: number
+  fileFormat: string
+  accessUrl?: string
+  fileSize: number
+}
 export interface Section {
-  sectionId: number
-  chapterId: number
+  sectionId: EntityId
+  chapterId: EntityId
   title: string
   orderIndex: number
   isFree: number
   resources?: SectionResource[]
+  resourceDetails?: ResourceSummary[]
 }
 export interface Chapter {
-  chapterId: number
-  courseId: number
+  chapterId: EntityId
+  courseId: EntityId
   title: string
   orderIndex: number
   sections?: Section[]
 }
 export interface Course {
-  courseId: number
+  courseId: EntityId
   courseName: string
   coverUrl?: string
   description?: string
-  teacherId: number
+  teacherId: EntityId
   teacherName?: string
   teacherAvatar?: string
-  categoryId?: number
+  categoryId?: EntityId
   categoryName?: string
   status: number
   isPublic: number
@@ -77,17 +89,17 @@ export interface Course {
   chapters?: Chapter[]
 }
 export interface Category {
-  categoryId: number
+  categoryId: EntityId
   categoryName: string
-  parentId?: number
+  parentId?: EntityId
   children?: Category[]
 }
 export interface CourseClass {
-  classId: number
-  courseId: number
+  classId: EntityId
+  courseId: EntityId
   courseName: string
   className: string
-  teacherId: number
+  teacherId: EntityId
   teacherName: string
   inviteCode?: string
   maxStudents: number
@@ -97,14 +109,22 @@ export interface CourseClass {
   status: number
   createdAt: string
 }
+export interface ClassMember {
+  id: EntityId
+  studentId: EntityId
+  studentName: string
+  avatarUrl?: string
+  status: number
+  joinedAt: string
+}
 export interface Exam {
-  examId: number
+  examId: EntityId
   examName: string
-  paperId: number
+  paperId: EntityId
   paperName?: string
-  classId: number
-  courseId: number
-  teacherId: number
+  classId: EntityId
+  courseId: EntityId
+  teacherId: EntityId
   examType: number
   startTime: string
   endTime: string
@@ -113,8 +133,38 @@ export interface Exam {
   status: number
   createdAt: string
 }
+export interface AnswerRecord {
+  recordId?: EntityId
+  questionId: EntityId
+  answerContent?: string
+  score?: number
+  isCorrect?: boolean
+  gradingStatus?: number
+  graderId?: number
+  comment?: string
+  questionType?: number
+  stem?: string
+  questionScore?: number
+  correctAnswer?: string
+}
+export interface AnswerSheet {
+  sheetId: EntityId
+  examId: EntityId
+  examName?: string
+  studentId: EntityId
+  studentName?: string
+  status: number
+  totalScore: number
+  objectiveScore: number
+  subjectiveScore: number
+  submitCount: number
+  startAnswerTime: string
+  submitTime?: string
+  deadline?: string
+  records?: AnswerRecord[]
+}
 export interface ResourceItem {
-  resourceId: number
+  resourceId: EntityId
   resourceName: string
   resourceType: number
   fileFormat: string
@@ -124,14 +174,14 @@ export interface ResourceItem {
   createdAt: string
 }
 export interface PresignedUpload {
-  resourceId: number
+  resourceId: EntityId
   uploadUrl: string
   storageKey: string
   accessUrl: string
   expiresIn: number
 }
 export interface MasteryPoint {
-  pointId: number
+  pointId: EntityId
   pointName: string
   masteryLevel?: number
   avgMasteryLevel?: number
@@ -144,33 +194,33 @@ export interface MasteryPoint {
 }
 export interface Recommendation {
   scene: string
-  points?: Array<{ pointId: number; pointName: string; masteryLevel?: number }>
+  points?: Array<{ pointId: EntityId; pointName: string; masteryLevel?: number }>
   sections?: unknown[]
   questions?: unknown[]
 }
 export interface GraphPoint {
-  pointId: number
+  pointId: EntityId
   pointName: string
-  parentId?: number
+  parentId?: EntityId
   description?: string
   orderIndex: number
   masteryLevel?: number
   isWeak: boolean
-  sectionIds: number[]
+  sectionIds: EntityId[]
   childPoints: GraphPoint[]
 }
 export interface GraphOverview {
-  courseId: number
-  classId: number
+  courseId: EntityId
+  classId: EntityId
   weakThreshold: number
   points: GraphPoint[]
 }
 export interface WrongRecord {
-  wrongId: number
-  classId: number
-  courseId: number
-  questionId: number
-  examId: number
+  wrongId: EntityId
+  classId: EntityId
+  courseId: EntityId
+  questionId: EntityId
+  examId: EntityId
   questionType: number
   fullScore: number
   earnedScore: number
@@ -178,5 +228,5 @@ export interface WrongRecord {
   isResolved: number
   wrongCount: number
   lastWrongAt: string
-  points: Array<{ pointId: number; pointName: string }>
+  points: Array<{ pointId: EntityId; pointName: string }>
 }

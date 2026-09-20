@@ -8,9 +8,16 @@ const tab = ref<'info' | 'password'>('info')
 const saving = ref(false)
 const message = ref('')
 const error = ref('')
+function sexCode(value: unknown) {
+  if (value === '男') return 1
+  if (value === '女') return 2
+  if (typeof value === 'number') return value
+  return 0
+}
 const form = ref({
   name: session.user?.name || '',
-  sex: session.user?.sex ?? 0,
+  sex: sexCode(session.user?.sex),
+  avatarUrl: session.user?.avatarUrl || '',
   school: session.user?.school || '',
   personalSignature: session.user?.personalSignature || '',
   email: session.user?.email || '',
@@ -24,7 +31,7 @@ const form = ref({
   department: session.user?.teacherProfile?.department || '',
   bio: session.user?.teacherProfile?.bio || '',
 })
-const password = ref({ oldPassword: '', newPassword: '' })
+const password = ref({ oldPassword: '', newPassword: '', confirmPassword: '' })
 const isStudent = computed(() => session.role === 'Student')
 const isTeacher = computed(() => session.role === 'Teacher')
 async function save() {
@@ -38,6 +45,8 @@ async function save() {
       school: form.value.school,
       personalSignature: form.value.personalSignature,
     })
+    if (form.value.avatarUrl !== (session.user?.avatarUrl || ''))
+      await userApi.updateAvatar(form.value.avatarUrl)
     if (isStudent.value)
       await userApi.updateProfile({
         studentNo: form.value.studentNo,
@@ -61,12 +70,19 @@ async function save() {
   }
 }
 async function changePassword() {
+  if (password.value.newPassword !== password.value.confirmPassword) {
+    error.value = '两次输入的新密码不一致'
+    return
+  }
   saving.value = true
   error.value = ''
   message.value = ''
   try {
-    await userApi.updatePassword(password.value)
-    password.value = { oldPassword: '', newPassword: '' }
+    await userApi.updatePassword({
+      oldPassword: password.value.oldPassword,
+      newPassword: password.value.newPassword,
+    })
+    password.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
     message.value = '密码修改成功'
   } catch (e) {
     error.value = e instanceof Error ? e.message : '修改失败'
@@ -113,8 +129,7 @@ async function changePassword() {
         </nav>
       </aside>
       <section class="card p-6 sm:p-8">
-        <p class="eyebrow">PROFILE SERVICE</p>
-        <h3 class="mt-2 text-2xl font-black">{{ tab === 'info' ? '基本资料' : '修改密码' }}</h3>
+        <h3 class="text-2xl font-black">{{ tab === 'info' ? '基本资料' : '修改密码' }}</h3>
         <p v-if="error" class="mt-5 rounded-xl bg-red-50 p-3 text-sm text-red-600">{{ error }}</p>
         <p v-if="message" class="mt-5 rounded-xl bg-green-50 p-3 text-sm text-green-700">
           {{ message }}
@@ -133,6 +148,13 @@ async function changePassword() {
           ><label
             ><span class="mb-2 block text-xs font-bold">学校</span
             ><input v-model="form.school" class="field" /></label
+          ><label
+            ><span class="mb-2 block text-xs font-bold">头像 URL</span
+            ><input
+              v-model="form.avatarUrl"
+              type="url"
+              class="field"
+              placeholder="https://…" /></label
           ><label
             ><span class="mb-2 block text-xs font-bold">邮箱</span
             ><input v-model="form.email" class="field bg-[#f4f5f1]" disabled /></label
@@ -186,6 +208,18 @@ async function changePassword() {
               type="password"
               class="field"
               minlength="6"
+              maxlength="20"
+              pattern="(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&amp;*()_+...]).{6,20}"
+              title="需包含字母、数字和特殊字符，长度 6–20 位"
+              required /></label
+          ><label
+            ><span class="mb-2 block text-xs font-bold">确认新密码</span
+            ><input
+              v-model="password.confirmPassword"
+              type="password"
+              class="field"
+              minlength="6"
+              maxlength="20"
               required /></label
           ><button class="btn-primary" :disabled="saving">确认修改</button>
         </form>

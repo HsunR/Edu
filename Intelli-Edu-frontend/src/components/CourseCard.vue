@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowUpRight, BookOpen, UserRound } from 'lucide-vue-next'
-import type { Course } from '@/types'
+import type { Course, EntityId } from '@/types'
 defineProps<{ course: Course }>()
 const palettes = [
   'from-violet-500 to-indigo-600',
@@ -8,8 +8,9 @@ const palettes = [
   'from-emerald-400 to-teal-600',
   'from-sky-400 to-blue-600',
 ]
-function palette(id: number) {
-  return palettes[id % palettes.length]
+function palette(id: EntityId) {
+  const tail = String(id).slice(-6)
+  return palettes[Number(tail) % palettes.length]
 }
 </script>
 <template>

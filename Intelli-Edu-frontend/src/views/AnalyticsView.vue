@@ -3,10 +3,10 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { AlertTriangle, BarChart3, CheckCircle2, Target } from 'lucide-vue-next'
 import { courseApi, learningApi } from '@/api/services'
 import { useSessionStore } from '@/stores/session'
-import type { CourseClass, MasteryPoint, WrongRecord } from '@/types'
+import type { Course, CourseClass, EntityId, MasteryPoint, WrongRecord } from '@/types'
 const session = useSessionStore()
 const classes = ref<CourseClass[]>([])
-const classId = ref<number>()
+const classId = ref<EntityId>()
 const mastery = ref<MasteryPoint[]>([])
 const weak = ref<MasteryPoint[]>([])
 const wrongs = ref<WrongRecord[]>([])
@@ -48,7 +48,14 @@ onMounted(async () => {
   try {
     if (session.role === 'Student') classes.value = await courseApi.mine()
     else {
-      const teaching = (await courseApi.teaching({ current: 1, pageSize: 100 })).records
+      const teaching: Course[] = []
+      let current = 1
+      while (current <= 20) {
+        const page = await courseApi.teaching({ current, pageSize: 50 })
+        teaching.push(...page.records)
+        if (page.records.length < 50) break
+        current++
+      }
       classes.value = (await Promise.all(teaching.map((c) => courseApi.classes(c.courseId)))).flat()
     }
     classId.value = classes.value[0]?.classId
@@ -73,7 +80,7 @@ async function resolve(item: WrongRecord) {
         <h2 class="text-3xl font-black">
           {{ session.role === 'Teacher' ? '班级学情' : '我的学情' }}
         </h2>
-        <p class="mt-2 text-sm text-[#7d857f]">掌握度与错题数据来自 learning 服务。</p>
+        <p class="mt-2 text-sm text-[#7d857f]">跟踪知识点掌握情况，及时处理薄弱项与错题。</p>
       </div>
       <select v-model="classId" class="field sm:w-72">
         <option v-for="c in classes" :key="c.classId" :value="c.classId">

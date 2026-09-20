@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { authApi, userApi } from '@/api/services'
+import { ApiError } from '@/api/client'
 import type { LoginResult, User, UserRole } from '@/types'
 
 export const useSessionStore = defineStore('session', () => {
@@ -31,8 +32,8 @@ export const useSessionStore = defineStore('session', () => {
     if (initialized.value) return
     try {
       await loadUser()
-    } catch {
-      clear()
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 40100) clear()
     } finally {
       initialized.value = true
     }
@@ -46,11 +47,22 @@ export const useSessionStore = defineStore('session', () => {
   async function logout() {
     try {
       if (accessToken.value) await authApi.logout()
+    } catch {
+      // 后端暂时不可用时也应允许用户清除本地会话。
     } finally {
       clear()
     }
   }
   window.addEventListener('auth-expired', clear)
+  window.addEventListener('auth-token-refreshed', (event) => {
+    accessToken.value = (event as CustomEvent<string>).detail
+  })
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'intelli-access-token') {
+      accessToken.value = event.newValue || ''
+      if (!event.newValue) user.value = null
+    }
+  })
   return {
     user,
     role,

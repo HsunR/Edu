@@ -2,14 +2,14 @@
 import { onMounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-vue-next'
 import { courseApi } from '@/api/services'
-import type { Category, Course } from '@/types'
+import type { Category, Course, EntityId } from '@/types'
 import CourseCard from '@/components/CourseCard.vue'
 const courses = ref<Course[]>([])
 const categories = ref<Category[]>([])
 const total = ref(0)
 const page = ref(1)
 const query = ref('')
-const categoryId = ref<number | undefined>()
+const categoryId = ref<EntityId | undefined>()
 const loading = ref(true)
 const error = ref('')
 async function load() {
@@ -64,9 +64,9 @@ watch(categoryId, () => {
       class="flex flex-col gap-5 rounded-[32px] border bg-[#e9efdf] p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between"
     >
       <div>
-        <p class="eyebrow text-leaf">PUBLIC COURSES</p>
-        <h2 class="mt-3 text-3xl font-black sm:text-4xl">浏览已发布课程</h2>
-        <p class="mt-3 text-sm text-[#657068]">数据来自课程服务的公开课程查询接口。</p>
+        <p class="eyebrow text-leaf">课程广场</p>
+        <h2 class="mt-3 text-3xl font-black sm:text-4xl">发现适合你的课程</h2>
+        <p class="mt-3 text-sm text-[#657068]">发现公开课程，了解课程内容与授课教师。</p>
       </div>
       <form class="relative w-full lg:w-80" @submit.prevent="search">
         <Search class="absolute left-4 top-1/2 -translate-y-1/2 text-[#89918c]" :size="18" /><input

@@ -2,8 +2,15 @@
 import { onMounted, ref } from 'vue'
 import { Archive, CirclePlus, MoreHorizontal, Send } from 'lucide-vue-next'
 import { courseApi } from '@/api/services'
-import type { Course } from '@/types'
+import { useUiStore } from '@/stores/ui'
+import type { Category, Course, EntityId } from '@/types'
+import AppPagination from '@/components/AppPagination.vue'
+const ui = useUiStore()
 const courses = ref<Course[]>([])
+const categories = ref<Category[]>([])
+const page = ref(1)
+const total = ref(0)
+const pageSize = 12
 const loading = ref(true)
 const error = ref('')
 const showCreate = ref(false)
@@ -12,14 +19,16 @@ const form = ref({
   courseName: '',
   description: '',
   coverUrl: '',
-  categoryId: undefined as number | undefined,
+  categoryId: undefined as EntityId | undefined,
   isPublic: 1,
 })
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    courses.value = (await courseApi.teaching({ current: 1, pageSize: 50 })).records
+    const result = await courseApi.teaching({ current: page.value, pageSize })
+    courses.value = result.records
+    total.value = result.total
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载失败'
   } finally {
@@ -39,6 +48,7 @@ async function create() {
       isPublic: 1,
     }
     await load()
+    ui.notify('课程已创建', 'success')
   } catch (e) {
     error.value = e instanceof Error ? e.message : '创建失败'
   } finally {
@@ -46,22 +56,43 @@ async function create() {
   }
 }
 async function publish(course: Course) {
+  const confirmed = await ui.confirm({
+    title: '发布课程',
+    message: `发布“${course.courseName}”后，符合可见性规则的学生即可浏览。确定发布吗？`,
+    confirmLabel: '确认发布',
+  })
+  if (!confirmed) return
   try {
     await courseApi.publish(course.courseId)
     await load()
+    ui.notify('课程已发布', 'success')
   } catch (e) {
     error.value = e instanceof Error ? e.message : '发布失败'
   }
 }
 async function archive(course: Course) {
+  const confirmed = await ui.confirm({
+    title: '归档课程',
+    message: `归档“${course.courseName}”后将不再作为正常课程展示，确定继续吗？`,
+    confirmLabel: '确认归档',
+  })
+  if (!confirmed) return
   try {
     await courseApi.archive(course.courseId)
     await load()
+    ui.notify('课程已归档', 'success')
   } catch (e) {
     error.value = e instanceof Error ? e.message : '归档失败'
   }
 }
-onMounted(load)
+function changePage(nextPage: number) {
+  page.value = nextPage
+  load()
+}
+onMounted(async () => {
+  categories.value = await courseApi.categories().catch(() => [])
+  await load()
+})
 </script>
 <template>
   <div>
@@ -69,7 +100,7 @@ onMounted(load)
       class="flex flex-col gap-5 rounded-[32px] bg-ink p-7 text-white sm:flex-row sm:items-center sm:justify-between sm:p-9"
     >
       <div>
-        <p class="eyebrow text-lime">TEACHING COURSES</p>
+        <p class="eyebrow text-lime">教学管理</p>
         <h2 class="mt-3 text-3xl font-black">我教的课程</h2>
         <p class="mt-2 text-sm text-white/50">创建、发布和归档课程。</p>
       </div>
@@ -100,8 +131,8 @@ onMounted(load)
             {{ course.description || '暂无简介' }}
           </p>
           <div class="mt-5 flex gap-2">
-            <RouterLink :to="`/courses/${course.courseId}`" class="btn-secondary flex-1 py-2.5"
-              >查看</RouterLink
+            <RouterLink :to="`/teaching/${course.courseId}`" class="btn-secondary flex-1 py-2.5"
+              >管理课程与班级</RouterLink
             ><button
               v-if="course.status === 0"
               class="icon-btn"
@@ -122,6 +153,13 @@ onMounted(load)
       </article>
     </div>
     <div v-else class="card mt-6 py-20 text-center"><p class="font-bold">还没有创建课程</p></div>
+    <AppPagination
+      :page="page"
+      :page-size="pageSize"
+      :total="total"
+      :disabled="loading"
+      @change="changePage"
+    />
     <Transition name="fade"
       ><div
         v-if="showCreate"
@@ -141,12 +179,21 @@ onMounted(load)
               v-model="form.description"
               class="field min-h-24"
               placeholder="课程简介"
-            /><input v-model="form.coverUrl" class="field" placeholder="封面 URL（可选）" /><input
-              v-model.number="form.categoryId"
-              type="number"
+            /><input
+              v-model="form.coverUrl"
+              type="url"
               class="field"
-              placeholder="分类 ID（可选）"
-            /><label class="flex items-center gap-2 text-sm"
+              placeholder="封面 URL（可选）"
+            /><select v-model="form.categoryId" class="field">
+              <option :value="undefined">请选择课程分类（可选）</option>
+              <option
+                v-for="category in categories"
+                :key="category.categoryId"
+                :value="category.categoryId"
+              >
+                {{ category.categoryName }}
+              </option></select
+            ><label class="flex items-center gap-2 text-sm"
               ><input
                 v-model="form.isPublic"
                 type="checkbox"

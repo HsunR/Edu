@@ -3,7 +3,6 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   BarChart3,
-  Bell,
   BookOpen,
   ChevronDown,
   ClipboardCheck,
@@ -73,7 +72,7 @@ async function logout() {
         </button>
       </div>
       <nav class="mt-10 flex-1 space-y-1">
-        <p class="eyebrow mb-3 px-3">已接入服务</p>
+        <p class="eyebrow mb-3 px-3">平台导航</p>
         <RouterLink
           v-for="item in nav"
           :key="item.to"
@@ -95,6 +94,7 @@ async function logout() {
           <img
             v-if="session.user?.avatarUrl"
             :src="session.user.avatarUrl"
+            :alt="`${userName}的头像`"
             class="h-full w-full object-cover"
           />
           <span v-else>{{ userName.slice(0, 1) }}</span>
@@ -114,11 +114,9 @@ async function logout() {
           <Menu :size="19" />
         </button>
         <div>
-          <p class="eyebrow hidden sm:block">{{ route.meta.eyebrow }}</p>
           <h1 class="text-lg font-extrabold tracking-tight sm:text-xl">{{ route.meta.title }}</h1>
         </div>
         <div class="ml-auto flex items-center gap-2">
-          <button class="icon-btn relative" aria-label="通知"><Bell :size="18" /></button>
           <div class="relative">
             <button
               class="ml-1 flex cursor-pointer items-center gap-2 rounded-full border bg-white py-1.5 pl-1.5 pr-3"

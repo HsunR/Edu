@@ -2,12 +2,19 @@
 import { onMounted, ref } from 'vue'
 import { GraduationCap, Search, Trash2, Users } from 'lucide-vue-next'
 import { userApi } from '@/api/services'
+import { useSessionStore } from '@/stores/session'
+import { useUiStore } from '@/stores/ui'
 import type { User } from '@/types'
+import AppPagination from '@/components/AppPagination.vue'
+const session = useSessionStore()
+const ui = useUiStore()
 const users = ref<User[]>([])
 const loading = ref(true)
 const error = ref('')
 const query = ref('')
 const total = ref(0)
+const page = ref(1)
+const pageSize = 15
 const showAssign = ref(false)
 const selected = ref<User | null>(null)
 const form = ref({ teacherNo: '', title: '', department: '', bio: '' })
@@ -15,7 +22,11 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const result = await userApi.list({ current: 1, pageSize: 100, name: query.value || undefined })
+    const result = await userApi.list({
+      current: page.value,
+      pageSize,
+      name: query.value || undefined,
+    })
     users.value = result.records
     total.value = result.total
   } catch (e) {
@@ -25,10 +36,22 @@ async function load() {
   }
 }
 async function remove(user: User) {
-  if (!confirm(`确定删除用户“${user.name}”吗？`)) return
+  if (user.userId === session.user?.userId) {
+    ui.notify('不能删除当前登录账号', 'error')
+    return
+  }
+  const confirmed = await ui.confirm({
+    title: '删除用户',
+    message: `确定永久删除用户“${user.name}”吗？此操作无法撤销。`,
+    confirmLabel: '删除用户',
+    danger: true,
+  })
+  if (!confirmed) return
   try {
     await userApi.remove(user.userId)
+    if (users.value.length === 1 && page.value > 1) page.value--
     await load()
+    ui.notify('用户已删除', 'success')
   } catch (e) {
     error.value = e instanceof Error ? e.message : '删除失败'
   }
@@ -43,24 +66,33 @@ async function assign() {
     await userApi.assignTeacher({ userId: selected.value.userId, ...form.value })
     showAssign.value = false
     await load()
+    ui.notify('教师角色已分配', 'success')
   } catch (e) {
     error.value = e instanceof Error ? e.message : '分配失败'
   }
 }
 onMounted(load)
+function search() {
+  page.value = 1
+  load()
+}
+function changePage(nextPage: number) {
+  page.value = nextPage
+  load()
+}
 </script>
 <template>
   <div>
     <div class="flex items-end justify-between">
       <div>
         <h2 class="text-3xl font-black">用户管理</h2>
-        <p class="mt-2 text-sm text-[#7d857f]">后端当前仅实现用户查询、删除和分配教师角色。</p>
+        <p class="mt-2 text-sm text-[#7d857f]">查询平台用户、分配教师角色并维护账号。</p>
       </div>
       <span class="pill bg-[#eaf2dd] text-leaf"
         ><Users :size="14" class="mr-1" />{{ total }} 用户</span
       >
     </div>
-    <form class="relative mt-7 max-w-lg" @submit.prevent="load">
+    <form class="relative mt-7 max-w-lg" @submit.prevent="search">
       <Search :size="17" class="absolute left-4 top-1/2 -translate-y-1/2 text-[#8b938d]" /><input
         v-model="query"
         class="field pl-11"
@@ -94,9 +126,23 @@ onMounted(load)
               <td>{{ { Student: '学生', Teacher: '教师', Admin: '管理员' }[user.userType] }}</td>
               <td>{{ user.school || '—' }}</td>
               <td>
-                <span class="pill bg-[#eef4e5] py-1 text-leaf">{{
-                  user.status === 1 ? '停用' : '正常'
-                }}</span>
+                <span
+                  :class="[
+                    'pill py-1',
+                    user.status === 1 || user.status === '正常'
+                      ? 'bg-[#eef4e5] text-leaf'
+                      : user.status === 0 || user.status === '禁止'
+                        ? 'bg-red-50 text-red-600'
+                        : 'bg-[#f0f2ed] text-[#68716b]',
+                  ]"
+                  >{{
+                    user.status === 1 || user.status === '正常'
+                      ? '正常'
+                      : user.status === 0 || user.status === '禁止'
+                        ? '停用'
+                        : '—'
+                  }}</span
+                >
               </td>
               <td class="pr-6">
                 <div class="flex justify-end gap-1">
@@ -107,16 +153,33 @@ onMounted(load)
                     @click="openAssign(user)"
                   >
                     <GraduationCap :size="15" /></button
-                  ><button class="icon-btn size-8 text-red-500" title="删除" @click="remove(user)">
+                  ><button
+                    class="icon-btn size-8 text-red-500"
+                    title="删除"
+                    :disabled="user.userId === session.user?.userId"
+                    @click="remove(user)"
+                  >
                     <Trash2 :size="15" />
                   </button>
                 </div>
+              </td>
+            </tr>
+            <tr v-if="!loading && !users.length">
+              <td colspan="5" class="p-12 text-center text-sm text-[#8b938d]">
+                暂无符合条件的用户
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+    <AppPagination
+      :page="page"
+      :page-size="pageSize"
+      :total="total"
+      :disabled="loading"
+      @change="changePage"
+    />
     <Transition name="fade"
       ><div
         v-if="showAssign"

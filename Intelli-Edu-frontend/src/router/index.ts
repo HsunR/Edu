@@ -55,10 +55,22 @@ const router = createRouter({
           meta: { title: '课程管理', eyebrow: 'TEACHING', roles: ['Teacher'] },
         },
         {
+          path: 'teaching/:id',
+          name: 'teaching-course',
+          component: () => import('@/views/TeachingCourseView.vue'),
+          meta: { title: '课程与班级', eyebrow: 'TEACHING', roles: ['Teacher'] },
+        },
+        {
           path: 'exams',
           name: 'exams',
           component: () => import('@/views/ExamsView.vue'),
           meta: { title: '考试与作业', eyebrow: 'EXAMS' },
+        },
+        {
+          path: 'exams/:id',
+          name: 'exam-workspace',
+          component: () => import('@/views/ExamWorkspaceView.vue'),
+          meta: { title: '在线答题', eyebrow: 'EXAM', roles: ['Student'] },
         },
         {
           path: 'resources',
